@@ -1,0 +1,256 @@
+/* =========================================================
+   CCPayment Design System — Colors & Typography
+   ---------------------------------------------------------
+   Extracted from the CCPayment Figma file (design-system page).
+   The system is Material-UI-derived: Poppins as the primary
+   UI typeface, a blue primary + lime secondary accent, and a
+   full 9-step grey scale with semantic success/warning/error.
+   Dark mode is fully supported — toggle with .dark on :root.
+   ========================================================= */
+
+/* ---- Poppins (local brand font files) -------------------- */
+/* Sourced from /fonts/. Poppins is the CCPayment primary face. */
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("fonts/Poppins-Light.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/Poppins-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("fonts/Poppins-Medium.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fonts/Poppins-SemiBold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("fonts/Poppins-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("fonts/Poppins-Black.ttf") format("truetype");
+}
+
+/* Inter + Public Sans are minor/legacy in the Figma source (Inter for giant
+   hero display banners; Public Sans for a few invoice templates). Kept from
+   Google Fonts — swap to local if you ship those surfaces. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Public+Sans:wght@400;600;700&display=swap");
+
+:root {
+  /* ---- Brand ------------------------------------------- */
+  --primary-lighter:   #D8E7FE;   /* tint used for soft backgrounds */
+  --primary-light:     #89AFFC;
+  --primary:           #3C6FF5;   /* CCPayment blue — the brand */
+  --primary-dark:      #1E3EB0;
+  --primary-darker:    #0A1F70;
+  --primary-contrast:  #FFFFFF;
+
+  --secondary-lighter: #EEF0E8;
+  --secondary-light:   #D7E89A;
+  --secondary:         #BEE072;   /* lime accent */
+  --secondary-dark:    #8CA852;
+  --secondary-darker:  #5A6E35;
+  --secondary-contrast:#1F2025;
+
+  /* ---- Neutrals (grey scale) --------------------------- */
+  --grey-100: #F8F9FB;
+  --grey-200: #F4F6F8;
+  --grey-300: #E8ECF2;
+  --grey-400: #CACFD8;
+  --grey-500: #B3B9C5;
+  --grey-600: #919FAB;   /* a.k.a. 919EAB in MUI source */
+  --grey-700: #71757E;
+  --grey-800: #454A55;
+  --grey-900: #1F2025;   /* primary text color */
+
+  /* ---- Semantic ---------------------------------------- */
+  --success-lighter: #C8FACD;
+  --success-light:   #5BE584;
+  --success:         #36B37E;
+  --success-dark:    #00AB55;
+  --success-darker:  #005249;
+
+  --info-lighter:    #D0F2FF;
+  --info-light:      #74CAFF;
+  --info:            #00B8D9;
+  --info-dark:       #0C53B7;
+  --info-darker:     #04297A;
+
+  --warning-lighter: #FFF7CD;
+  --warning-light:   #FFE16A;
+  --warning:         #FFAB00;
+  --warning-dark:    #B78103;
+  --warning-darker:  #7A4F01;
+
+  --error-lighter:   #FFE7D9;
+  --error-light:     #FFA48D;
+  --error:           #FF5630;
+  --error-dark:      #B72136;
+  --error-darker:    #7A0C2E;
+
+  /* ---- Surfaces / text (light mode) -------------------- */
+  --bg-default:   #FFFFFF;   /* Background1 */
+  --bg-neutral:   #F4F6F8;   /* page bg */
+  --bg-paper:     #FFFFFF;   /* Background2 */
+  --bg-subtle:    #F8F9FB;
+  --bg-disabled:  rgba(145,158,171,0.24);
+
+  --text-primary:   #1F2025;   /* body text */
+  --text-secondary: #71757E;   /* subdued text */
+  --text-disabled:  #B3B9C5;
+  --text-inverse:   #FFFFFF;
+
+  --border-subtle: rgba(145,158,171,0.24);
+  --border-default: #E8ECF2;
+  --border-strong: #CACFD8;
+  --border-focus:  #3C6FF5;
+
+  /* ---- Shadow system ----------------------------------- */
+  --shadow-z1:   0 1px 2px 0 rgba(113,117,126,0.12);
+  --shadow-z4:   0 4px 8px 0 rgba(145,158,171,0.16);
+  --shadow-z8:   0 8px 16px 0 rgba(145,158,171,0.16);
+  --shadow-z12:  0 12px 24px -4px rgba(113,117,126,0.20);
+  --shadow-z16:  0 16px 32px -4px rgba(145,158,171,0.24);
+  --shadow-z20:  0 20px 40px -4px rgba(145,158,171,0.24);
+  --shadow-z24:  0 24px 48px 0 rgba(145,158,171,0.24);
+  --shadow-dialog:   -40px 40px 80px -8px rgba(145,158,171,0.24);
+  --shadow-dropdown: -20px 20px 40px -4px rgba(182,184,176,0.24), 0 0 2px 0 rgba(182,184,176,0.24);
+  --shadow-card:     0 0 2px 0 rgba(145,158,171,0.20), 0 12px 24px -4px rgba(145,158,171,0.12);
+
+  /* colored shadows for emphasis buttons */
+  --shadow-primary: 0 8px 16px 0 rgba(60,111,245,0.24);
+  --shadow-success: 0 8px 16px 0 rgba(54,179,126,0.24);
+  --shadow-warning: 0 8px 16px 0 rgba(255,171,0,0.24);
+  --shadow-error:   0 8px 16px 0 rgba(255,86,48,0.24);
+
+  /* ---- Radii / spacing --------------------------------- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;     /* buttons, chips, menu items */
+  --radius-lg: 12px;    /* inputs, cards interior */
+  --radius-xl: 16px;    /* cards, dialogs */
+  --radius-2xl: 24px;
+  --radius-pill: 9999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* ---- Typography -------------------------------------- */
+  --font-sans: "Poppins", "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Inter", "Poppins", sans-serif;       /* big numeric hero "Colors/Typography" display */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace;
+
+  /* weights */
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semibold:600;
+  --fw-bold:    700;
+  --fw-extrabold:800;
+
+  /* named type styles (from Typography [Light] frame) */
+  --h1-size: 40px;  --h1-lh: 56px;  --h1-weight: 700;
+  --h2-size: 24px;  --h2-lh: 36px;  --h2-weight: 700;
+  --h3-size: 20px;  --h3-lh: 28px;  --h3-weight: 700;
+  --h4-size: 18px;  --h4-lh: 24px;  --h4-weight: 700;
+  --h5-size: 16px;  --h5-lh: 24px;  --h5-weight: 700;
+  --subtitle-size: 14px; --subtitle-lh: 20px; --subtitle-weight: 600;
+  --body1-size: 16px;    --body1-lh: 24px;    --body1-weight: 400;
+  --body2-size: 14px;    --body2-lh: 20px;    --body2-weight: 400;
+  --body3-size: 12px;    --body3-lh: 16px;    --body3-weight: 400;
+  --button-size: 14px;   --button-lh: 20px;   --button-weight: 700;
+  --caption-size: 12px;  --caption-lh: 16px;  --caption-weight: 400;
+  --overline-size: 12px; --overline-lh: 16px; --overline-weight: 600;
+}
+
+/* ---- Dark mode ------------------------------------------- */
+:root.dark,
+[data-theme="dark"] {
+  --bg-default:   #18181A;   /* Background1 */
+  --bg-neutral:   #0F0F11;
+  --bg-paper:     #1F2125;   /* Background2 */
+  --bg-subtle:    #24262B;
+  --bg-disabled:  rgba(145,158,171,0.24);
+
+  --text-primary:   #E8ECF2;
+  --text-secondary: #919FAB;
+  --text-disabled:  #5A5D67;
+  --text-inverse:   #1F2025;
+
+  --border-subtle: rgba(145,158,171,0.18);
+  --border-default: #2E2F34;
+  --border-strong: #454A55;
+
+  --grey-100: #24262B;
+  --grey-200: #2E2F34;
+  --grey-300: #3A3C42;
+  --grey-400: #4C4F57;
+  --grey-500: #5A5D67;
+  --grey-600: #71757E;
+  --grey-700: #919FAB;
+  --grey-800: #B3B9C5;
+  --grey-900: #E8ECF2;
+}
+
+/* =========================================================
+   Semantic element defaults
+   ========================================================= */
+html, body {
+  margin: 0;
+  background: var(--bg-neutral);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--body2-size);
+  line-height: var(--body2-lh);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5 { margin: 0; color: var(--text-primary); font-family: var(--font-sans); }
+h1 { font-size: var(--h1-size); line-height: var(--h1-lh); font-weight: var(--h1-weight); letter-spacing: -0.5px; }
+h2 { font-size: var(--h2-size); line-height: var(--h2-lh); font-weight: var(--h2-weight); }
+h3 { font-size: var(--h3-size); line-height: var(--h3-lh); font-weight: var(--h3-weight); }
+h4 { font-size: var(--h4-size); line-height: var(--h4-lh); font-weight: var(--h4-weight); }
+h5 { font-size: var(--h5-size); line-height: var(--h5-lh); font-weight: var(--h5-weight); }
+
+p  { margin: 0; font-size: var(--body2-size); line-height: var(--body2-lh); color: var(--text-primary); }
+small, .caption { font-size: var(--caption-size); line-height: var(--caption-lh); color: var(--text-secondary); }
+code, pre { font-family: var(--font-mono); font-size: 13px; }
+a { color: var(--primary); text-decoration: none; }
+a:hover { color: var(--primary-dark); }
+
+.subtitle { font-size: var(--subtitle-size); line-height: var(--subtitle-lh); font-weight: var(--fw-semibold); }
+.body1    { font-size: var(--body1-size);    line-height: var(--body1-lh); }
+.body2    { font-size: var(--body2-size);    line-height: var(--body2-lh); }
+.body3    { font-size: var(--body3-size);    line-height: var(--body3-lh); color: var(--text-secondary); }
+.overline { font-size: var(--overline-size); line-height: var(--overline-lh); font-weight: var(--fw-semibold); letter-spacing: 1.1px; text-transform: uppercase; color: var(--text-secondary); }

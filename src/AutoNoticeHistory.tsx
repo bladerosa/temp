@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Card, Button, Tag } from './ui';
+import { DateRangePicker } from './DatePicker';
 import { IconDownload, IconMail } from './icons';
 import { PageHeader } from './NormalNotice';
 import type { AutoNoticeItem, HistoryRow, HistoryStatus } from './types';
@@ -137,7 +138,7 @@ export function AutoNoticeHistory({ item, onBack }: HistoryProps) {
       <PageHeader
         title={
           <span>
-            <span style={{ color: 'var(--text-3)', fontWeight: 400, fontSize: 14 }}>自动通知 · 历史记录 / </span>
+            <span style={{ color: 'var(--text-secondary)', fontWeight: 400, fontSize: 14 }}>自动通知 · 历史记录 / </span>
             {item.name}
           </span>
         }
@@ -167,10 +168,11 @@ export function AutoNoticeHistory({ item, onBack }: HistoryProps) {
                 placeholder="ntf_xxxxxxx" style={inputStyle(160)} />
             </FilterField>
             <FilterField label="执行通知时间">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <input type="date" value={filters.sentAtStart} onChange={e => setF('sentAtStart', e.target.value)} style={inputStyle(150)} />
-                <span style={{ color: 'var(--text-3)', fontSize: 12 }}>至</span>
-                <input type="date" value={filters.sentAtEnd} onChange={e => setF('sentAtEnd', e.target.value)} style={inputStyle(150)} />
+              <div style={{ width: 320, display: 'flex' }}>
+                <DateRangePicker
+                  value={{ start: filters.sentAtStart, end: filters.sentAtEnd }}
+                  onChange={({ start, end }) => setFilters(f => ({ ...f, sentAtStart: start, sentAtEnd: end }))}
+                />
               </div>
             </FilterField>
             <FilterField label="通知商户 ID">
@@ -190,7 +192,7 @@ export function AutoNoticeHistory({ item, onBack }: HistoryProps) {
             </FilterField>
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
               {activeFilterCount > 0 && (
-                <span style={{ fontSize: 12, color: 'var(--text-3)' }}>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                   已应用 <b style={{ color: 'var(--primary)' }}>{activeFilterCount}</b> 项筛选
                 </span>
               )}
@@ -203,12 +205,11 @@ export function AutoNoticeHistory({ item, onBack }: HistoryProps) {
         <Card padding={0} style={{ overflow: 'hidden' }}>
           <div style={{ overflowX: 'auto' }}>
             <div style={{ minWidth: totalWidth }}>
-              {/* Header row */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: COLS.map(c => `${c.width}px`).join(' '),
-                borderBottom: '1px solid var(--border)', background: '#FAFBFD',
-                fontSize: 12, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '.04em',
+                borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-subtle)',
+                fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '.04em',
               }}>
                 {COLS.map(col => (
                   <div
@@ -222,16 +223,15 @@ export function AutoNoticeHistory({ item, onBack }: HistoryProps) {
                 ))}
               </div>
 
-              {/* Body */}
               {filtered.length === 0 ? (
-                <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)' }}>
+                <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-secondary)' }}>
                   {activeFilterCount > 0 ? '暂无匹配的通知记录，可尝试调整筛选条件' : '该自动通知暂未执行'}
                 </div>
               ) : pageRows.map((r, idx) => (
                 <div key={r.id} style={{
                   display: 'grid',
                   gridTemplateColumns: COLS.map(c => `${c.width}px`).join(' '),
-                  borderBottom: idx === pageRows.length - 1 ? 'none' : '1px solid var(--border)',
+                  borderBottom: idx === pageRows.length - 1 ? 'none' : '1px solid var(--border-subtle)',
                   fontSize: 13, alignItems: 'center',
                 }}>
                   <CellMono>{r.id}</CellMono>
@@ -239,9 +239,9 @@ export function AutoNoticeHistory({ item, onBack }: HistoryProps) {
                   <CellMono>{r.merchantId}</CellMono>
                   <Cell>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      {item.type === 'Email通知' && <IconMail size={12} stroke="var(--text-3)" />}
+                      {item.type === 'Email通知' && <IconMail size={12} stroke="var(--text-secondary)" />}
                       <span style={{
-                        fontFamily: item.type === 'Email通知' ? "'JetBrains Mono', monospace" : 'inherit',
+                        fontFamily: item.type === 'Email通知' ? 'var(--font-mono)' : 'inherit',
                         fontSize: item.type === 'Email通知' ? 12 : 13,
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }}>{r.channel}</span>
@@ -273,30 +273,33 @@ export function AutoNoticeHistory({ item, onBack }: HistoryProps) {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function inputStyle(width: number): CSSProperties {
   return {
-    width, height: 32, border: '1px solid var(--border)',
-    borderRadius: 6, fontSize: 13, padding: '0 10px',
-    background: '#fff', color: 'var(--text)', fontFamily: 'inherit', outline: 'none',
+    width, height: 36,
+    border: '1px solid var(--border-default)', borderRadius: 8,
+    fontSize: 13, padding: '0 12px',
+    background: 'var(--bg-paper)', color: 'var(--text-primary)',
+    fontFamily: 'inherit', outline: 'none',
+    transition: 'border-color 120ms ease-out, box-shadow 120ms ease-out',
   };
 }
 
 function FilterField({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <div style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500, letterSpacing: '.02em' }}>{label}</div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>{label}</div>
       {children}
     </div>
   );
 }
 
 function Cell({ children }: { children: ReactNode }) {
-  return <div style={{ padding: '12px', color: 'var(--text)' }}>{children}</div>;
+  return <div style={{ padding: '12px', color: 'var(--text-primary)' }}>{children}</div>;
 }
 
 function CellMono({ children, muted }: { children: ReactNode; muted?: boolean }) {
   return (
     <div style={{
-      padding: '12px', fontFamily: "'JetBrains Mono', monospace", fontSize: 12,
-      color: muted ? 'var(--text-2)' : 'var(--text)',
+      padding: '12px', fontFamily: 'var(--font-mono)', fontSize: 12,
+      color: muted ? 'var(--text-secondary)' : 'var(--text-primary)',
       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
     }}>{children}</div>
   );
@@ -304,7 +307,7 @@ function CellMono({ children, muted }: { children: ReactNode; muted?: boolean })
 
 function SortCaret({ active, dir }: { active: boolean; dir: SortDir }) {
   return (
-    <div style={{ display: 'inline-flex', flexDirection: 'column', marginLeft: 2, color: active ? 'var(--primary)' : 'var(--text-3)', opacity: active ? 1 : 0.55 }}>
+    <div style={{ display: 'inline-flex', flexDirection: 'column', marginLeft: 2, color: active ? 'var(--primary)' : 'var(--grey-600)', opacity: active ? 1 : 0.55 }}>
       <svg width="8" height="5" viewBox="0 0 8 5" style={{ opacity: active && dir === 'asc' ? 1 : 0.4 }}>
         <path d="M4 0l4 5H0z" fill="currentColor" />
       </svg>
@@ -321,7 +324,7 @@ function StatusCell({ status, reason }: { status: HistoryStatus; reason: string 
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
       <Tag color={s.color}>{s.label}</Tag>
       {reason && (
-        <span title={reason} style={{ fontSize: 11, color: 'var(--danger)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160 }}>
+        <span title={reason} style={{ fontSize: 11, color: 'var(--error)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160 }}>
           {reason}
         </span>
       )}
@@ -338,22 +341,22 @@ interface StatPillProps {
 }
 
 function StatPill({ label, value, accent, tone, hint }: StatPillProps) {
-  const toneColor = tone === 'danger' ? 'var(--danger)'
-    : tone === 'warn' ? '#B77A00'
-    : accent ? 'var(--primary)' : 'var(--text)';
-  const toneBorder = accent ? '#D9DDF5' : 'var(--border)';
-  const toneBg = accent ? 'var(--primary-soft)' : '#fff';
+  const toneColor = tone === 'danger' ? 'var(--error)'
+    : tone === 'warn' ? 'var(--warning-dark)'
+    : accent ? 'var(--primary)' : 'var(--text-primary)';
+  const toneBorder = accent ? '#C5D9FC' : 'var(--border-subtle)';
+  const toneBg = accent ? 'var(--primary-lighter)' : 'var(--bg-paper)';
   return (
-    <div style={{ padding: '10px 18px', background: toneBg, border: `1px solid ${toneBorder}`, borderRadius: 10, minWidth: 130 }}>
-      <div style={{ fontSize: 12, color: accent ? 'var(--primary)' : 'var(--text-3)', marginBottom: 2, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
+    <div style={{ padding: '10px 18px', background: toneBg, border: `1px solid ${toneBorder}`, borderRadius: 12, minWidth: 130 }}>
+      <div style={{ fontSize: 12, color: accent ? 'var(--primary-dark)' : 'var(--text-secondary)', marginBottom: 2, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
         <span>{label}</span>
         {hint && (
-          <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 10, background: '#fff', border: '1px solid #D9DDF5', color: 'var(--primary)', fontWeight: 500 }}>
+          <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 9999, background: 'var(--bg-paper)', border: '1px solid #C5D9FC', color: 'var(--primary)', fontWeight: 600 }}>
             {hint}
           </span>
         )}
       </div>
-      <div style={{ fontSize: 22, fontWeight: 700, color: toneColor, fontFamily: "'JetBrains Mono', monospace" }}>{value}</div>
+      <div style={{ fontSize: 22, fontWeight: 700, color: toneColor, fontFamily: 'var(--font-mono)' }}>{value}</div>
     </div>
   );
 }
@@ -385,30 +388,33 @@ function Pagination({ page, pageSize, total, onPageChange, onPageSizeChange }: P
   }
 
   const btnStyle = (disabled: boolean): CSSProperties => ({
-    minWidth: 30, height: 30, padding: '0 8px',
-    border: '1px solid var(--border)', background: '#fff', borderRadius: 6,
-    fontSize: 12, color: disabled ? 'var(--text-3)' : 'var(--text-2)',
+    minWidth: 32, height: 32, padding: '0 10px',
+    border: '1px solid var(--border-default)',
+    background: 'var(--bg-paper)', borderRadius: 8,
+    fontSize: 13, color: disabled ? 'var(--grey-400)' : 'var(--text-secondary)',
     cursor: disabled ? 'not-allowed' : 'pointer',
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
     fontFamily: 'inherit',
+    transition: 'background 120ms ease-out, border-color 120ms ease-out',
   });
   const activeBtn: CSSProperties = {
     ...btnStyle(false), background: 'var(--primary)',
     borderColor: 'var(--primary)', color: '#fff', fontWeight: 600,
+    boxShadow: 'var(--shadow-primary)',
   };
 
   return (
     <div style={{
-      padding: '12px 16px', borderTop: '1px solid var(--border)',
+      padding: '12px 16px', borderTop: '1px solid var(--border-subtle)',
       display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
     }}>
-      <div style={{ fontSize: 12, color: 'var(--text-3)' }}>
-        显示第 <b style={{ color: 'var(--text-2)' }}>{start}–{end}</b> 条，共 <b style={{ color: 'var(--text-2)' }}>{total.toLocaleString()}</b> 条
+      <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+        显示第 <b style={{ color: 'var(--text-primary)' }}>{start}–{end}</b> 条，共 <b style={{ color: 'var(--text-primary)' }}>{total.toLocaleString()}</b> 条
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <button style={btnStyle(p === 1)} disabled={p === 1} onClick={() => onPageChange(p - 1)}>‹</button>
         {pages.map((pg, i) => pg === '…' ? (
-          <span key={`e${i}`} style={{ fontSize: 12, color: 'var(--text-3)', padding: '0 4px' }}>…</span>
+          <span key={`e${i}`} style={{ fontSize: 12, color: 'var(--text-secondary)', padding: '0 4px' }}>…</span>
         ) : (
           <button key={pg} style={pg === p ? activeBtn : btnStyle(false)} onClick={() => onPageChange(pg)}>
             {pg}
@@ -418,7 +424,7 @@ function Pagination({ page, pageSize, total, onPageChange, onPageSizeChange }: P
         <select
           value={pageSize}
           onChange={e => onPageSizeChange(Number(e.target.value))}
-          style={{ height: 30, border: '1px solid var(--border)', borderRadius: 6, fontSize: 12, padding: '0 6px', background: '#fff', color: 'var(--text-2)', fontFamily: 'inherit', outline: 'none', marginLeft: 4 }}
+          style={{ height: 32, border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12, padding: '0 8px', background: 'var(--bg-paper)', color: 'var(--text-secondary)', fontFamily: 'inherit', outline: 'none', marginLeft: 4 }}
         >
           {[10, 20, 50, 100].map(n => <option key={n} value={n}>{n} 条/页</option>)}
         </select>

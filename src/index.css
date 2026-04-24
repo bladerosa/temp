@@ -1,39 +1,212 @@
-:root {
-  --bg: #F6F7FB;
-  --panel: #FFFFFF;
-  --sidebar: #FFFFFF;
-  --sidebar-active: #EEF0FF;
-  --border: #E6E8EE;
-  --border-strong: #D6DAE2;
-  --text: #1A1E2C;
-  --text-2: #5A6275;
-  --text-3: #8A92A6;
-  --primary: #4F5BD5;
-  --primary-hover: #3F4BC5;
-  --primary-soft: #EEF0FF;
-  --danger: #E5484D;
-  --success: #2EB67D;
-  --warning: #F5A524;
-  --radius: 8px;
-  --shadow-sm: 0 1px 2px rgba(16,24,40,.04);
-  --shadow-md: 0 4px 12px rgba(16,24,40,.06);
-  --shadow-lg: 0 10px 30px rgba(16,24,40,.08);
+/* =========================================================
+   CCPayment Design System — Colors & Typography
+   (ported from project/ccpayment/colors_and_type.css)
+   ========================================================= */
+
+/* ---- Poppins (local brand font files) -------------------- */
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/Poppins-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/Poppins-Medium.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/Poppins-SemiBold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/Poppins-Bold.ttf") format("truetype");
 }
 
+:root {
+  /* ---- Brand ------------------------------------------- */
+  --primary-lighter:   #D8E7FE;
+  --primary-light:     #89AFFC;
+  --primary:           #3C6FF5;   /* CCPayment blue */
+  --primary-dark:      #1E3EB0;
+  --primary-darker:    #0A1F70;
+  --primary-contrast:  #FFFFFF;
+
+  --secondary-lighter: #EEF0E8;
+  --secondary-light:   #D7E89A;
+  --secondary:         #BEE072;
+  --secondary-dark:    #8CA852;
+  --secondary-darker:  #5A6E35;
+  --secondary-contrast:#1F2025;
+
+  /* ---- Neutrals ---------------------------------------- */
+  --grey-100: #F8F9FB;
+  --grey-200: #F4F6F8;
+  --grey-300: #E8ECF2;
+  --grey-400: #CACFD8;
+  --grey-500: #B3B9C5;
+  --grey-600: #919FAB;
+  --grey-700: #71757E;
+  --grey-800: #454A55;
+  --grey-900: #1F2025;
+
+  /* ---- Semantic ---------------------------------------- */
+  --success-lighter: #C8FACD;
+  --success-light:   #5BE584;
+  --success:         #36B37E;
+  --success-dark:    #00AB55;
+  --success-darker:  #005249;
+
+  --info-lighter:    #D0F2FF;
+  --info-light:      #74CAFF;
+  --info:            #00B8D9;
+  --info-dark:       #0C53B7;
+  --info-darker:     #04297A;
+
+  --warning-lighter: #FFF7CD;
+  --warning-light:   #FFE16A;
+  --warning:         #FFAB00;
+  --warning-dark:    #B78103;
+  --warning-darker:  #7A4F01;
+
+  --error-lighter:   #FFE7D9;
+  --error-light:     #FFA48D;
+  --error:           #FF5630;
+  --error-dark:      #B72136;
+  --error-darker:    #7A0C2E;
+
+  /* ---- Surfaces / text --------------------------------- */
+  --bg-default:   #FFFFFF;
+  --bg-neutral:   #F4F6F8;
+  --bg-paper:     #FFFFFF;
+  --bg-subtle:    #F8F9FB;
+  --bg-disabled:  rgba(145,158,171,0.24);
+
+  --text-primary:   #1F2025;
+  --text-secondary: #71757E;
+  --text-disabled:  #B3B9C5;
+  --text-inverse:   #FFFFFF;
+
+  --border-subtle: rgba(145,158,171,0.24);
+  --border-default: #E8ECF2;
+  --border-strong: #CACFD8;
+  --border-focus:  #3C6FF5;
+
+  /* ---- Shadow system ----------------------------------- */
+  --shadow-z1:   0 1px 2px 0 rgba(113,117,126,0.12);
+  --shadow-z4:   0 4px 8px 0 rgba(145,158,171,0.16);
+  --shadow-z8:   0 8px 16px 0 rgba(145,158,171,0.16);
+  --shadow-z12:  0 12px 24px -4px rgba(113,117,126,0.20);
+  --shadow-z16:  0 16px 32px -4px rgba(145,158,171,0.24);
+  --shadow-z20:  0 20px 40px -4px rgba(145,158,171,0.24);
+  --shadow-z24:  0 24px 48px 0 rgba(145,158,171,0.24);
+  --shadow-dialog:   -40px 40px 80px -8px rgba(145,158,171,0.24);
+  --shadow-dropdown: -20px 20px 40px -4px rgba(182,184,176,0.24), 0 0 2px 0 rgba(182,184,176,0.24);
+  --shadow-card:     0 0 2px 0 rgba(145,158,171,0.20), 0 12px 24px -4px rgba(145,158,171,0.12);
+
+  --shadow-primary: 0 8px 16px 0 rgba(60,111,245,0.24);
+  --shadow-success: 0 8px 16px 0 rgba(54,179,126,0.24);
+  --shadow-warning: 0 8px 16px 0 rgba(255,171,0,0.24);
+  --shadow-error:   0 8px 16px 0 rgba(255,86,48,0.24);
+
+  /* ---- Radii / spacing --------------------------------- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-pill: 9999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* ---- Typography -------------------------------------- */
+  --font-sans: "Poppins", "PingFang SC", "Microsoft YaHei",
+               -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Poppins", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace;
+
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semibold:600;
+  --fw-bold:    700;
+
+  --body1-size: 16px;    --body1-lh: 24px;
+  --body2-size: 14px;    --body2-lh: 20px;
+  --body3-size: 12px;    --body3-lh: 16px;
+  --caption-size: 12px;  --caption-lh: 16px;
+
+  /* ---- Legacy aliases (preserve existing code) --------- */
+  --bg: var(--bg-neutral);
+  --panel: var(--bg-paper);
+  --sidebar: var(--bg-paper);
+  --sidebar-active: var(--primary-lighter);
+  --border: var(--border-subtle);
+  --text: var(--text-primary);
+  --text-2: var(--text-secondary);
+  --text-3: var(--grey-600);
+  --primary-hover: var(--primary-dark);
+  --primary-soft: var(--primary-lighter);
+  --danger: var(--error);
+  --success: var(--success);
+  --warning: var(--warning);
+  --radius: var(--radius-md);
+  --shadow-sm: var(--shadow-z1);
+  --shadow-md: var(--shadow-z4);
+  --shadow-lg: var(--shadow-dropdown);
+}
+
+/* ---- Reset & base ------------------------------------------ */
 * { box-sizing: border-box; }
 
 html, body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 14px;
-  line-height: 1.5;
+  background: var(--bg-neutral);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--body2-size);
+  line-height: var(--body2-lh);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 #root { min-height: 100vh; }
+
+/* ---- Scrollbar --------------------------------------------- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb {
+  background: var(--grey-300);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--grey-400);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ---- Motion ------------------------------------------------ */
+.nav-row { transition: background 120ms ease-out, color 120ms ease-out; }
+.nav-row:hover { background: var(--bg-subtle); }
 
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {

@@ -1,4 +1,4 @@
-// Layout: sidebar + topbar shell
+// Layout: sidebar + topbar shell (CCPayment Design System)
 
 const SIDEBAR_ITEMS = [
   { key: 'data', label: '数据看板', hasSub: true },
@@ -18,26 +18,21 @@ const SIDEBAR_ITEMS = [
     { key: 'notice.auto', label: '自动通知' },
   ]},
   { key: 'syslog', label: '运营系统日志', hasSub: false },
-  { key: 'ip1', label: '', hasSub: false },
-  { key: 'ip2', label: '', hasSub: false },
-  { key: 'ip3', label: '', hasSub: false },
-  { key: 'ip4', label: '', hasSub: false },
-  { key: 'email', label: '', hasSub: false },
-  { key: 'campaign', label: '', hasSub: true },
 ];
 
 function Layout({ active, onNavigate, children }) {
   const [expanded, setExpanded] = useState({ notice: true });
-
   const toggle = (k) => setExpanded(e => ({ ...e, [k]: !e[k] }));
 
+  const crumbCurrent = active === 'notice.auto' ? '自动通知' : '常规通知';
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Sidebar */}
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-neutral)' }}>
+      {/* ================= Sidebar ================= */}
       <aside style={{
-        width: 220,
-        background: '#fff',
-        borderRight: '1px solid var(--border)',
+        width: 248,
+        background: 'var(--bg-paper)',
+        borderRight: '1px solid var(--border-subtle)',
         position: 'sticky',
         top: 0,
         height: '100vh',
@@ -45,25 +40,30 @@ function Layout({ active, onNavigate, children }) {
         flexDirection: 'column',
         flexShrink: 0,
       }}>
-        {/* Logo */}
+        {/* Logo — CCPayment wordmark */}
         <div style={{
-          padding: '16px 20px',
-          borderBottom: '1px solid var(--border)',
-          display: 'flex', alignItems: 'center', gap: 8,
+          padding: '20px 20px 16px',
+          display: 'flex', alignItems: 'center',
         }}>
-          <div style={{
-            width: 22, height: 22, background: 'var(--primary)',
-            borderRadius: 6,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontSize: 13, fontWeight: 700,
-          }}>c</div>
-          <span style={{ fontSize: 15, fontWeight: 700, color: '#2B3A5B', letterSpacing: '-.01em' }}>
-            ccpayment
-          </span>
+          <img
+            src="ccpayment/assets/logo-withfont.svg"
+            alt="CCPayment"
+            style={{ height: 26, display: 'block' }}
+          />
         </div>
 
+        {/* Section label */}
+        <div style={{
+          padding: '4px 24px 6px',
+          fontSize: 11,
+          fontWeight: 600,
+          color: 'var(--text-secondary)',
+          textTransform: 'uppercase',
+          letterSpacing: '1.1px',
+        }}>运营后台</div>
+
         {/* Menu */}
-        <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 6px' }}>
+        <nav style={{ flex: 1, overflowY: 'auto', padding: '4px 12px 16px' }}>
           {SIDEBAR_ITEMS.map(item => {
             const isNotice = item.key === 'notice';
             const isExpanded = expanded[item.key];
@@ -71,30 +71,32 @@ function Layout({ active, onNavigate, children }) {
             const parentActive = isNotice && active.startsWith('notice.');
 
             return (
-              <div key={item.key} style={{ marginBottom: 1 }}>
+              <div key={item.key} style={{ marginBottom: 2 }}>
                 <div
+                  className="nav-row"
                   onClick={() => hasChildren ? toggle(item.key) : null}
                   style={{
-                    padding: '7px 12px',
-                    fontSize: 13,
-                    color: parentActive ? 'var(--text)' : 'var(--text-2)',
-                    fontWeight: parentActive ? 600 : 400,
+                    padding: '9px 12px',
+                    fontSize: 13.5,
+                    color: parentActive ? 'var(--primary-dark)' : 'var(--text-primary)',
+                    fontWeight: parentActive ? 600 : 500,
                     cursor: hasChildren ? 'pointer' : 'default',
-                    borderRadius: 6,
+                    borderRadius: 8,
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    background: parentActive ? 'var(--primary-lighter)' : 'transparent',
                   }}
                 >
                   <span>{item.label}</span>
                   {item.hasSub && (
                     <IconChevronRight
                       size={12}
-                      stroke="var(--text-3)"
-                      style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}
+                      stroke={parentActive ? 'var(--primary)' : 'var(--text-secondary)'}
+                      style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 120ms ease-out' }}
                     />
                   )}
                 </div>
                 {hasChildren && isExpanded && (
-                  <div style={{ paddingLeft: 18, marginBottom: 4 }}>
+                  <div style={{ paddingLeft: 12, paddingTop: 2, paddingBottom: 4 }}>
                     {item.children.map(sub => {
                       const isActive = sub.key === active;
                       return (
@@ -102,19 +104,28 @@ function Layout({ active, onNavigate, children }) {
                           key={sub.key}
                           onClick={() => onNavigate(sub.key)}
                           style={{
-                            padding: '7px 12px',
+                            position: 'relative',
+                            padding: '8px 12px 8px 20px',
                             fontSize: 13,
-                            color: isActive ? 'var(--primary)' : 'var(--text-2)',
-                            fontWeight: isActive ? 600 : 400,
-                            background: isActive ? 'var(--sidebar-active)' : 'transparent',
-                            borderRadius: 6,
+                            color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
+                            fontWeight: isActive ? 600 : 500,
+                            background: 'transparent',
+                            borderRadius: 8,
                             cursor: 'pointer',
                             marginBottom: 1,
-                            transition: 'background .12s',
+                            transition: 'color 120ms ease-out, background 120ms ease-out',
                           }}
-                          onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = '#F6F7FB'; }}
+                          onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'var(--bg-subtle)'; }}
                           onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
                         >
+                          {/* left dot indicator */}
+                          <span style={{
+                            position: 'absolute',
+                            left: 8, top: '50%', transform: 'translateY(-50%)',
+                            width: 4, height: 4, borderRadius: '50%',
+                            background: isActive ? 'var(--primary)' : 'var(--grey-400)',
+                            transition: 'background 120ms ease-out',
+                          }} />
                           {sub.label}
                         </div>
                       );
@@ -125,37 +136,77 @@ function Layout({ active, onNavigate, children }) {
             );
           })}
         </nav>
+
+        {/* Footer: operator card */}
+        <div style={{
+          margin: 12,
+          padding: 12,
+          background: 'var(--bg-subtle)',
+          borderRadius: 12,
+          display: 'flex', alignItems: 'center', gap: 10,
+        }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: '50%',
+            background: 'var(--primary)', color: '#fff',
+            display: 'grid', placeItems: 'center',
+            fontWeight: 700, fontSize: 12,
+          }}>OP</div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.2 }}>运营同学</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.2, marginTop: 2 }}>Admin · Notifications</div>
+          </div>
+        </div>
       </aside>
 
-      {/* Main */}
+      {/* ================= Main ================= */}
       <main style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-        {/* Topbar */}
+        {/* Appbar */}
         <div style={{
-          height: 56,
-          background: '#fff',
-          borderBottom: '1px solid var(--border)',
-          padding: '0 28px',
+          height: 64,
+          background: 'var(--bg-paper)',
+          borderBottom: '1px solid var(--border-subtle)',
+          padding: '0 32px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           position: 'sticky', top: 0, zIndex: 10,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-3)' }}>
+          {/* Breadcrumb */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            fontSize: 12.5, color: 'var(--text-secondary)',
+          }}>
             <span>通知系统</span>
-            <span>/</span>
-            <span style={{ color: 'var(--text)' }}>{active === 'notice.auto' ? '自动通知' : '常规通知'}</span>
+            <span style={{ opacity: 0.5 }}>/</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{crumbCurrent}</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <button style={{
-              width: 32, height: 32, borderRadius: 8,
-              border: 'none', background: 'transparent', cursor: 'pointer',
-              color: 'var(--text-2)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <IconSettings size={18} />
-            </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <IconButton title="Docs"><IconGlobe size={18} /></IconButton>
+            <IconButton title="Help"><IconHelp size={18} /></IconButton>
+            <IconButton title="Notifications" badge>
+              <IconBell size={18} />
+            </IconButton>
+            <div style={{ width: 1, height: 24, background: 'var(--border-subtle)', margin: '0 8px' }} />
             <div style={{
-              width: 32, height: 32, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #6EA3FF, #9B7DFF)',
-            }} />
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '4px 14px 4px 4px',
+              borderRadius: 9999, cursor: 'pointer',
+              transition: 'background 120ms ease-out',
+            }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-subtle)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              <div style={{
+                width: 32, height: 32, borderRadius: '50%',
+                background: 'var(--primary)', color: '#fff',
+                display: 'grid', placeItems: 'center',
+                fontWeight: 700, fontSize: 12,
+              }}>OP</div>
+              <div style={{ lineHeight: 1.2 }}>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>运营同学</div>
+                <div style={{ fontSize: 10.5, color: 'var(--text-secondary)' }}>Admin</div>
+              </div>
+              <IconChevronDown size={14} stroke="var(--text-secondary)" />
+            </div>
           </div>
         </div>
 
@@ -164,6 +215,37 @@ function Layout({ active, onNavigate, children }) {
         </div>
       </main>
     </div>
+  );
+}
+
+// Small icon button (appbar)
+function IconButton({ children, title, badge }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <button
+      title={title}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        width: 40, height: 40, borderRadius: '50%',
+        background: hover ? 'var(--bg-subtle)' : 'transparent',
+        border: 'none', cursor: 'pointer',
+        color: 'var(--text-secondary)',
+        display: 'grid', placeItems: 'center',
+        position: 'relative',
+        transition: 'background 120ms ease-out',
+      }}
+    >
+      {children}
+      {badge && (
+        <span style={{
+          position: 'absolute', top: 8, right: 8,
+          width: 8, height: 8, borderRadius: '50%',
+          background: 'var(--error)',
+          boxShadow: '0 0 0 2px var(--bg-paper)',
+        }} />
+      )}
+    </button>
   );
 }
 

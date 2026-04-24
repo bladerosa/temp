@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { Select, NumberInput, DateInput, Switch } from './ui';
+import { Select, NumberInput, Switch } from './ui';
+import { DateRangePicker } from './DatePicker';
 import { IconInfo } from './icons';
 import type {
   RegTimeValue, RegTimeRelative, RegTimeAbsolute,
@@ -46,8 +47,10 @@ export function RegTimeCondition({ value, onChange, mode = 'relative' }: RegTime
 
   return (
     <div style={{
-      padding: 16, background: '#FAFBFD',
-      border: '1px dashed var(--border-strong)', borderRadius: 8,
+      padding: 16,
+      background: 'var(--bg-subtle)',
+      border: '1px solid var(--border-subtle)',
+      borderRadius: 8,
     }}>
       {mode === 'absolute' ? (
         <AbsoluteRegTime
@@ -68,13 +71,12 @@ export function RegTimeCondition({ value, onChange, mode = 'relative' }: RegTime
 function AbsoluteRegTime({ v, update }: { v: RegTimeAbsolute; update: (p: Partial<RegTimeAbsolute>) => void }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-      <span style={{ fontSize: 13, color: 'var(--text-2)', width: 84 }}>注册时间</span>
-      <div style={{ flex: 1, minWidth: 160 }}>
-        <DateInput value={v.startDate} onChange={startDate => update({ startDate })} />
-      </div>
-      <span style={{ color: 'var(--text-3)' }}>—</span>
-      <div style={{ flex: 1, minWidth: 160 }}>
-        <DateInput value={v.endDate} onChange={endDate => update({ endDate })} />
+      <span style={{ fontSize: 13, color: 'var(--text-secondary)', width: 84 }}>注册时间</span>
+      <div style={{ flex: 1, minWidth: 260, display: 'flex' }}>
+        <DateRangePicker
+          value={{ start: v.startDate, end: v.endDate }}
+          onChange={({ start, end }) => update({ startDate: start, endDate: end })}
+        />
       </div>
     </div>
   );
@@ -83,7 +85,7 @@ function AbsoluteRegTime({ v, update }: { v: RegTimeAbsolute; update: (p: Partia
 function RelativeRegTime({ v, update }: { v: RegTimeRelative; update: (p: Partial<RegTimeRelative>) => void }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-      <span style={{ fontSize: 13, color: 'var(--text-2)' }}>注册时间</span>
+      <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>注册时间</span>
       <div style={{ width: 120 }}>
         <Select value={v.op} onChange={op => update({ op: op as Operator })} options={OPERATOR_OPTIONS} />
       </div>
@@ -95,7 +97,7 @@ function RelativeRegTime({ v, update }: { v: RegTimeRelative; update: (p: Partia
           <div style={{ width: 90 }}>
             <Select value={v.u1} onChange={u1 => update({ u1: u1 as TimeUnit })} options={TIME_UNIT_OPTIONS} />
           </div>
-          <span style={{ fontSize: 12, color: 'var(--text-3)', marginLeft: 4 }}>(相对执行日)</span>
+          <span style={{ fontSize: 12, color: 'var(--text-secondary)', marginLeft: 4 }}>(相对执行日)</span>
         </>
       ) : (
         <>
@@ -108,7 +110,7 @@ function RelativeRegTime({ v, update }: { v: RegTimeRelative; update: (p: Partia
           <div style={{ width: 80 }}>
             <Select value={v.u1} onChange={u1 => update({ u1: u1 as TimeUnit })} options={TIME_UNIT_OPTIONS} />
           </div>
-          <span style={{ fontSize: 13, color: 'var(--text-2)' }}>且</span>
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>且</span>
           <div style={{ width: 110 }}>
             <Select value={v.rightOp ?? 'lt'} onChange={rightOp => update({ rightOp: rightOp as BoundOp })} options={RIGHT_OP_OPTIONS} />
           </div>
@@ -118,7 +120,7 @@ function RelativeRegTime({ v, update }: { v: RegTimeRelative; update: (p: Partia
           <div style={{ width: 80 }}>
             <Select value={v.u2} onChange={u2 => update({ u2: u2 as TimeUnit })} options={TIME_UNIT_OPTIONS} />
           </div>
-          <span style={{ fontSize: 12, color: 'var(--text-3)', marginLeft: 4 }}>(相对执行日)</span>
+          <span style={{ fontSize: 12, color: 'var(--text-secondary)', marginLeft: 4 }}>(相对执行日)</span>
         </>
       )}
     </div>
@@ -161,37 +163,34 @@ export function DepositCondition({ value, onChange, rangeMode }: DepositConditio
   const update = (patch: Partial<DepositValue>) => onChange({ ...v, ...patch });
 
   return (
-    <div style={{ padding: 16, background: '#FAFBFD', border: '1px dashed var(--border-strong)', borderRadius: 8 }}>
+    <div style={{ padding: 16, background: 'var(--bg-subtle)', border: '1px solid var(--border-subtle)', borderRadius: 8 }}>
       {/* Time range row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-        <span style={{ fontSize: 13, color: 'var(--text-2)', width: 84 }}>统计时间</span>
+        <span style={{ fontSize: 13, color: 'var(--text-secondary)', width: 84 }}>统计时间</span>
         {rangeMode === 'absolute' ? (
-          <>
-            <div style={{ flex: 1, minWidth: 160 }}>
-              <DateInput value={v.startDate} onChange={startDate => update({ startDate })} />
-            </div>
-            <span style={{ color: 'var(--text-3)' }}>—</span>
-            <div style={{ flex: 1, minWidth: 160 }}>
-              <DateInput value={v.endDate} onChange={endDate => update({ endDate })} />
-            </div>
-          </>
+          <div style={{ flex: 1, minWidth: 260, display: 'flex' }}>
+            <DateRangePicker
+              value={{ start: v.startDate, end: v.endDate }}
+              onChange={({ start, end }) => update({ startDate: start, endDate: end })}
+            />
+          </div>
         ) : (
           <>
-            <span style={{ fontSize: 13, color: 'var(--text-2)' }}>最近</span>
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>最近</span>
             <div style={{ width: 100 }}>
               <NumberInput value={v.recentN} onChange={recentN => update({ recentN })} placeholder="数值" min={1} />
             </div>
             <div style={{ width: 90 }}>
               <Select value={v.recentU} onChange={recentU => update({ recentU: recentU as TimeUnit })} options={TIME_UNIT_OPTIONS} />
             </div>
-            <span style={{ fontSize: 12, color: 'var(--text-3)', marginLeft: 4 }}>(相对执行日)</span>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)', marginLeft: 4 }}>(相对执行日)</span>
           </>
         )}
       </div>
 
       {/* Amount row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 13, color: 'var(--text-2)', whiteSpace: 'nowrap' }}>入金金额（相对执行日）</span>
+        <span style={{ fontSize: 13, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>入金金额（相对执行日）</span>
         <div style={{ width: 120 }}>
           <Select value={v.op} onChange={op => update({ op: op as Operator })} options={OPERATOR_OPTIONS} />
         </div>
@@ -207,7 +206,7 @@ export function DepositCondition({ value, onChange, rangeMode }: DepositConditio
             <div style={{ width: 140 }}>
               <NumberInput value={v.a1} onChange={a1 => update({ a1 })} placeholder="0.00" min={0} step="0.01" suffix="USD" />
             </div>
-            <span style={{ fontSize: 13, color: 'var(--text-2)' }}>且</span>
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>且</span>
             <div style={{ width: 90 }}>
               <Select value={v.rightOp ?? 'lt'} onChange={rightOp => update({ rightOp: rightOp as BoundOp })} options={RIGHT_OP_OPTIONS} />
             </div>
@@ -253,12 +252,12 @@ function ConditionPreview({ text }: { text: string }) {
   return (
     <div style={{
       marginTop: 12, padding: '8px 12px',
-      background: '#fff', border: '1px solid var(--border)',
-      borderRadius: 6, fontSize: 12, color: 'var(--text-2)',
-      fontFamily: "'JetBrains Mono', monospace",
+      background: 'var(--bg-paper)', border: '1px solid var(--border-subtle)',
+      borderRadius: 8, fontSize: 12, color: 'var(--text-secondary)',
+      fontFamily: 'var(--font-mono)',
       display: 'flex', alignItems: 'center', gap: 8,
     }}>
-      <IconInfo size={12} stroke="var(--text-3)" />
+      <IconInfo size={12} stroke="var(--grey-600)" />
       <span style={{ flex: 1 }}>预览：{text}</span>
     </div>
   );
@@ -299,13 +298,15 @@ export function ConditionGroup({ value, onChange, rangeMode, showHintNone = true
 
       {bothOn && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '2px 0' }}>
-          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+          <div style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
           <div style={{
-            padding: '3px 12px', background: 'var(--primary-soft)',
-            color: 'var(--primary)', fontSize: 12, fontWeight: 600,
-            borderRadius: 10, letterSpacing: '.02em',
+            padding: '4px 12px',
+            background: 'var(--primary-lighter)',
+            color: 'var(--primary-darker)',
+            fontSize: 11, fontWeight: 700,
+            borderRadius: 9999, letterSpacing: '.04em',
           }}>AND · 且</div>
-          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+          <div style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
         </div>
       )}
 
@@ -324,11 +325,19 @@ export function ConditionGroup({ value, onChange, rangeMode, showHintNone = true
 
       {showHintNone && noneOn && (
         <div style={{
-          padding: 12, background: '#FDF5E6', border: '1px solid #F3D98A',
-          borderRadius: 8, fontSize: 13, color: '#8A6A18',
-          display: 'flex', alignItems: 'center', gap: 8,
+          padding: '12px 16px',
+          background: 'var(--warning-lighter)',
+          borderRadius: 12,
+          fontSize: 13,
+          color: 'var(--warning-darker)',
+          display: 'flex', alignItems: 'center', gap: 10,
         }}>
-          <IconInfo size={14} />
+          <span style={{
+            width: 22, height: 22, borderRadius: '50%',
+            background: 'var(--warning)', color: 'var(--text-primary)',
+            display: 'grid', placeItems: 'center',
+            fontSize: 13, fontWeight: 700, flexShrink: 0,
+          }}>!</span>
           请至少启用一个条件块
         </div>
       )}
@@ -348,28 +357,30 @@ interface ConditionBlockProps {
 function ConditionBlock({ title, description, enabled, onToggle, children }: ConditionBlockProps) {
   return (
     <div style={{
-      border: `1px solid ${enabled ? 'var(--border-strong)' : 'var(--border)'}`,
-      borderRadius: 10, background: enabled ? '#fff' : '#FAFBFD',
-      transition: 'border-color .15s, background .15s',
+      border: '1px solid var(--border-subtle)',
+      borderRadius: 16,
+      background: 'var(--bg-paper)',
+      boxShadow: enabled ? 'var(--shadow-z1)' : 'none',
+      transition: 'box-shadow 120ms ease-out',
     }}>
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '12px 16px',
-        borderBottom: enabled ? '1px solid var(--border)' : 'none',
+        padding: '14px 20px',
+        borderBottom: enabled ? '1px solid var(--border-subtle)' : 'none',
       }}>
         <div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>{description}</div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{title}</div>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>{description}</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 12, color: enabled ? 'var(--primary)' : 'var(--text-3)', fontWeight: 500 }}>
+          <span style={{ fontSize: 12, color: enabled ? 'var(--primary-dark)' : 'var(--text-secondary)', fontWeight: 500 }}>
             {enabled ? '已启用' : '未启用'}
           </span>
-          <Switch checked={enabled} onChange={onToggle} size="sm" />
+          <Switch checked={enabled} onChange={onToggle} />
         </div>
       </div>
       {enabled && (
-        <div style={{ padding: 16 }}>
+        <div style={{ padding: 20 }}>
           {children}
         </div>
       )}

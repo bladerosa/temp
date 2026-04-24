@@ -35,3 +35,5 @@ export const IconLink = (p: IProps) => <Icon {...p} content={<g><path d="M10 13a
 export const IconZap = (p: IProps) => <Icon {...p} content={<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>} />;
 export const IconInfo = (p: IProps) => <Icon {...p} content={<g><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></g>} />;
 export const IconMail = (p: IProps) => <Icon {...p} content={<g><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></g>} />;
+export const IconGlobe = (p: IProps) => <Icon {...p} content={<g><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></g>} />;
+export const IconHelp = (p: IProps) => <Icon {...p} content={<g><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></g>} />;

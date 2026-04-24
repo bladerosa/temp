@@ -181,19 +181,10 @@ function AutoNoticeHistory({ item, onBack }) {
               />
             </FilterField>
             <FilterField label="执行通知时间">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <input
-                  type="date"
-                  value={filters.sentAtStart}
-                  onChange={e => setF('sentAtStart', e.target.value)}
-                  style={inputStyle(150)}
-                />
-                <span style={{ color: 'var(--text-3)', fontSize: 12 }}>至</span>
-                <input
-                  type="date"
-                  value={filters.sentAtEnd}
-                  onChange={e => setF('sentAtEnd', e.target.value)}
-                  style={inputStyle(150)}
+              <div style={{ width: 320, display: 'flex' }}>
+                <DateRangePicker
+                  value={{ start: filters.sentAtStart, end: filters.sentAtEnd }}
+                  onChange={({ start, end }) => { setF('sentAtStart', start); setF('sentAtEnd', end); }}
                 />
               </div>
             </FilterField>
@@ -281,7 +272,7 @@ function AutoNoticeHistory({ item, onBack }) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       {item?.type === 'Email通知' && <IconMail size={12} stroke="var(--text-3)" />}
                       <span style={{
-                        fontFamily: item?.type === 'Email通知' ? "'JetBrains Mono', monospace" : 'inherit',
+                        fontFamily: item?.type === 'Email通知' ? 'var(--font-mono)' : 'inherit',
                         fontSize: item?.type === 'Email通知' ? 12 : 13,
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }}>{r.channel}</span>
@@ -313,22 +304,23 @@ function AutoNoticeHistory({ item, onBack }) {
 function inputStyle(width) {
   return {
     width,
-    height: 32,
-    border: '1px solid var(--border)',
-    borderRadius: 6,
+    height: 36,
+    border: '1px solid var(--border-default)',
+    borderRadius: 8,
     fontSize: 13,
-    padding: '0 10px',
+    padding: '0 12px',
     background: '#fff',
-    color: 'var(--text)',
+    color: 'var(--text-primary)',
     fontFamily: 'inherit',
     outline: 'none',
+    transition: 'border-color 120ms ease-out, box-shadow 120ms ease-out',
   };
 }
 
 function FilterField({ label, children }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <div style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500, letterSpacing: '.02em' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>
         {label}
       </div>
       {children}
@@ -342,7 +334,7 @@ function Cell({ children, style }) {
 function CellMono({ children, muted }) {
   return <div style={{
     padding: '12px',
-    fontFamily: "'JetBrains Mono', monospace",
+    fontFamily: 'var(--font-mono)',
     fontSize: 12,
     color: muted ? 'var(--text-2)' : 'var(--text)',
     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
@@ -413,7 +405,7 @@ function StatPill({ label, value, accent, tone, hint }) {
       </div>
       <div style={{
         fontSize: 22, fontWeight: 700, color: toneColor,
-        fontFamily: "'JetBrains Mono', monospace",
+        fontFamily: 'var(--font-mono)',
       }}>{value}</div>
     </div>
   );
@@ -441,14 +433,15 @@ function Pagination({ page, pageSize, total, onPageChange, onPageSizeChange }) {
   }
 
   const btn = (disabled) => ({
-    minWidth: 30, height: 30, padding: '0 8px',
-    border: '1px solid var(--border)',
+    minWidth: 32, height: 32, padding: '0 10px',
+    border: '1px solid var(--border-default)',
     background: '#fff',
-    borderRadius: 6,
-    fontSize: 12, color: disabled ? 'var(--text-3)' : 'var(--text-2)',
+    borderRadius: 8,
+    fontSize: 13, color: disabled ? 'var(--grey-400)' : 'var(--text-secondary)',
     cursor: disabled ? 'not-allowed' : 'pointer',
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
     fontFamily: 'inherit',
+    transition: 'background 120ms ease-out, border-color 120ms ease-out',
   });
   const activeBtn = {
     ...btn(false),
@@ -456,6 +449,7 @@ function Pagination({ page, pageSize, total, onPageChange, onPageSizeChange }) {
     borderColor: 'var(--primary)',
     color: '#fff',
     fontWeight: 600,
+    boxShadow: 'var(--shadow-primary)',
   };
 
   return (
@@ -485,9 +479,9 @@ function Pagination({ page, pageSize, total, onPageChange, onPageSizeChange }) {
           value={pageSize}
           onChange={e => onPageSizeChange(Number(e.target.value))}
           style={{
-            height: 30, border: '1px solid var(--border)',
-            borderRadius: 6, fontSize: 12, padding: '0 6px', background: '#fff',
-            color: 'var(--text-2)', fontFamily: 'inherit', outline: 'none', marginLeft: 4,
+            height: 32, border: '1px solid var(--border-default)',
+            borderRadius: 8, fontSize: 12, padding: '0 8px', background: '#fff',
+            color: 'var(--text-secondary)', fontFamily: 'inherit', outline: 'none', marginLeft: 4,
           }}
         >
           {[10, 20, 50, 100].map(n => <option key={n} value={n}>{n} 条/页</option>)}

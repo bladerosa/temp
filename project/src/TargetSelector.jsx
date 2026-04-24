@@ -148,7 +148,7 @@ function QueryResultCard({ result }) {
           按照当前筛选条件，共筛选出
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 8 }}>
-          <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--primary)', fontFamily: "'JetBrains Mono', monospace" }}>
+          <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--primary)', fontFamily: 'var(--font-mono)' }}>
             {result.count.toLocaleString()}
           </span>
           <span style={{ fontSize: 13, color: 'var(--text-2)' }}>名用户</span>
@@ -163,7 +163,7 @@ function QueryResultCard({ result }) {
               fontSize: 11, padding: '2px 6px',
               background: '#fff', border: '1px solid var(--border)',
               borderRadius: 4, color: 'var(--text-2)',
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: 'var(--font-mono)',
             }}>{id}</code>
           ))}
           <span style={{ fontSize: 12, color: 'var(--text-3)' }}>等</span>

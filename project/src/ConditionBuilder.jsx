@@ -28,19 +28,18 @@ function RegTimeCondition({ value, onChange, mode = 'relative' }) {
   return (
     <div style={{
       padding: 16,
-      background: '#FAFBFD',
-      border: '1px dashed var(--border-strong)',
+      background: 'var(--bg-subtle)',
+      border: '1px solid var(--border-subtle)',
       borderRadius: 8,
     }}>
       {mode === 'absolute' ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 13, color: 'var(--text-2)', width: 84 }}>注册时间</span>
-          <div style={{ flex: 1, minWidth: 160 }}>
-            <DateInput value={v.startDate} onChange={startDate => update({ startDate })} />
-          </div>
-          <span style={{ color: 'var(--text-3)' }}>—</span>
-          <div style={{ flex: 1, minWidth: 160 }}>
-            <DateInput value={v.endDate} onChange={endDate => update({ endDate })} />
+          <div style={{ flex: 1, minWidth: 260, display: 'flex' }}>
+            <DateRangePicker
+              value={{ start: v.startDate, end: v.endDate }}
+              onChange={({ start, end }) => update({ startDate: start, endDate: end })}
+            />
           </div>
         </div>
       ) : (
@@ -143,23 +142,20 @@ function DepositCondition({ value, onChange, rangeMode }) {
   return (
     <div style={{
       padding: 16,
-      background: '#FAFBFD',
-      border: '1px dashed var(--border-strong)',
+      background: 'var(--bg-subtle)',
+      border: '1px solid var(--border-subtle)',
       borderRadius: 8,
     }}>
       {/* Time range */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
         <span style={{ fontSize: 13, color: 'var(--text-2)', width: 84 }}>统计时间</span>
         {rangeMode === 'absolute' ? (
-          <>
-            <div style={{ flex: 1, minWidth: 160 }}>
-              <DateInput value={v.startDate} onChange={startDate => update({ startDate })} />
-            </div>
-            <span style={{ color: 'var(--text-3)' }}>—</span>
-            <div style={{ flex: 1, minWidth: 160 }}>
-              <DateInput value={v.endDate} onChange={endDate => update({ endDate })} />
-            </div>
-          </>
+          <div style={{ flex: 1, minWidth: 260, display: 'flex' }}>
+            <DateRangePicker
+              value={{ start: v.startDate, end: v.endDate }}
+              onChange={({ start, end }) => update({ startDate: start, endDate: end })}
+            />
+          </div>
         ) : (
           <>
             <span style={{ fontSize: 13, color: 'var(--text-2)' }}>最近</span>
@@ -254,14 +250,14 @@ function ConditionPreview({ text }) {
       marginTop: 12,
       padding: '8px 12px',
       background: '#fff',
-      border: '1px solid var(--border)',
-      borderRadius: 6,
+      border: '1px solid var(--border-subtle)',
+      borderRadius: 8,
       fontSize: 12,
-      color: 'var(--text-2)',
-      fontFamily: "'JetBrains Mono', monospace",
+      color: 'var(--text-secondary)',
+      fontFamily: 'var(--font-mono)',
       display: 'flex', alignItems: 'center', gap: 8,
     }}>
-      <IconInfo size={12} stroke="var(--text-3)" />
+      <IconInfo size={12} stroke="var(--grey-600)" />
       <span style={{ flex: 1 }}>预览：{text}</span>
     </div>
   );
@@ -304,11 +300,11 @@ function ConditionGroup({ value, onChange, rangeMode, showHintNone = true }) {
         }}>
           <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
           <div style={{
-            padding: '3px 12px',
-            background: 'var(--primary-soft)',
-            color: 'var(--primary)',
-            fontSize: 12, fontWeight: 600, borderRadius: 10,
-            letterSpacing: '.02em',
+            padding: '4px 12px',
+            background: 'var(--primary-lighter)',
+            color: 'var(--primary-darker)',
+            fontSize: 11, fontWeight: 700, borderRadius: 9999,
+            letterSpacing: '.04em',
           }}>AND · 且</div>
           <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
         </div>
@@ -331,15 +327,19 @@ function ConditionGroup({ value, onChange, rangeMode, showHintNone = true }) {
 
       {showHintNone && noneOn && (
         <div style={{
-          padding: 12,
-          background: '#FDF5E6',
-          border: '1px solid #F3D98A',
-          borderRadius: 8,
+          padding: '12px 16px',
+          background: 'var(--warning-lighter)',
+          borderRadius: 12,
           fontSize: 13,
-          color: '#8A6A18',
-          display: 'flex', alignItems: 'center', gap: 8,
+          color: 'var(--warning-darker)',
+          display: 'flex', alignItems: 'center', gap: 10,
         }}>
-          <IconInfo size={14} />
+          <span style={{
+            width: 22, height: 22, borderRadius: '50%',
+            background: 'var(--warning)', color: 'var(--text-primary)',
+            display: 'grid', placeItems: 'center',
+            fontSize: 13, fontWeight: 700, flexShrink: 0,
+          }}>!</span>
           请至少启用一个条件块
         </div>
       )}
@@ -350,33 +350,34 @@ function ConditionGroup({ value, onChange, rangeMode, showHintNone = true }) {
 function ConditionBlock({ title, description, enabled, onToggle, children }) {
   return (
     <div style={{
-      border: `1px solid ${enabled ? 'var(--border-strong)' : 'var(--border)'}`,
-      borderRadius: 10,
-      background: enabled ? '#fff' : '#FAFBFD',
-      transition: 'border-color .15s, background .15s',
+      border: '1px solid var(--border-subtle)',
+      borderRadius: 16,
+      background: 'var(--bg-paper)',
+      boxShadow: enabled ? 'var(--shadow-z1)' : 'none',
+      transition: 'box-shadow 120ms ease-out',
     }}>
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '12px 16px',
-        borderBottom: enabled ? '1px solid var(--border)' : 'none',
+        padding: '14px 20px',
+        borderBottom: enabled ? '1px solid var(--border-subtle)' : 'none',
       }}>
         <div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
             {title}
           </div>
-          <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
             {description}
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 12, color: enabled ? 'var(--primary)' : 'var(--text-3)', fontWeight: 500 }}>
+          <span style={{ fontSize: 12, color: enabled ? 'var(--primary-dark)' : 'var(--text-secondary)', fontWeight: 500 }}>
             {enabled ? '已启用' : '未启用'}
           </span>
-          <Switch checked={enabled} onChange={onToggle} size="sm" />
+          <Switch checked={enabled} onChange={onToggle} />
         </div>
       </div>
       {enabled && (
-        <div style={{ padding: 16 }}>
+        <div style={{ padding: 20 }}>
           {children}
         </div>
       )}

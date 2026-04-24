@@ -194,7 +194,7 @@ function AutoNotice() {
               <div style={{
               color: 'var(--text-2)',
               fontSize: 12,
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: 'var(--font-mono)',
               lineHeight: 1.5
             }}>
                 {item.triggerSummary}
@@ -203,7 +203,7 @@ function AutoNotice() {
               textAlign: 'right',
               fontWeight: 600,
               color: item.totalMatched > 0 ? 'var(--primary)' : 'var(--text-3)',
-              fontFamily: "'JetBrains Mono', monospace"
+              fontFamily: 'var(--font-mono)'
             }}>
                 <button
                 onClick={() => {setViewingHistory(item);setView('history');}}
@@ -346,7 +346,7 @@ function AutoNoticeEditor({ initial, onBack, onSave }) {
           }}>
             <IconInfo size={13} stroke="var(--text-3)" style={{ marginTop: 2, flexShrink: 0 }} />
             <div>
-              <div>条件摘要：<span style={{ fontFamily: "'JetBrains Mono', monospace", color: 'var(--text)' }}>{triggerSummary()}</span></div>
+              <div>条件摘要：<span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text)' }}>{triggerSummary()}</span></div>
               <div style={{ marginTop: 4, color: 'var(--text-3)' }}>
                 提示：相对时间按任务执行当天计算。例如"最近7天"指任务执行日前推 7 天的区间。
               </div>

@@ -32,13 +32,19 @@ function Field({ label, required, hint, children, style }) {
   return (
     <div style={{ marginBottom: 18, ...style }}>
       {label && (
-        <label style={uiStyles.label}>
+        <label style={{
+          display: 'block',
+          fontSize: 12,
+          fontWeight: 500,
+          color: 'var(--text-secondary)',
+          marginBottom: 6,
+        }}>
           {label}
-          {required && <span style={{ color: 'var(--danger)', marginLeft: 2 }}>*</span>}
+          {required && <span style={{ color: 'var(--error)', marginLeft: 2 }}>*</span>}
         </label>
       )}
       {children}
-      {hint && <div style={{ marginTop: 6, fontSize: 12, color: 'var(--text-3)' }}>{hint}</div>}
+      {hint && <div style={{ marginTop: 6, fontSize: 12, color: 'var(--text-secondary)' }}>{hint}</div>}
     </div>
   );
 }
@@ -50,14 +56,14 @@ function TextInput({ value, onChange, placeholder, maxLength, type = 'text', pre
       position: 'relative',
       display: 'flex',
       alignItems: 'center',
-      background: disabled ? '#F6F7FB' : '#fff',
-      border: `1px solid ${focus ? 'var(--primary)' : 'var(--border)'}`,
+      background: disabled ? 'var(--bg-subtle)' : 'var(--bg-paper)',
+      border: `1px solid ${focus ? 'var(--primary)' : 'var(--border-default)'}`,
       borderRadius: 8,
-      boxShadow: focus ? '0 0 0 3px rgba(79,91,213,.12)' : 'none',
-      transition: 'border-color .15s, box-shadow .15s',
+      boxShadow: focus ? '0 0 0 3px rgba(60,111,245,.14)' : 'none',
+      transition: 'border-color 120ms ease-out, box-shadow 120ms ease-out',
       height: 40,
     }}>
-      {prefix && <div style={{ paddingLeft: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center' }}>{prefix}</div>}
+      {prefix && <div style={{ paddingLeft: 12, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}>{prefix}</div>}
       <input
         value={value || ''}
         type={type}
@@ -76,16 +82,16 @@ function TextInput({ value, onChange, placeholder, maxLength, type = 'text', pre
           outline: 'none',
           fontSize: 14,
           fontFamily: 'inherit',
-          color: 'var(--text)',
+          color: 'var(--text-primary)',
           minWidth: 0,
         }}
       />
       {maxLength != null && (
-        <div style={{ paddingRight: 12, fontSize: 12, color: 'var(--text-3)' }}>
+        <div style={{ paddingRight: 12, fontSize: 12, color: 'var(--text-secondary)' }}>
           {(value || '').length}/{maxLength}
         </div>
       )}
-      {suffix && <div style={{ paddingRight: 12, color: 'var(--text-3)' }}>{suffix}</div>}
+      {suffix && <div style={{ paddingRight: 12, color: 'var(--text-secondary)' }}>{suffix}</div>}
     </div>
   );
 }
@@ -113,21 +119,21 @@ function Select({ value, onChange, options, placeholder, disabled, width }) {
           width: '100%',
           height: 40,
           padding: '0 36px 0 12px',
-          background: disabled ? '#F6F7FB' : '#fff',
-          border: `1px solid ${open ? 'var(--primary)' : 'var(--border)'}`,
-          boxShadow: open ? '0 0 0 3px rgba(79,91,213,.12)' : 'none',
+          background: disabled ? 'var(--bg-subtle)' : 'var(--bg-paper)',
+          border: `1px solid ${open ? 'var(--primary)' : 'var(--border-default)'}`,
+          boxShadow: open ? '0 0 0 3px rgba(60,111,245,.14)' : 'none',
           borderRadius: 8,
           textAlign: 'left',
           fontSize: 14,
-          color: selected ? 'var(--text)' : 'var(--text-3)',
+          color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
           cursor: disabled ? 'not-allowed' : 'pointer',
           fontFamily: 'inherit',
           position: 'relative',
-          transition: 'border-color .15s, box-shadow .15s',
+          transition: 'border-color 120ms ease-out, box-shadow 120ms ease-out',
         }}
       >
         {selected ? selected.label : (placeholder || '请选择')}
-        <div style={{ position: 'absolute', right: 12, top: '50%', transform: `translateY(-50%) rotate(${open ? 180 : 0}deg)`, color: 'var(--text-3)', transition: 'transform .15s' }}>
+        <div style={{ position: 'absolute', right: 12, top: '50%', transform: `translateY(-50%) rotate(${open ? 180 : 0}deg)`, color: 'var(--text-secondary)', transition: 'transform .15s' }}>
           <IconChevronDown size={16} />
         </div>
       </button>
@@ -137,32 +143,33 @@ function Select({ value, onChange, options, placeholder, disabled, width }) {
           top: 'calc(100% + 4px)',
           left: 0,
           right: 0,
-          background: '#fff',
-          border: '1px solid var(--border)',
-          borderRadius: 8,
-          boxShadow: 'var(--shadow-lg)',
+          background: 'var(--bg-paper)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 12,
+          boxShadow: 'var(--shadow-dropdown)',
           zIndex: 30,
           maxHeight: 260,
           overflowY: 'auto',
-          padding: 4,
+          padding: 6,
         }}>
           {options.map(opt => (
             <div
               key={opt.value}
               onClick={() => { onChange(opt.value); setOpen(false); }}
               style={{
-                padding: '8px 10px',
-                borderRadius: 6,
-                fontSize: 14,
+                padding: '9px 10px',
+                borderRadius: 8,
+                fontSize: 13.5,
                 cursor: 'pointer',
-                background: opt.value === value ? 'var(--primary-soft)' : 'transparent',
-                color: opt.value === value ? 'var(--primary)' : 'var(--text)',
+                background: opt.value === value ? 'var(--primary-lighter)' : 'transparent',
+                color: opt.value === value ? 'var(--primary-dark)' : 'var(--text-primary)',
+                fontWeight: opt.value === value ? 600 : 500,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                transition: 'background .12s',
+                transition: 'background 120ms ease-out',
               }}
-              onMouseEnter={e => { if (opt.value !== value) e.currentTarget.style.background = '#F6F7FB'; }}
+              onMouseEnter={e => { if (opt.value !== value) e.currentTarget.style.background = 'var(--bg-subtle)'; }}
               onMouseLeave={e => { if (opt.value !== value) e.currentTarget.style.background = 'transparent'; }}
             >
               <span>{opt.label}</span>
@@ -178,17 +185,38 @@ function Select({ value, onChange, options, placeholder, disabled, width }) {
 function Button({ variant = 'primary', size = 'md', icon, children, onClick, disabled, style, type = 'button' }) {
   const sizes = {
     sm: { height: 32, padding: '0 12px', fontSize: 13 },
-    md: { height: 40, padding: '0 16px', fontSize: 14 },
-    lg: { height: 44, padding: '0 20px', fontSize: 14 },
+    md: { height: 40, padding: '0 18px', fontSize: 14 },
+    lg: { height: 44, padding: '0 22px', fontSize: 14 },
   };
   const variants = {
-    primary: { background: 'var(--primary)', color: '#fff', border: '1px solid var(--primary)' },
-    secondary: { background: '#fff', color: 'var(--text)', border: '1px solid var(--border-strong)' },
-    ghost: { background: 'transparent', color: 'var(--text-2)', border: '1px solid transparent' },
-    danger: { background: '#fff', color: 'var(--danger)', border: '1px solid #F7C8C9' },
+    primary: {
+      background: 'var(--primary)', color: '#fff', border: '1px solid var(--primary)',
+      shadow: 'var(--shadow-primary)',
+      hoverBg: 'var(--primary-dark)',
+    },
+    secondary: {
+      background: '#fff', color: 'var(--text-primary)', border: '1px solid var(--border-default)',
+      shadow: 'var(--shadow-z1)',
+      hoverBg: 'var(--bg-subtle)',
+    },
+    soft: {
+      background: 'var(--primary-lighter)', color: 'var(--primary-dark)', border: '1px solid transparent',
+      shadow: 'none',
+      hoverBg: '#C4D8FC',
+    },
+    ghost: {
+      background: 'transparent', color: 'var(--text-secondary)', border: '1px solid transparent',
+      shadow: 'none',
+      hoverBg: 'var(--bg-subtle)',
+    },
+    danger: {
+      background: '#fff', color: 'var(--error)', border: '1px solid var(--error-light)',
+      shadow: 'var(--shadow-z1)',
+      hoverBg: 'var(--error-lighter)',
+    },
   };
   const s = sizes[size];
-  const v = variants[variant];
+  const v = variants[variant] || variants.primary;
   const [hover, setHover] = useState(false);
   return (
     <button
@@ -199,19 +227,20 @@ function Button({ variant = 'primary', size = 'md', icon, children, onClick, dis
       onMouseLeave={() => setHover(false)}
       style={{
         ...s,
-        ...v,
+        background: hover && !disabled ? v.hoverBg : v.background,
+        color: v.color,
+        border: v.border,
         borderRadius: 8,
         fontFamily: 'inherit',
-        fontWeight: 500,
+        fontWeight: 600,
         cursor: disabled ? 'not-allowed' : 'pointer',
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 6,
-        opacity: disabled ? 0.5 : (hover ? 0.92 : 1),
-        transform: hover && !disabled ? 'translateY(-0.5px)' : 'none',
-        transition: 'opacity .12s, transform .12s, box-shadow .12s',
-        boxShadow: variant === 'primary' && hover && !disabled ? '0 4px 12px rgba(79,91,213,.24)' : 'var(--shadow-sm)',
+        opacity: disabled ? 0.5 : 1,
+        transition: 'background 120ms ease-out, box-shadow 120ms ease-out, color 120ms ease-out',
+        boxShadow: disabled ? 'none' : v.shadow,
         whiteSpace: 'nowrap',
         ...style,
       }}
@@ -230,15 +259,15 @@ function Radio({ checked, onChange, children, disabled }) {
       gap: 8,
       cursor: disabled ? 'not-allowed' : 'pointer',
       fontSize: 14,
-      color: 'var(--text)',
+      color: 'var(--text-primary)',
       userSelect: 'none',
     }}>
       <span style={{
-        width: 16, height: 16, borderRadius: '50%',
-        border: `1.5px solid ${checked ? 'var(--primary)' : 'var(--border-strong)'}`,
+        width: 18, height: 18, borderRadius: '50%',
+        border: `1.5px solid ${checked ? 'var(--primary)' : 'var(--grey-500)'}`,
         background: '#fff',
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        transition: 'border-color .12s',
+        transition: 'border-color 120ms ease-out',
       }}>
         {checked && <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)' }} />}
       </span>
@@ -256,18 +285,18 @@ function Checkbox({ checked, onChange, children, disabled }) {
       gap: 8,
       cursor: disabled ? 'not-allowed' : 'pointer',
       fontSize: 14,
-      color: 'var(--text)',
+      color: 'var(--text-primary)',
       userSelect: 'none',
     }}>
       <span style={{
-        width: 16, height: 16, borderRadius: 4,
-        border: `1.5px solid ${checked ? 'var(--primary)' : 'var(--border-strong)'}`,
+        width: 18, height: 18, borderRadius: 4,
+        border: `1.5px solid ${checked ? 'var(--primary)' : 'var(--grey-500)'}`,
         background: checked ? 'var(--primary)' : '#fff',
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
         color: '#fff',
-        transition: 'background .12s, border-color .12s',
+        transition: 'background 120ms ease-out, border-color 120ms ease-out',
       }}>
-        {checked && <IconCheck size={12} strokeWidth={3} />}
+        {checked && <IconCheck size={13} strokeWidth={3} />}
       </span>
       <input type="checkbox" checked={checked} onChange={e => onChange && onChange(e.target.checked)} style={{ display: 'none' }} disabled={disabled} />
       {children}
@@ -276,8 +305,9 @@ function Checkbox({ checked, onChange, children, disabled }) {
 }
 
 function Switch({ checked, onChange, size = 'md' }) {
-  const w = size === 'sm' ? 32 : 40;
-  const h = size === 'sm' ? 18 : 22;
+  // md matches CCPayment spec (34×20 with 16px thumb)
+  const w = size === 'sm' ? 30 : 34;
+  const h = size === 'sm' ? 18 : 20;
   const d = h - 4;
   return (
     <button
@@ -285,13 +315,13 @@ function Switch({ checked, onChange, size = 'md' }) {
       onClick={() => onChange && onChange(!checked)}
       style={{
         width: w, height: h,
-        background: checked ? 'var(--primary)' : '#D6DAE2',
+        background: checked ? 'var(--primary)' : 'var(--grey-400)',
         borderRadius: h,
         border: 'none',
         cursor: 'pointer',
         position: 'relative',
         padding: 0,
-        transition: 'background .15s',
+        transition: 'background 120ms ease-out',
       }}
     >
       <span style={{
@@ -301,41 +331,45 @@ function Switch({ checked, onChange, size = 'md' }) {
         width: d, height: d,
         background: '#fff',
         borderRadius: '50%',
-        transition: 'left .15s',
+        transition: 'left 160ms ease-out',
         boxShadow: '0 1px 3px rgba(0,0,0,.16)',
       }} />
     </button>
   );
 }
 
-function Card({ children, style, padding = 20 }) {
+function Card({ children, style, padding = 24 }) {
   return (
     <div style={{
-      background: '#fff',
-      border: '1px solid var(--border)',
-      borderRadius: 12,
+      background: 'var(--bg-paper)',
+      border: '1px solid var(--border-subtle)',
+      borderRadius: 16,
       padding,
-      boxShadow: 'var(--shadow-sm)',
+      boxShadow: 'var(--shadow-card)',
       ...style,
     }}>{children}</div>
   );
 }
 
-function Tag({ children, color = 'neutral' }) {
+function Tag({ children, color = 'neutral', dot = true }) {
   const palette = {
-    neutral: { bg: '#F2F3F7', fg: 'var(--text-2)' },
-    success: { bg: '#E8F6EF', fg: '#0E8A57' },
-    warn: { bg: '#FEF4E1', fg: '#B57417' },
-    primary: { bg: 'var(--primary-soft)', fg: 'var(--primary)' },
-    danger: { bg: '#FDECEC', fg: 'var(--danger)' },
-  }[color];
+    neutral: { bg: 'var(--grey-200)',       fg: 'var(--grey-800)',       dotC: 'var(--grey-600)' },
+    success: { bg: 'var(--success-lighter)', fg: 'var(--success-darker)', dotC: 'var(--success)' },
+    warn:    { bg: 'var(--warning-lighter)', fg: 'var(--warning-darker)', dotC: 'var(--warning)' },
+    info:    { bg: 'var(--info-lighter)',    fg: 'var(--info-darker)',    dotC: 'var(--info)' },
+    primary: { bg: 'var(--primary-lighter)', fg: 'var(--primary-darker)', dotC: 'var(--primary)' },
+    danger:  { bg: 'var(--error-lighter)',   fg: 'var(--error-darker)',   dotC: 'var(--error)' },
+  }[color] || { bg: 'var(--grey-200)', fg: 'var(--grey-800)', dotC: 'var(--grey-600)' };
   return (
     <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 4,
-      padding: '2px 8px', borderRadius: 4,
+      display: 'inline-flex', alignItems: 'center', gap: 6,
+      padding: '3px 10px', borderRadius: 9999,
       background: palette.bg, color: palette.fg,
-      fontSize: 12, fontWeight: 500,
-    }}>{children}</span>
+      fontSize: 11.5, fontWeight: 600, lineHeight: 1.2,
+    }}>
+      {dot && <span style={{ width: 6, height: 6, borderRadius: '50%', background: palette.dotC }} />}
+      {children}
+    </span>
   );
 }
 
@@ -344,16 +378,16 @@ function DateInput({ value, onChange, placeholder }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center',
-      border: '1px solid var(--border)',
-      borderRadius: 8, height: 40, background: '#fff',
+      border: '1px solid var(--border-default)',
+      borderRadius: 8, height: 40, background: 'var(--bg-paper)',
       padding: '0 10px', gap: 8, flex: 1,
     }}>
-      <IconCalendar size={14} stroke="var(--text-3)" />
+      <IconCalendar size={14} stroke="var(--text-secondary)" />
       <input
         type="date"
         value={value || ''}
         onChange={e => onChange && onChange(e.target.value)}
-        style={{ border: 'none', outline: 'none', fontSize: 14, fontFamily: 'inherit', flex: 1, background: 'transparent', color: 'var(--text)' }}
+        style={{ border: 'none', outline: 'none', fontSize: 14, fontFamily: 'inherit', flex: 1, background: 'transparent', color: 'var(--text-primary)' }}
         placeholder={placeholder}
       />
     </div>
@@ -364,8 +398,8 @@ function NumberInput({ value, onChange, placeholder, min, suffix, step }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center',
-      border: '1px solid var(--border)',
-      borderRadius: 8, height: 40, background: '#fff',
+      border: '1px solid var(--border-default)',
+      borderRadius: 8, height: 40, background: 'var(--bg-paper)',
       padding: '0 12px', flex: 1, minWidth: 0,
     }}>
       <input
@@ -374,10 +408,10 @@ function NumberInput({ value, onChange, placeholder, min, suffix, step }) {
         min={min}
         step={step}
         onChange={e => onChange && onChange(e.target.value)}
-        style={{ border: 'none', outline: 'none', fontSize: 14, fontFamily: 'inherit', flex: 1, background: 'transparent', color: 'var(--text)', minWidth: 0, width: '100%' }}
+        style={{ border: 'none', outline: 'none', fontSize: 14, fontFamily: 'inherit', flex: 1, background: 'transparent', color: 'var(--text-primary)', minWidth: 0, width: '100%' }}
         placeholder={placeholder}
       />
-      {suffix && <span style={{ color: 'var(--text-3)', fontSize: 13, marginLeft: 4, whiteSpace: 'nowrap' }}>{suffix}</span>}
+      {suffix && <span style={{ color: 'var(--text-secondary)', fontSize: 13, marginLeft: 4, whiteSpace: 'nowrap' }}>{suffix}</span>}
     </div>
   );
 }
