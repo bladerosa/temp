@@ -173,7 +173,7 @@ export function EmailPreviewPlaceholder() {
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
           padding: '8px 16px', background: '#fff', borderRadius: 8,
-          fontSize: 15, fontWeight: 600, color: '#2B3A5B',
+          fontSize: 15, fontWeight: 600, color: 'var(--text-primary)',
         }}>
           <span style={{ width: 18, height: 18, background: 'var(--primary)', borderRadius: 4, display: 'inline-block' }} />
           ccpayment

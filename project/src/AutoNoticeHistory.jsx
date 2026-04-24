@@ -379,9 +379,9 @@ function StatusCell({ status, reason }) {
 
 function StatPill({ label, value, accent, tone, hint }) {
   const toneColor = tone === 'danger' ? 'var(--danger)'
-    : tone === 'warn' ? '#B77A00'
+    : tone === 'warn' ? 'var(--warning-darker)'
     : accent ? 'var(--primary)' : 'var(--text)';
-  const toneBorder = accent ? '#D9DDF5' : 'var(--border)';
+  const toneBorder = accent ? 'var(--primary-light)' : 'var(--border)';
   const toneBg = accent ? 'var(--primary-soft)' : '#fff';
   return (
     <div style={{
@@ -400,7 +400,7 @@ function StatPill({ label, value, accent, tone, hint }) {
         <span>{label}</span>
         {hint && <span style={{
           fontSize: 10, padding: '1px 6px', borderRadius: 10,
-          background: '#fff', border: '1px solid #D9DDF5', color: 'var(--primary)', fontWeight: 500,
+          background: '#fff', border: '1px solid var(--primary-light)', color: 'var(--primary)', fontWeight: 500,
         }}>{hint}</span>}
       </div>
       <div style={{

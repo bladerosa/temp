@@ -64,12 +64,12 @@ function RegTimeCondition({ value, onChange, mode = 'relative' }) {
             </>
           ) : (
             <>
-              <div style={{ width: 110 }}>
+              <div style={{ width: 118 }}>
                 <Select
                   value={v.leftOp || 'gt'}
                   onChange={leftOp => update({ leftOp })}
                   options={[
-                    { value: 'gt', label: '大于 (>)' },
+                    { value: 'gt',  label: '大于 (>)' },
                     { value: 'gte', label: '大于等于 (≥)' },
                   ]}
                 />
@@ -81,12 +81,12 @@ function RegTimeCondition({ value, onChange, mode = 'relative' }) {
                 <Select value={v.u1} onChange={u1 => update({ u1 })} options={TIME_UNIT_OPTIONS} />
               </div>
               <span style={{ fontSize: 13, color: 'var(--text-2)' }}>且</span>
-              <div style={{ width: 110 }}>
+              <div style={{ width: 118 }}>
                 <Select
                   value={v.rightOp || 'lt'}
                   onChange={rightOp => update({ rightOp })}
                   options={[
-                    { value: 'lt', label: '小于 (<)' },
+                    { value: 'lt',  label: '小于 (<)' },
                     { value: 'lte', label: '小于等于 (≤)' },
                   ]}
                 />
@@ -182,31 +182,31 @@ function DepositCondition({ value, onChange, rangeMode }) {
           </div>
         ) : (
           <>
-            <div style={{ width: 90 }}>
+            <div style={{ width: 118 }}>
               <Select
                 value={v.leftOp || 'gt'}
                 onChange={leftOp => update({ leftOp })}
                 options={[
-                  { value: 'gt', label: '大于 (>)' },
+                  { value: 'gt',  label: '大于 (>)' },
                   { value: 'gte', label: '大于等于 (≥)' },
                 ]}
               />
             </div>
-            <div style={{ width: 140 }}>
+            <div style={{ width: 130 }}>
               <NumberInput value={v.a1} onChange={a1 => update({ a1 })} placeholder="0.00" min={0} step="0.01" suffix="USD" />
             </div>
             <span style={{ fontSize: 13, color: 'var(--text-2)' }}>且</span>
-            <div style={{ width: 90 }}>
+            <div style={{ width: 118 }}>
               <Select
                 value={v.rightOp || 'lt'}
                 onChange={rightOp => update({ rightOp })}
                 options={[
-                  { value: 'lt', label: '小于 (<)' },
+                  { value: 'lt',  label: '小于 (<)' },
                   { value: 'lte', label: '小于等于 (≤)' },
                 ]}
               />
             </div>
-            <div style={{ width: 140 }}>
+            <div style={{ width: 130 }}>
               <NumberInput value={v.a2} onChange={a2 => update({ a2 })} placeholder="0.00" min={0} step="0.01" suffix="USD" />
             </div>
           </>

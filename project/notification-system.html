@@ -31,8 +31,8 @@
     --primary-hover: var(--primary-dark);
     --primary-soft: var(--primary-lighter);
     --danger: var(--error);
-    --success: var(--success);
-    --warning: var(--warning);
+    /* --success and --warning: already defined by CCPayment tokens, do NOT re-alias
+       (self-reference like `--success: var(--success)` breaks the cascade) */
     --radius: var(--radius-md);
     --shadow-sm: var(--shadow-z1);
     --shadow-md: var(--shadow-z4);

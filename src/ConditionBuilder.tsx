@@ -101,7 +101,7 @@ function RelativeRegTime({ v, update }: { v: RegTimeRelative; update: (p: Partia
         </>
       ) : (
         <>
-          <div style={{ width: 110 }}>
+          <div style={{ width: 118 }}>
             <Select value={v.leftOp ?? 'gt'} onChange={leftOp => update({ leftOp: leftOp as BoundOp })} options={LEFT_OP_OPTIONS} />
           </div>
           <div style={{ width: 80 }}>
@@ -111,7 +111,7 @@ function RelativeRegTime({ v, update }: { v: RegTimeRelative; update: (p: Partia
             <Select value={v.u1} onChange={u1 => update({ u1: u1 as TimeUnit })} options={TIME_UNIT_OPTIONS} />
           </div>
           <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>且</span>
-          <div style={{ width: 110 }}>
+          <div style={{ width: 118 }}>
             <Select value={v.rightOp ?? 'lt'} onChange={rightOp => update({ rightOp: rightOp as BoundOp })} options={RIGHT_OP_OPTIONS} />
           </div>
           <div style={{ width: 80 }}>
@@ -200,17 +200,17 @@ export function DepositCondition({ value, onChange, rangeMode }: DepositConditio
           </div>
         ) : (
           <>
-            <div style={{ width: 90 }}>
+            <div style={{ width: 118 }}>
               <Select value={v.leftOp ?? 'gt'} onChange={leftOp => update({ leftOp: leftOp as BoundOp })} options={LEFT_OP_OPTIONS} />
             </div>
-            <div style={{ width: 140 }}>
+            <div style={{ width: 130 }}>
               <NumberInput value={v.a1} onChange={a1 => update({ a1 })} placeholder="0.00" min={0} step="0.01" suffix="USD" />
             </div>
             <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>且</span>
-            <div style={{ width: 90 }}>
+            <div style={{ width: 118 }}>
               <Select value={v.rightOp ?? 'lt'} onChange={rightOp => update({ rightOp: rightOp as BoundOp })} options={RIGHT_OP_OPTIONS} />
             </div>
-            <div style={{ width: 140 }}>
+            <div style={{ width: 130 }}>
               <NumberInput value={v.a2} onChange={a2 => update({ a2 })} placeholder="0.00" min={0} step="0.01" suffix="USD" />
             </div>
           </>

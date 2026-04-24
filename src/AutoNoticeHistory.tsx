@@ -342,16 +342,16 @@ interface StatPillProps {
 
 function StatPill({ label, value, accent, tone, hint }: StatPillProps) {
   const toneColor = tone === 'danger' ? 'var(--error)'
-    : tone === 'warn' ? 'var(--warning-dark)'
+    : tone === 'warn' ? 'var(--warning-darker)'
     : accent ? 'var(--primary)' : 'var(--text-primary)';
-  const toneBorder = accent ? '#C5D9FC' : 'var(--border-subtle)';
+  const toneBorder = accent ? 'var(--primary-light)' : 'var(--border-subtle)';
   const toneBg = accent ? 'var(--primary-lighter)' : 'var(--bg-paper)';
   return (
     <div style={{ padding: '10px 18px', background: toneBg, border: `1px solid ${toneBorder}`, borderRadius: 12, minWidth: 130 }}>
       <div style={{ fontSize: 12, color: accent ? 'var(--primary-dark)' : 'var(--text-secondary)', marginBottom: 2, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
         <span>{label}</span>
         {hint && (
-          <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 9999, background: 'var(--bg-paper)', border: '1px solid #C5D9FC', color: 'var(--primary)', fontWeight: 600 }}>
+          <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 9999, background: 'var(--bg-paper)', border: '1px solid var(--primary-light)', color: 'var(--primary)', fontWeight: 600 }}>
             {hint}
           </span>
         )}

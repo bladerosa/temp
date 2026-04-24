@@ -129,6 +129,9 @@ export function Select({ value, onChange, options, placeholder, disabled, width 
           cursor: disabled ? 'not-allowed' : 'pointer',
           fontFamily: 'inherit', position: 'relative',
           transition: 'border-color 120ms ease-out, box-shadow 120ms ease-out',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
         }}
       >
         {selected ? selected.label : (placeholder ?? '请选择')}
@@ -212,7 +215,7 @@ export function Button({ variant = 'primary', size = 'md', icon, children, onCli
     },
     soft: {
       background: 'var(--primary-lighter)', color: 'var(--primary-dark)', border: '1px solid transparent',
-      shadow: 'none', hoverBg: '#C4D8FC',
+      shadow: 'none', hoverBg: 'var(--primary-light)',
     },
     ghost: {
       background: 'transparent', color: 'var(--text-secondary)', border: '1px solid transparent',
@@ -393,8 +396,9 @@ export function Tag({ children, color = 'neutral', dot = true }: TagProps) {
       padding: '3px 10px', borderRadius: 9999,
       background: p.bg, color: p.fg,
       fontSize: 11.5, fontWeight: 600, lineHeight: 1.2,
+      whiteSpace: 'nowrap', flexShrink: 0,
     }}>
-      {dot && <span style={{ width: 6, height: 6, borderRadius: '50%', background: p.dotC }} />}
+      {dot && <span style={{ width: 6, height: 6, borderRadius: '50%', background: p.dotC, flexShrink: 0 }} />}
       {children}
     </span>
   );
