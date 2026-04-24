@@ -1,0 +1,36 @@
+import type { SVGProps, ReactNode } from 'react';
+
+interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
+  size?: number;
+  content: ReactNode;
+}
+
+const Icon = ({ content, size = 16, stroke = 'currentColor', fill = 'none', strokeWidth = 1.5, ...rest }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={stroke}
+    strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" {...rest}>
+    {content}
+  </svg>
+);
+
+type IProps = Omit<IconProps, 'content'>;
+
+export const IconChevronDown = (p: IProps) => <Icon {...p} content={<polyline points="6 9 12 15 18 9" />} />;
+export const IconChevronRight = (p: IProps) => <Icon {...p} content={<polyline points="9 6 15 12 9 18" />} />;
+export const IconChevronLeft = (p: IProps) => <Icon {...p} content={<polyline points="15 6 9 12 15 18" />} />;
+export const IconPlus = (p: IProps) => <Icon {...p} content={<><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>} />;
+export const IconSearch = (p: IProps) => <Icon {...p} content={<><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></>} />;
+export const IconX = (p: IProps) => <Icon {...p} content={<><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>} />;
+export const IconCheck = (p: IProps) => <Icon {...p} content={<polyline points="20 6 9 17 4 12"/>} />;
+export const IconSettings = (p: IProps) => <Icon {...p} content={<><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></>} />;
+export const IconBell = (p: IProps) => <Icon {...p} content={<><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></>} />;
+export const IconDownload = (p: IProps) => <Icon {...p} content={<><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></>} />;
+export const IconUsers = (p: IProps) => <Icon {...p} content={<><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></>} />;
+export const IconCalendar = (p: IProps) => <Icon {...p} content={<><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></>} />;
+export const IconClock = (p: IProps) => <Icon {...p} content={<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>} />;
+export const IconEdit = (p: IProps) => <Icon {...p} content={<><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></>} />;
+export const IconCopy = (p: IProps) => <Icon {...p} content={<><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></>} />;
+export const IconLink = (p: IProps) => <Icon {...p} content={<><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></>} />;
+export const IconZap = (p: IProps) => <Icon {...p} content={<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>} />;
+export const IconInfo = (p: IProps) => <Icon {...p} content={<><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></>} />;
+export const IconMail = (p: IProps) => <Icon {...p} content={<><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></>} />;
+export const IconFilter = (p: IProps) => <Icon {...p} content={<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>} />;
