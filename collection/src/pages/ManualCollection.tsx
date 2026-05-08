@@ -4,7 +4,7 @@ import { queryUncollected } from '../data/mockData';
 import type { UncollectedAddress, UncollectedQueryResult } from '../data/mockData';
 import { SingleTokenPicker } from '../components/TokenPicker';
 import {
-  Checkbox, CoinBadge, Modal, Stat, fmtDateTime, fmtTokenAmount,
+  CoinBadge, Modal, Stat, fmtDateTime, fmtTokenAmount,
   TOKEN_AMOUNT_STEP, usd,
 } from '../components/Primitives';
 import {
@@ -33,7 +33,6 @@ export default function ManualCollection() {
   const [query, setQuery] = useState<UncollectedQueryResult | null>(null);
   const [querying, setQuerying] = useState(false);
 
-  const [pickedAbnormal, setPickedAbnormal] = useState<Set<string>>(new Set());
   const [confirm, setConfirm] = useState(false);
   const toast = useToast();
   const step2Ref = useRef<HTMLDivElement | null>(null);
@@ -45,7 +44,7 @@ export default function ManualCollection() {
   // ---- chain/token change resets the lower workflow ----
   const updateChainToken = (c: string, t: string) => {
     setChainId(c); setTokenId(t);
-    setQuery(null); setPhase('idle'); setPickedAbnormal(new Set());
+    setQuery(null); setPhase('idle');
   };
 
   // ---- run query ----
@@ -53,7 +52,6 @@ export default function ManualCollection() {
     if (!token) return;
     setQuerying(true);
     setQuery(null);
-    setPickedAbnormal(new Set());
     setTimeout(() => {
       setQuery(queryUncollected(chainId, tokenId));
       setPhase('queried');
@@ -90,36 +88,13 @@ export default function ManualCollection() {
     };
   }, [query, conv, minUsd, minAmount]);
 
-  // ---- abnormal picking ----
-  const toggleOne = (addr: string) => {
-    setPickedAbnormal((prev) => {
-      const next = new Set(prev);
-      if (next.has(addr)) next.delete(addr); else next.add(addr);
-      return next;
-    });
-  };
-  const allVisibleSelected = (filtered?.abnormal.length ?? 0) > 0
-    && filtered!.abnormal.every((a) => pickedAbnormal.has(a.address));
-  const toggleAllVisible = () => {
-    if (!filtered) return;
-    const next = new Set(pickedAbnormal);
-    if (allVisibleSelected) filtered.abnormal.forEach((a) => next.delete(a.address));
-    else filtered.abnormal.forEach((a) => next.add(a.address));
-    setPickedAbnormal(next);
-  };
-  const selectedAbnormalEffective = useMemo(() => {
-    if (!filtered) return [] as UncollectedAddress[];
-    return filtered.abnormal.filter((a) => pickedAbnormal.has(a.address));
-  }, [filtered, pickedAbnormal]);
-
   // ---- partial reset (used after submit ack)
   // Preserves the user's chain/token + min threshold so they can immediately
   // re-query or run another collection on the same target. Only the query
-  // result, abnormal-address picks, and phase are cleared.
+  // result and phase are cleared.
   const resetAfterSubmit = () => {
     setQuery(null);
     setPhase('idle');
-    setPickedAbnormal(new Set());
   };
 
   // ---- submit ----
@@ -140,7 +115,7 @@ export default function ManualCollection() {
 
   const minInputValid = conv ? minUsd > 0 : minAmount > 0;
   const canSubmit = phase === 'queried' && minInputValid
-    && !!filtered && (filtered.normal.length + selectedAbnormalEffective.length) > 0;
+    && !!filtered && filtered.normal.length > 0;
 
   const tokenSymbol = token?.symbol ?? '';
 
@@ -253,16 +228,13 @@ export default function ManualCollection() {
 
           <div className="row gap-8 mb-12">
             <span style={{ fontWeight: 600, fontSize: 13 }}>异常金额地址表</span>
-            <span className="muted" style={{ fontSize: 12 }}>· 默认不归集；勾选后才会一并发起归集</span>
+            <span className="muted" style={{ fontSize: 12 }}>· 仅供参考，不会被归集</span>
           </div>
 
           <div className="table-wrap" style={{ boxShadow: 'none', border: '1px solid var(--border-subtle)' }}>
             <table className="table">
               <thead>
                 <tr>
-                  <th style={{ width: 36 }}>
-                    <Checkbox checked={allVisibleSelected} onChange={toggleAllVisible}/>
-                  </th>
                   <th>chain</th>
                   <th>token</th>
                   <th>地址</th>
@@ -273,7 +245,6 @@ export default function ManualCollection() {
               <tbody>
                 {filtered.abnormal.map((a) => (
                   <tr key={a.address}>
-                    <td><Checkbox checked={pickedAbnormal.has(a.address)} onChange={() => toggleOne(a.address)}/></td>
                     <td>
                       {chain && (
                         <span className="coin-cell">
@@ -298,7 +269,7 @@ export default function ManualCollection() {
                   </tr>
                 ))}
                 {filtered.abnormal.length === 0 && (
-                  <tr><td colSpan={6}>
+                  <tr><td colSpan={5}>
                     <div className="empty">
                       <div className="empty-art"><IconShield size={28}/></div>
                       <div className="title">无符合条件的异常地址</div>
@@ -322,23 +293,19 @@ export default function ManualCollection() {
           {/* ===== Submit area ===== */}
           <div className="divider"/>
 
-          {filtered.normal.length + selectedAbnormalEffective.length === 0 ? (
+          {filtered.normal.length === 0 ? (
             <div className="warn-tip">
               <IconAlert size={16} className="ico"/>
               <div>
-                当前阈值下没有可归集的地址。请<b>调低最小归集{conv ? '金额' : '数量'}</b>，或在上方异常地址表中勾选要包含的地址。
+                当前阈值下没有可归集的正常地址。请<b>调低最小归集{conv ? '金额' : '数量'}</b>后重新查询。异常金额地址不参与本次归集。
               </div>
             </div>
           ) : (
             <div className="tip">
               <IconInfo size={16} className="ico"/>
               <div>
-                提交后将归集 <b>该 chain · token</b> 中：
-                <br/>· 余额 ≥ 阈值的 <b>{filtered.normal.length} 个正常地址</b>（自动）
-                <br/>· 你在上方表格中勾选的 <b>{selectedAbnormalEffective.length} 个异常地址</b>
-                {pickedAbnormal.size !== selectedAbnormalEffective.length && (
-                  <span className="muted">（其中 {pickedAbnormal.size - selectedAbnormalEffective.length} 个因不满足最小归集阈值已自动忽略）</span>
-                )}
+                提交后将归集 <b>该 chain · token</b> 中余额 ≥ 阈值的 <b>{filtered.normal.length} 个正常地址</b>。
+                <br/><span className="muted">异常金额地址仅作展示，不会被归集。</span>
               </div>
             </div>
           )}
@@ -375,7 +342,7 @@ export default function ManualCollection() {
           <div>
             将立即对 <b>{chain?.name}</b> 上的 <b>{tokenSymbol}</b> 发起归集：
             <br/>· 余额 ≥ <b>{conv ? usd(minUsd) : `${fmtTokenAmount(minAmount)} ${tokenSymbol}`}</b> 的 <b>{filtered?.normal.length ?? 0}</b> 个正常地址
-            <br/>· 你勾选的 <b>{selectedAbnormalEffective.length}</b> 个异常地址
+            <br/><span className="muted">· 异常金额地址不参与归集</span>
           </div>
         </div>
         <div className="mt-12 muted" style={{ fontSize: 12.5, lineHeight: 1.7 }}>
