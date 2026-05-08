@@ -1084,3 +1084,175 @@ a:hover { color: var(--primary-dark); }
 .body2    { font-size: var(--body2-size); line-height: var(--body2-lh); }
 .body3    { font-size: var(--body3-size); line-height: var(--body3-lh); color: var(--text-secondary); }
 .overline { font-size: var(--overline-size); line-height: var(--overline-lh); font-weight: var(--fw-semibold); letter-spacing: 1.1px; text-transform: uppercase; color: var(--text-secondary); }
+
+/* ============================================================
+   Responsive — mobile drawer + tablet/phone adaptations
+   --------------------------------------------------------------
+   Breakpoints:
+     ≤767px  → mobile (drawer sidebar, condensed appbar, stacked grids)
+     768–1023 → tablet (sidebar still icon-rail per existing logic)
+     ≥1024 → desktop
+     ≥1280 → wide desktop (sidebar full 280)
+   ============================================================ */
+
+/* ---------- Tablet (768–1023): tighten gutters ---------- */
+@media (max-width: 1023px) {
+  .scroll { padding: 24px var(--space-5) var(--space-10); }
+  .stat-strip { grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
+  .stat-strip.stat-strip-3 { grid-template-columns: repeat(3, 1fr); }
+  .appbar .iconbtn-help { display: none; } /* drop help icon to save space */
+  .appbar .search { max-width: 240px; }
+}
+
+/* ---------- Mobile (≤767px): drawer sidebar + reflow ---------- */
+@media (max-width: 767px) {
+  /* === Sidebar drawer === */
+  .sidebar.mobile {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 280px !important;
+    padding: 0 var(--space-4) var(--space-6) !important;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 240ms ease-out;
+    box-shadow: var(--shadow-z16);
+  }
+  .sidebar.mobile.drawer-open { transform: translateX(0); }
+  .sidebar.mobile .nav-children { display: flex !important; }
+  .sidebar.mobile .nav-item .lbl,
+  .sidebar.mobile .nav-item .chev { display: inline; }
+  .sidebar.mobile .brand {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .sidebar.mobile .brand .drawer-close {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: transparent; border: 0; color: var(--text-secondary);
+    display: grid; place-items: center; cursor: pointer;
+  }
+  .sidebar.mobile .brand .drawer-close:hover { background: rgba(145,158,171,0.08); color: var(--text-primary); }
+  .sidebar-backdrop {
+    position: fixed; inset: 0; background: rgba(28,30,36,0.36);
+    z-index: 199;
+    animation: fade-in 200ms ease-out;
+  }
+
+  /* Hide the desktop drawer-close button on tablet/desktop (it only renders for mobile) */
+  .sidebar:not(.mobile) .drawer-close { display: none; }
+
+  /* === Appbar condensed === */
+  .appbar {
+    height: 64px;
+    padding: 12px var(--space-4);
+    gap: var(--space-2);
+  }
+  .appbar .search { display: none; }
+  .appbar .iconbtn[title="设置"] { display: none; }       /* settings hidden on phone */
+  .appbar .iconbtn-help { display: none; }
+  .appbar .account {
+    height: 36px;
+    padding: 2px;
+    border-radius: 50%;
+    background: transparent;
+    border: 0;
+  }
+  .appbar .account .avatar { width: 32px; height: 32px; }
+  .appbar .account .meta { display: none; }
+
+  /* === Page chrome === */
+  .scroll { padding: var(--space-4); }
+  .page-head { flex-direction: column; align-items: stretch; gap: var(--space-3); margin-bottom: var(--space-4); }
+  .page-head .row { flex-wrap: wrap; }
+
+  /* === Stat strips: 2-up phone, single column for 3-up info-rows === */
+  .stat-strip { grid-template-columns: repeat(2, 1fr); gap: var(--space-3); margin-bottom: var(--space-4); }
+  .stat-strip.stat-strip-3 { grid-template-columns: 1fr; }
+  .stat { padding: var(--space-3) var(--space-4); }
+  .stat .value { font-size: 20px; }
+
+  /* === Cards: tighter padding === */
+  .card { padding: var(--space-4); border-radius: var(--radius-lg); }
+  .card + .card { margin-top: var(--space-3); }
+
+  /* === Forms: stack 2-col grids === */
+  .field-grid { grid-template-columns: 1fr; gap: var(--space-3); }
+  .field-grid.three { grid-template-columns: 1fr; }
+
+  /* === Picker grid: stack chain / token columns === */
+  .picker-row { flex-direction: column; gap: var(--space-3); }
+  .picker-col { min-width: 0; padding: 0 !important; border-right: none !important; }
+  .picker-col + .picker-col { padding-top: var(--space-3) !important; border-top: 1px solid var(--border-subtle); }
+
+  /* === Table toolbar: stack search + filters === */
+  .table-toolbar {
+    height: auto; min-height: 64px;
+    padding: var(--space-3) var(--space-4);
+    flex-direction: column; align-items: stretch; gap: var(--space-3);
+  }
+  .table-toolbar .left { flex-direction: column; align-items: stretch; gap: var(--space-2); }
+  .table-toolbar .right { justify-content: flex-end; }
+  .table-toolbar .search { max-width: none; }
+  .filter-select { width: 100%; }
+
+  /* === Tables: cell padding tighten + ensure horizontal scroll === */
+  .table-wrap > div[style*="overflow-x"] { overflow-x: auto; }
+  .table thead th, .table tbody td { padding: 12px var(--space-3); }
+
+  /* === Pagination footer: stack info + buttons === */
+  .pagination-footer {
+    height: auto; padding: var(--space-3) var(--space-4);
+    flex-direction: column; gap: var(--space-3); align-items: stretch;
+  }
+  .pagination-footer > div:first-child { justify-content: space-between; }
+  .pagination-footer > div:last-child { justify-content: center; flex-wrap: wrap; }
+
+  /* === Modals: nearly full-width with safe margin === */
+  .modal {
+    margin: var(--space-4);
+    max-width: calc(100vw - 32px) !important;
+    max-height: calc(100vh - 32px);
+  }
+  .modal-head { padding: var(--space-4); min-height: 56px; }
+  .modal-head h3 { font-size: var(--h5-size); line-height: var(--h5-lh); }
+  .close-x { width: 36px; height: 36px; }
+  .modal-body { padding: var(--space-3) var(--space-4) var(--space-4); font-size: var(--body2-size); line-height: var(--body2-lh); }
+  .modal-foot { padding: var(--space-3) var(--space-4); min-height: 64px; flex-wrap: wrap; }
+  .modal-foot .btn { flex: 1; min-width: 100px; }
+
+  /* === Type-card grid (auto task type chooser): single column === */
+  .type-grid { grid-template-columns: 1fr; gap: var(--space-2); }
+
+  /* === Token pills: smaller === */
+  .token-pill { font-size: 11px; padding: 3px 8px 3px 3px; }
+
+  /* === Toast stack: span full width === */
+  .toast-stack { top: 12px; right: 12px; left: 12px; }
+  .toast { min-width: 0; max-width: none; width: 100%; }
+
+  /* === Address detail row: stack address + amount === */
+  .addr-item {
+    grid-template-columns: 1fr auto;
+    gap: var(--space-2);
+  }
+  .addr-item > div:nth-child(2) { grid-column: 1 / -1; text-align: left; display: flex; gap: var(--space-3); align-items: baseline; }
+  .addr-item > button { grid-row: 1; grid-column: 2; }
+
+  /* === Schedule grid: stack labels above inputs === */
+  .schedule-grid { grid-template-columns: 1fr; gap: 6px; }
+  .schedule-grid > .lbl { margin-top: var(--space-2); }
+
+  /* === Amount table: compact === */
+  .amount-table-row { grid-template-columns: 1fr; gap: var(--space-2); padding: var(--space-3) var(--space-4); }
+  .amount-table-row .input-wrap { width: 100% !important; justify-self: stretch !important; }
+
+  /* === Hide page-sub on really tight viewports to save space === */
+  .page-sub { font-size: 12px; }
+}
+
+/* ---------- Extra-small phones (≤375): even tighter ---------- */
+@media (max-width: 375px) {
+  .scroll { padding: var(--space-3); }
+  .stat .value { font-size: 18px; }
+  .card { padding: var(--space-3); }
+  .appbar { padding: 8px var(--space-3); }
+  .modal-foot .btn { font-size: 13px; padding: 8px var(--space-3); }
+}

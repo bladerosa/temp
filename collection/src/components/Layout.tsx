@@ -4,7 +4,7 @@ import {
   IconChart, IconMegaphone, IconCoin, IconStore, IconBolt, IconLayers,
   IconList, IconShield, IconAd, IconHandshake, IconClipboard, IconWallet,
   IconBell, IconBan, IconMail, IconLog, IconSettings, IconHelp, IconMenu,
-  IconChevronRight, IconSearch,
+  IconChevronRight, IconSearch, IconClose,
 } from './Icon';
 
 type SidebarKey =
@@ -48,34 +48,109 @@ const topItems: TopItem[] = [
   { key: 'mail-list',   label: '邮件验证码列表', Icon: IconMail },
 ];
 
+// ============================================================
+// Responsive breakpoints (mobile-first thinking, but expressed as caps):
+//   mobile     : ≤767px → drawer pattern (slide-in overlay)
+//   tablet/sm  : 768–1279 → collapsed icon-rail sidebar
+//   desktop    : ≥1280 → full 280-px sidebar
+// ============================================================
+
+const MOBILE_MQ = '(max-width: 767px)';
+const TABLET_MAX_MQ = '(max-width: 1279px)';
+
 export default function Layout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const [openKey, setOpenKey] = useState<SidebarKey | null>(
     location.pathname.startsWith('/collection') ? 'collection' : null,
   );
-  // Auto-collapse on narrow viewports (≤1280px). User can still toggle manually
-  // via the hamburger; the next breakpoint crossing will re-sync.
+
+  // Tablet+desktop collapse state.
   const [collapsed, setCollapsed] = useState<boolean>(() =>
-    typeof window !== 'undefined' && window.matchMedia('(max-width: 1280px)').matches,
+    typeof window !== 'undefined' && window.matchMedia(TABLET_MAX_MQ).matches,
+  );
+  // Mobile drawer open/closed (only meaningful on ≤767px).
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  // Track whether viewport is currently in mobile mode.
+  const [isMobile, setIsMobile] = useState<boolean>(() =>
+    typeof window !== 'undefined' && window.matchMedia(MOBILE_MQ).matches,
   );
 
+  // Sync state on viewport size changes.
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 1280px)');
-    const onChange = (e: MediaQueryListEvent) => setCollapsed(e.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
+    const mqTablet = window.matchMedia(TABLET_MAX_MQ);
+    const mqMobile = window.matchMedia(MOBILE_MQ);
+    const onTablet = (e: MediaQueryListEvent) => setCollapsed(e.matches);
+    const onMobile = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches);
+      // Always close the drawer when crossing back into desktop/tablet.
+      if (!e.matches) setDrawerOpen(false);
+    };
+    mqTablet.addEventListener('change', onTablet);
+    mqMobile.addEventListener('change', onMobile);
+    return () => {
+      mqTablet.removeEventListener('change', onTablet);
+      mqMobile.removeEventListener('change', onMobile);
+    };
   }, []);
+
+  // ESC closes drawer.
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setDrawerOpen(false); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [drawerOpen]);
+
+  // Auto-close drawer when navigating to a new collection sub-route on mobile.
+  useEffect(() => {
+    if (isMobile) setDrawerOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   const isCollectionRoute = location.pathname.startsWith('/collection');
 
+  const onHamburger = () => {
+    if (isMobile) {
+      setDrawerOpen((v) => !v);
+    } else {
+      setCollapsed((c) => !c);
+    }
+  };
+
+  // Collapsed visual state only applies in tablet/desktop. Inside mobile drawer
+  // the sidebar always shows as full-width (280) to be usable.
+  const sidebarClasses = [
+    'sidebar',
+    !isMobile && collapsed ? 'collapsed' : '',
+    isMobile && drawerOpen ? 'drawer-open' : '',
+    isMobile ? 'mobile' : '',
+  ].filter(Boolean).join(' ');
+
+  const sidebarShowsCollapsedVisuals = !isMobile && collapsed;
+
   return (
-    <div className={`app ${collapsed ? 'sidebar-collapsed' : ''}`}>
-      <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
+    <div className={`app ${drawerOpen ? 'drawer-open' : ''}`}>
+      {/* Backdrop for mobile drawer */}
+      {isMobile && drawerOpen && (
+        <div className="sidebar-backdrop" onClick={() => setDrawerOpen(false)} />
+      )}
+
+      <aside className={sidebarClasses} aria-hidden={isMobile && !drawerOpen}>
         <div className="brand">
-          {collapsed ? (
+          {sidebarShowsCollapsedVisuals ? (
             <img src="/logo-mark.svg" alt="ccpayment" />
           ) : (
             <img src="/logo.svg" alt="ccpayment" />
+          )}
+          {/* Mobile drawer close button */}
+          {isMobile && (
+            <button
+              className="drawer-close"
+              aria-label="关闭侧栏"
+              onClick={() => setDrawerOpen(false)}
+            >
+              <IconClose size={20} />
+            </button>
           )}
         </div>
 
@@ -89,23 +164,22 @@ export default function Layout({ children }: { children: ReactNode }) {
               return (
                 <div key={it.key}>
                   <div
-                    className={`nav-item ${!collapsed && isOpen ? 'open' : ''} ${hasActiveChild ? 'has-active-child' : ''}`}
+                    className={`nav-item ${!sidebarShowsCollapsedVisuals && isOpen ? 'open' : ''} ${hasActiveChild ? 'has-active-child' : ''}`}
                     onClick={() => {
-                      if (collapsed) {
-                        // expand sidebar and open this group
+                      if (sidebarShowsCollapsedVisuals) {
                         setCollapsed(false);
                         setOpenKey(it.key);
                       } else {
                         setOpenKey(isOpen ? null : it.key);
                       }
                     }}
-                    title={collapsed ? it.label : undefined}
+                    title={sidebarShowsCollapsedVisuals ? it.label : undefined}
                   >
                     <it.Icon size={24} className="ico" />
                     <span className="lbl">{it.label}</span>
                     <IconChevronRight size={16} className="chev" />
                   </div>
-                  {!collapsed && isOpen && (
+                  {!sidebarShowsCollapsedVisuals && isOpen && (
                     <div className="nav-children">
                       {it.routes.map((r) => (
                         <NavLink
@@ -127,7 +201,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                 key={it.key}
                 className="nav-item"
                 onClick={() => { /* prototype: non-interactive */ }}
-                title={collapsed ? it.label : undefined}
+                title={sidebarShowsCollapsedVisuals ? it.label : undefined}
               >
                 <it.Icon size={24} className="ico" />
                 <span className="lbl">{it.label}</span>
@@ -142,9 +216,9 @@ export default function Layout({ children }: { children: ReactNode }) {
         <div className="appbar">
           <button
             className="menu-toggle"
-            aria-label={collapsed ? '展开侧栏' : '折叠侧栏'}
-            title={collapsed ? '展开侧栏' : '折叠侧栏'}
-            onClick={() => setCollapsed((c) => !c)}
+            aria-label={isMobile ? (drawerOpen ? '关闭侧栏' : '打开侧栏') : (collapsed ? '展开侧栏' : '折叠侧栏')}
+            title={isMobile ? (drawerOpen ? '关闭侧栏' : '打开侧栏') : (collapsed ? '展开侧栏' : '折叠侧栏')}
+            onClick={onHamburger}
           >
             <IconMenu size={20} />
           </button>
@@ -154,7 +228,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           </div>
           <div className="spacer" />
           <button className="iconbtn" title="设置"><IconSettings size={18} /></button>
-          <button className="iconbtn" title="帮助"><IconHelp size={18} /></button>
+          <button className="iconbtn iconbtn-help" title="帮助"><IconHelp size={18} /></button>
           <button className="iconbtn" title="通知">
             <IconBell size={18} />
             <span className="badge"/>

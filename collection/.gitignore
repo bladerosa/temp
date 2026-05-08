@@ -4,3 +4,6 @@ dist
 *.local
 .vite
 tsconfig.tsbuildinfo
+
+# Capture-script transient deps (we copy /tmp/node_modules in for one-shot runs)
+workflow/node_modules
