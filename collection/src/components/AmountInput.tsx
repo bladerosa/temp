@@ -66,7 +66,7 @@ export function AmountInput({
   if (targets.length === 0) {
     return (
       <Stack spacing={2}>
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>{label}</Typography>
+        <Typography variant="subtitle2">{label}</Typography>
         <Box>
           <TextField
             type="number"
@@ -89,7 +89,7 @@ export function AmountInput({
 
   return (
     <Stack spacing={2}>
-      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+      <Typography variant="subtitle2">
         {label}
       </Typography>
 
@@ -161,7 +161,7 @@ export function AmountInput({
                   <Stack direction="row" alignItems="center" gap={1.5}>
                     <CryptoBadge symbol={t.symbol} color={t.color} size={22} />
                     <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      <Typography variant="subtitle2">
                         {c.name} · {t.symbol}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">

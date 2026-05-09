@@ -81,14 +81,14 @@ const ToastHost = observer(function ToastHost() {
 
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography
-                sx={{ fontSize: 14, lineHeight: '22px', fontWeight: 700, color: 'text.primary' }}
+                sx={{ fontSize: 14, lineHeight: '20px', fontWeight: 700, color: 'text.primary' }}
               >
                 {t.title}
               </Typography>
               {t.desc && (
                 <Typography
                   variant="body2"
-                  sx={{ fontSize: 13, lineHeight: '18px', color: 'text.secondary', mt: 0.25 }}
+                  sx={{ fontSize: 13, lineHeight: '20px', color: 'text.secondary', mt: 0.25 }}
                   component="div"
                 >
                   {t.desc}

@@ -58,25 +58,25 @@ export default function TablePager({ page, totalPages, onPageChange }: TablePage
         pl: { xs: 4, sm: 6 },
         pr: { xs: 4, sm: 2 },
         bgcolor: 'transparent', // TableFooter already grey.100
-        fontFamily: '"Poppins"',
       }}
       role="navigation"
       aria-label="分页"
     >
-      <Typography sx={{ fontSize: 14, lineHeight: '22px', color: 'text.primary' }}>
+      <Typography sx={{ fontSize: 14, lineHeight: '20px', color: 'text.primary' }}>
         共 {totalPages} 页
       </Typography>
 
       {!singlePage && (
         <Stack direction="row" alignItems="center" gap={2}>
-          <Typography sx={{ fontSize: 14, lineHeight: '22px', color: 'text.primary' }}>
+          <Typography sx={{ fontSize: 14, lineHeight: '20px', color: 'text.primary' }}>
             前往
           </Typography>
           <Box
             sx={{
               width: 64,
               height: 32,
-              border: '1px solid #919EAB',
+              border: '1px solid',
+              borderColor: 'grey.500',
               borderRadius: 1,
               display: 'inline-flex',
               alignItems: 'center',
@@ -107,8 +107,8 @@ export default function TablePager({ page, totalPages, onPageChange }: TablePage
               inputProps={{
                 inputMode: 'numeric',
                 style: {
-                  textAlign: 'center', fontSize: 14, lineHeight: '22px',
-                  padding: 0, color: '#212B36',
+                  textAlign: 'center', fontSize: 14, lineHeight: '20px',
+                  padding: 0, color: '#1F2025',
                 },
               }}
               sx={{ width: '100%', height: '100%' }}
@@ -124,7 +124,7 @@ export default function TablePager({ page, totalPages, onPageChange }: TablePage
           onClick={() => onPageChange(page - 1)}
           sx={{
             width: 28, height: 28, borderRadius: 1,
-            color: isFirst ? '#C4CDD5' : '#212B36',
+            color: isFirst ? 'text.disabled' : 'text.primary',
             '&:hover': { bgcolor: 'rgba(145,158,171,0.12)' },
           }}
         >
@@ -136,7 +136,7 @@ export default function TablePager({ page, totalPages, onPageChange }: TablePage
           onClick={() => onPageChange(page + 1)}
           sx={{
             width: 28, height: 28, borderRadius: 1,
-            color: isLast ? '#C4CDD5' : '#212B36',
+            color: isLast ? 'text.disabled' : 'text.primary',
             '&:hover': { bgcolor: 'rgba(145,158,171,0.12)' },
           }}
         >

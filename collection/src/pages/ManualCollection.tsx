@@ -173,7 +173,7 @@ const ManualCollection = observer(function ManualCollection() {
 
           <Grid container spacing={3} sx={{ mt: 2 }}>
             <Grid item xs={12} md={6}>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>
                 最小归集{conv ? '金额（USD）' : `数量（${tokenSymbol}）`}
               </Typography>
               <TextField
@@ -201,7 +201,7 @@ const ManualCollection = observer(function ManualCollection() {
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>
                 预览
               </Typography>
               <Box
@@ -220,7 +220,7 @@ const ManualCollection = observer(function ManualCollection() {
                   <>
                     <CryptoBadge symbol={token.symbol} color={token.color} size={32} />
                     <Box sx={{ flex: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      <Typography variant="subtitle2">
                         {chain.name} · {token.symbol}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
@@ -282,7 +282,7 @@ const ManualCollection = observer(function ManualCollection() {
               }}
             >
               <StatCard
-                tone="accent"
+                tone="lead"
                 label="总未归集"
                 value={`${fmtTokenAmount(filtered.totalAmount)} ${tokenSymbol}`}
                 hint={
@@ -336,7 +336,7 @@ const ManualCollection = observer(function ManualCollection() {
                         {chain && (
                           <Stack direction="row" alignItems="center" gap={1}>
                             <CryptoBadge symbol={chain.id} color={chain.color} size={20} />
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            <Typography variant="subtitle2">
                               {chain.name}
                             </Typography>
                           </Stack>
@@ -346,7 +346,7 @@ const ManualCollection = observer(function ManualCollection() {
                         {token && (
                           <Stack direction="row" alignItems="center" gap={1}>
                             <CryptoBadge symbol={token.symbol} color={token.color} size={20} />
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            <Typography variant="subtitle2">
                               {token.symbol}
                             </Typography>
                           </Stack>
@@ -354,8 +354,8 @@ const ManualCollection = observer(function ManualCollection() {
                       </TableCell>
                       <TableCell
                         sx={{
-                          fontFamily: 'monospace',
-                          fontSize: 11.5,
+                          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace',
+                          fontSize: 13,
                           wordBreak: 'break-all',
                           maxWidth: 320,
                         }}

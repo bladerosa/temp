@@ -299,7 +299,7 @@ const DashboardSidebar = observer(function DashboardSidebar() {
             mx: 4, mt: 2, // 16 / 8
             height: 64,
             borderRadius: 3, // 12
-            bgcolor: '#F2F6F9',
+            bgcolor: 'grey.100',
             px: 4, // 16
             cursor: 'pointer',
             flexShrink: 0,

@@ -34,7 +34,7 @@ export default function EmptyState({ icon, title, desc, action }: EmptyStateProp
         >
           {icon}
         </Box>
-        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'text.primary' }}>
+        <Typography variant="h5" sx={{ color: 'text.primary' }}>
           {title}
         </Typography>
         {desc && (

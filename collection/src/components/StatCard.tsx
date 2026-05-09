@@ -2,123 +2,120 @@ import { Box, Stack, Typography, type SxProps } from '@mui/material';
 import type { ReactNode } from 'react';
 import { brandShadows } from '@/theme';
 
-// Stat / KPI card. Strict implementation of preview/components/Stat (+ ui_kit).
+// StatCard — strict implementation of preview/card.html §05A.
 // Anatomy:
-//   - Card surface 16 radius, padding 20 22, shadow-card (or shadow-primary on accent)
-//   - Label   = caption (12 / 16 / Medium) secondary color
-//   - Value   = 26 / 1.1 / Bold / -0.2 letter-spacing  (NOT h2)
-//   - Delta   = caption / SemiBold, success.main (up) or error.main (down)
-//   - Accent  = brand-blue gradient surface, white text, shadow-primary
-
-type Tone = 'default' | 'primary' | 'success' | 'warning' | 'info' | 'error' | 'accent';
-
-const toneAccent: Record<Tone, { color: string; bg: string } | null> = {
-  default: null,
-  primary: { color: '#3C6FF5', bg: 'rgba(60,111,245,0.10)' },
-  success: { color: '#218861', bg: 'rgba(67,190,118,0.12)' },
-  warning: { color: '#AC7C1F', bg: 'rgba(231,178,43,0.14)' },
-  info:    { color: '#3767A3', bg: 'rgba(101,174,232,0.14)' },
-  error:   { color: '#A92926', bg: 'rgba(236,104,76,0.12)' },
-  accent:  null, // accent is the full-bleed gradient handled below
-};
+//   - 24px padding (no exception)
+//   - Label    = 13/secondary regular           (Poppins)
+//   - Value    = 32 / bold / -0.2 letter-spacing (Poppins, NOT 26)
+//   - Sub line = 12 / font-mono / semantic-darker (success-dark / warning-dark / secondary)
+//                Use deltaDir 'up'/'down' for ▲ +N / ▼ -N format,
+//                or pass `hint` as plain string for "— 3 awaiting verification" style.
+// Card surface stays WHITE — DS Don't (§06): "Don't recolor the card surface".
+// The "lead" emphasis is achieved by adding a subtle 3px primary left rail
+// (`tone="lead"`), NOT by tinting the surface. This is the DS-compliant
+// alternative to the prior accent-gradient.
 
 export type StatCardProps = {
   label: ReactNode;
   value: ReactNode;
+  /** Plain hint copy under value (12 mono, secondary). e.g. "73 个地址 · 平均 $848" */
   hint?: ReactNode;
+  /** Optional delta with ▲/▼ glyph and semantic color. Renders before hint. */
   delta?: { dir: 'up' | 'down'; text: ReactNode };
-  icon?: ReactNode;
-  tone?: Tone;
+  /** "lead" adds a 3px primary left rail (DS-allowed accent treatment). */
+  tone?: 'default' | 'lead';
   sx?: SxProps;
 };
 
-export default function StatCard({
-  label, value, hint, delta, icon, tone = 'default', sx,
-}: StatCardProps) {
-  const accent = tone !== 'accent' ? toneAccent[tone] : null;
-  const isAccent = tone === 'accent';
+const FONT_MONO = 'ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace';
 
+export default function StatCard({
+  label, value, hint, delta, tone = 'default', sx,
+}: StatCardProps) {
   return (
     <Box
       sx={{
         position: 'relative',
-        overflow: 'hidden',
-        bgcolor: isAccent ? 'transparent' : 'background.paper',
-        background: isAccent ? 'linear-gradient(135deg, #3C6FF5 0%, #5A88F8 100%)' : undefined,
-        color: isAccent ? '#FFFFFF' : 'text.primary',
-        borderRadius: 4, // 16
-        boxShadow: isAccent ? brandShadows.primary : brandShadows.card,
-        p: '20px 22px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '6px',
-        minHeight: 96,
+        bgcolor: 'background.paper',
+        borderRadius: 4,                              // 16
+        boxShadow: brandShadows.card,
+        p: 6,                                         // 24 all sides per spec
+        // Lead rail — single allowed accent treatment per DS card.html §06.
+        ...(tone === 'lead' && {
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            left: 0, top: 16, bottom: 16,
+            width: 3,
+            borderRadius: 2,
+            bgcolor: 'primary.main',
+          },
+        }),
         ...sx,
       }}
     >
-      <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+      <Stack spacing={0.5}>
         <Typography
           sx={{
-            fontSize: 12,
-            lineHeight: '16px',
-            fontWeight: 500,
-            color: isAccent ? 'rgba(255,255,255,0.85)' : 'text.secondary',
+            fontSize: 13,
+            lineHeight: '20px',
+            fontWeight: 400,
+            color: 'text.secondary',
           }}
         >
           {label}
         </Typography>
-        {icon && (
-          <Box
-            sx={{
-              width: 28, height: 28,
-              borderRadius: '50%',
-              display: 'grid', placeItems: 'center',
-              bgcolor: accent?.bg ?? (isAccent ? 'rgba(255,255,255,0.16)' : 'rgba(145,158,171,0.10)'),
-              color: accent?.color ?? (isAccent ? '#FFFFFF' : 'text.secondary'),
-              flexShrink: 0,
-              '& svg': { fontSize: 16 },
-            }}
+        <Typography
+          sx={{
+            fontSize: 32,
+            lineHeight: 1.2,
+            fontWeight: 700,
+            letterSpacing: '-0.4px',
+            color: 'text.primary',
+            // Allow long-format numbers like "$1,234,567.89" to ellipsize gracefully
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {value}
+        </Typography>
+        {(delta || hint) && (
+          <Stack
+            direction="row"
+            alignItems="center"
+            gap={1}
+            sx={{ fontFamily: FONT_MONO, fontSize: 12, lineHeight: '16px' }}
           >
-            {icon}
-          </Box>
+            {delta && (
+              <Box
+                component="span"
+                sx={{
+                  color: delta.dir === 'up' ? 'success.dark' : 'error.dark',
+                  fontWeight: 500,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {delta.dir === 'up' ? '▲' : '▼'} {delta.text}
+              </Box>
+            )}
+            {hint && (
+              <Typography
+                component="span"
+                sx={{
+                  fontFamily: FONT_MONO,
+                  fontSize: 12,
+                  lineHeight: '16px',
+                  color: 'text.secondary',
+                  fontWeight: 400,
+                }}
+              >
+                {hint}
+              </Typography>
+            )}
+          </Stack>
         )}
       </Stack>
-
-      <Typography
-        sx={{
-          fontSize: 26, lineHeight: 1.1, fontWeight: 700, letterSpacing: '-0.2px',
-          color: 'inherit',
-        }}
-      >
-        {value}
-      </Typography>
-
-      {(hint || delta) && (
-        <Stack direction="row" alignItems="center" spacing={1.5}>
-          {delta && (
-            <Typography
-              sx={{
-                fontSize: 12, lineHeight: '16px', fontWeight: 600,
-                color: isAccent
-                  ? 'rgba(255,255,255,0.92)'
-                  : delta.dir === 'up' ? 'success.main' : 'error.main',
-              }}
-            >
-              {delta.dir === 'up' ? '↑ ' : '↓ '}{delta.text}
-            </Typography>
-          )}
-          {hint && (
-            <Typography
-              sx={{
-                fontSize: 12, lineHeight: '16px',
-                color: isAccent ? 'rgba(255,255,255,0.85)' : 'text.secondary',
-              }}
-            >
-              {hint}
-            </Typography>
-          )}
-        </Stack>
-      )}
     </Box>
   );
 }

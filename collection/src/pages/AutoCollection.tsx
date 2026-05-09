@@ -281,10 +281,10 @@ const AutoCollection = observer(function AutoCollection() {
           }}
         >
           <StatCard
-            tone="accent"
+            tone="lead"
             label="总任务数"
             value={stats.total}
-            hint="包含全部类型"
+            hint="包含全部 4 种触发类型"
           />
           <StatCard
             label="运行中"
@@ -372,13 +372,13 @@ const AutoCollection = observer(function AutoCollection() {
                   {filtered.map((t) => (
                     <TableRow key={t.id} hover>
                       <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        <Typography variant="subtitle2">
                           {t.name}
                         </Typography>
                         <Typography
                           variant="caption"
                           color="text.secondary"
-                          sx={{ fontFamily: 'monospace' }}
+                          sx={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace' }}
                         >
                           {t.id}
                         </Typography>
@@ -418,7 +418,7 @@ const AutoCollection = observer(function AutoCollection() {
                         </Stack>
                       </TableCell>
                       <TableCell>{renderKeyParams(t)}</TableCell>
-                      <TableCell sx={{ fontSize: 12, fontFamily: 'monospace' }}>
+                      <TableCell sx={{ fontSize: 12, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace' }}>
                         {t.lastRunAt ? (
                           fmtDateTime(t.lastRunAt)
                         ) : (
@@ -427,7 +427,7 @@ const AutoCollection = observer(function AutoCollection() {
                           </Typography>
                         )}
                       </TableCell>
-                      <TableCell sx={{ fontSize: 12, fontFamily: 'monospace' }}>
+                      <TableCell sx={{ fontSize: 12, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace' }}>
                         {t.type === 'large_deposit' || t.type === 'withdraw_short' ? (
                           <Typography variant="caption" color="text.secondary">
                             事件驱动
@@ -528,7 +528,7 @@ const AutoCollection = observer(function AutoCollection() {
                           >
                             {TASK_TYPE_ICON[k]}
                           </Box>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                          <Typography variant="subtitle2">
                             {meta.name}
                           </Typography>
                           <Box sx={{ flex: 1 }} />
@@ -622,7 +622,7 @@ function ConfigureForm({
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
-          <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>
             任务名称
           </Typography>
           <TextField
@@ -633,7 +633,7 @@ function ConfigureForm({
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>
             任务类型
           </Typography>
           <TextField
@@ -646,7 +646,7 @@ function ConfigureForm({
       </Grid>
 
       <Box>
-        <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+        <Typography variant="subtitle2" sx={{ mb: 1 }}>
           目标 chain · token（多选）
         </Typography>
         <MultiTokenPicker
@@ -681,7 +681,7 @@ function ConfigureForm({
             helperText="仅归集余额 ≥ 此金额的地址。"
           />
           <Box>
-            <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
               检测周期
             </Typography>
             <ScheduleEditor
@@ -705,7 +705,7 @@ function ConfigureForm({
             helperText="扫描所有地址中目标 token 的余额，达到此金额则归集。"
           />
           <Box>
-            <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
               检测周期
             </Typography>
             <ScheduleEditor
@@ -765,7 +765,7 @@ function CooldownField({
 }) {
   return (
     <Box sx={{ maxWidth: 380 }}>
-      <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+      <Typography variant="subtitle2" sx={{ mb: 1 }}>
         重复触发最短间隔
       </Typography>
       <Stack direction="row" spacing={1} alignItems="center">

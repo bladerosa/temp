@@ -67,12 +67,8 @@ const STATUS_COLOR: Record<JobStatus, 'default' | 'info' | 'success' | 'error'> 
   aborted: 'error',
 };
 
-const STATUS_DOT_COLOR: Record<JobStatus, string> = {
-  pending: '#71757E',
-  running: '#3767A3',
-  completed: '#218861',
-  aborted: '#A92926',
-};
+// Status dot inherits chip palette via currentColor — no raw hex.
+// (The Chip already supplies a semantic palette via STATUS_COLOR.)
 
 type SortKey =
   | 'occurredAt'
@@ -191,9 +187,16 @@ const CollectionJobs = observer(function CollectionJobs() {
         (s, r) => s + (isTrxChain(r.chainId) ? r.trxConsumed ?? 0 : 0),
         0,
       ),
+      trxJobsCount: filtered.filter((r) => isTrxChain(r.chainId)).length,
     }),
     [filtered],
   );
+
+  const statusBreakdown = useMemo(() => {
+    const out: Record<JobStatus, number> = { pending: 0, running: 0, completed: 0, aborted: 0 };
+    for (const r of filtered) out[r.status]++;
+    return out;
+  }, [filtered]);
 
   const doAbort = async (r: CollectionRecord) => {
     // AC-008 dictates the exact reason string: "运营人员手动终止" (both pending & running).
@@ -224,10 +227,35 @@ const CollectionJobs = observer(function CollectionJobs() {
             gap: 5,
           }}
         >
-          <StatCard tone="accent" label="任务数" value={stats.count} />
-          <StatCard label="归集总额" value={usd(stats.totalUsd)} />
-          <StatCard label="覆盖地址数" value={stats.addresses} />
-          <StatCard label="fee 消耗" value={usd(stats.fee)} />
+          <StatCard
+            tone="lead"
+            label="任务数"
+            value={stats.count}
+            hint={`完成 ${statusBreakdown.completed} · 执行中 ${statusBreakdown.running} · 待执行 ${statusBreakdown.pending}`}
+          />
+          <StatCard
+            label="归集总额"
+            value={usd(stats.totalUsd)}
+            hint={
+              stats.addresses > 0
+                ? `${stats.addresses} 个地址 · 平均 ${usd(stats.totalUsd / Math.max(1, stats.count))}`
+                : '尚无归集'
+            }
+          />
+          <StatCard
+            label="覆盖地址数"
+            value={stats.addresses}
+            hint={`涉及 ${stats.count} 笔归集任务`}
+          />
+          <StatCard
+            label="fee 消耗"
+            value={usd(stats.fee)}
+            hint={
+              stats.totalUsd > 0
+                ? `占归集总额 ${((stats.fee / stats.totalUsd) * 100).toFixed(2)}%`
+                : '—'
+            }
+          />
         </Box>
 
         {/* ===== Strip 2: 3 TRX-only cards ===== */}
@@ -238,9 +266,21 @@ const CollectionJobs = observer(function CollectionJobs() {
             gap: 5,
           }}
         >
-          <StatCard label="能量消耗" value={numFmt(stats.energy, 0)} />
-          <StatCard label="带宽消耗" value={numFmt(stats.bandwidth, 0)} />
-          <StatCard label="trx 消耗" value={`${numFmt(stats.trx, 2)} TRX`} />
+          <StatCard
+            label="能量消耗"
+            value={numFmt(stats.energy, 0)}
+            hint={`${stats.trxJobsCount} 笔 TRON 链归集累计`}
+          />
+          <StatCard
+            label="带宽消耗"
+            value={numFmt(stats.bandwidth, 0)}
+            hint={`${stats.trxJobsCount} 笔 TRON 链归集累计`}
+          />
+          <StatCard
+            label="trx 消耗"
+            value={`${numFmt(stats.trx, 2)} TRX`}
+            hint={`${stats.trxJobsCount} 笔 TRON 链归集累计`}
+          />
         </Box>
 
         {/* ===== Table ===== */}
@@ -320,7 +360,7 @@ const CollectionJobs = observer(function CollectionJobs() {
               </>
             }
             right={
-              <Typography sx={{ fontSize: 12.5, color: 'text.secondary' }}>
+              <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
                 共 {filtered.length} 条
               </Typography>
             }
@@ -436,7 +476,7 @@ const CollectionJobs = observer(function CollectionJobs() {
                       const trxRow = isTrxChain(r.chainId);
                       return (
                         <TableRow key={r.id} hover>
-                          <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>
+                          <TableCell sx={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace', fontSize: 12 }}>
                             {fmtDateTime(r.occurredAt)}
                           </TableCell>
                           <TableCell>
@@ -466,7 +506,7 @@ const CollectionJobs = observer(function CollectionJobs() {
                             {r.triggerName && r.trigger !== 'manual' && (
                               <Typography
                                 color="text.secondary"
-                                sx={{ display: 'block', mt: 0.5, fontSize: 11 }}
+                                sx={{ display: 'block', mt: 0.5, fontSize: 12 }}
                               >
                                 {r.triggerName}
                               </Typography>
@@ -533,7 +573,7 @@ const CollectionJobs = observer(function CollectionJobs() {
                           </TableCell>
                           <TableCell
                             align="right"
-                            sx={{ fontFamily: 'Roboto Mono, monospace', fontVariantNumeric: 'tabular-nums' }}
+                            sx={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace', fontVariantNumeric: 'tabular-nums' }}
                           >
                             {fmtTokenAmount(r.totalAmount)}
                           </TableCell>
@@ -610,8 +650,9 @@ const CollectionJobs = observer(function CollectionJobs() {
                                       width: 7,
                                       height: 7,
                                       borderRadius: '50%',
-                                      bgcolor: STATUS_DOT_COLOR[r.status],
+                                      bgcolor: 'currentColor',
                                       display: 'inline-block',
+                                      opacity: 0.9,
                                     }}
                                   />
                                   {JOB_STATUS_META[r.status].name}
@@ -709,7 +750,7 @@ const CollectionJobs = observer(function CollectionJobs() {
                         <>
                           <CryptoBadge symbol={t.symbol} color={t.color} size={36} />
                           <Box>
-                            <Typography sx={{ fontWeight: 700, fontSize: 15 }}>
+                            <Typography sx={{ fontWeight: 700, fontSize: 16 }}>
                               {c.name} · {t.symbol}
                             </Typography>
                             <Typography
@@ -744,7 +785,7 @@ const CollectionJobs = observer(function CollectionJobs() {
                           component="span"
                           variant="caption"
                           color="text.secondary"
-                          sx={{ ml: 1, fontSize: 11.5 }}
+                          sx={{ ml: 1, fontSize: 12 }}
                         >
                           {fmtDateTime(detail.abortedAt)}
                         </Typography>
@@ -761,13 +802,30 @@ const CollectionJobs = observer(function CollectionJobs() {
                       mb: 3,
                     }}
                   >
-                    <StatCard label="覆盖地址数" value={detail.addresses.length} />
-                    <StatCard label="归集总数量" value={fmtTokenAmount(detail.totalAmount)} />
+                    <StatCard
+                      label="覆盖地址数"
+                      value={detail.addresses.length}
+                      hint={detail.addresses.length > 0 ? `本次归集涉及` : '尚无地址'}
+                    />
+                    <StatCard
+                      label="归集总数量"
+                      value={fmtTokenAmount(detail.totalAmount)}
+                      hint={findToken(detail.tokenId)?.symbol ?? ''}
+                    />
                     <StatCard
                       label="归集总额（USD）"
                       value={detail.totalUsd != null ? usd(detail.totalUsd) : '—'}
+                      hint={detail.totalUsd == null ? '该 token 无 USD 折算' : undefined}
                     />
-                    <StatCard label="fee 消耗（USD）" value={usd(detail.feeUsd)} />
+                    <StatCard
+                      label="fee 消耗（USD）"
+                      value={usd(detail.feeUsd)}
+                      hint={
+                        detail.totalUsd != null && detail.totalUsd > 0
+                          ? `占归集 ${((detail.feeUsd / detail.totalUsd) * 100).toFixed(2)}%`
+                          : undefined
+                      }
+                    />
                   </Box>
 
                   {trx && (
@@ -790,7 +848,7 @@ const CollectionJobs = observer(function CollectionJobs() {
                     </Stack>
                   )}
 
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
                     地址清单
                   </Typography>
                   <Stack spacing={1}>
@@ -811,7 +869,7 @@ const CollectionJobs = observer(function CollectionJobs() {
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Typography
                             sx={{
-                              fontFamily: 'monospace',
+                              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace',
                               fontSize: 12,
                               wordBreak: 'break-all',
                             }}
@@ -824,7 +882,7 @@ const CollectionJobs = observer(function CollectionJobs() {
                             <Typography
                               variant="caption"
                               color="text.secondary"
-                              sx={{ display: 'block', fontSize: 11.5 }}
+                              sx={{ display: 'block', fontSize: 12 }}
                             >
                               {usd(a.amountUsd)}
                             </Typography>
