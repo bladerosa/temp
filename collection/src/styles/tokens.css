@@ -1,0 +1,184 @@
+/* =========================================================
+   CCPayment Design System — Colors & Typography
+   Verbatim from the design bundle (colors_and_type.css).
+   Only the @font-face url paths are rewritten to absolute
+   "/fonts/…" so Vite's static serving works.
+   ========================================================= */
+
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/Poppins-Light.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/Poppins-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/Poppins-Medium.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/Poppins-SemiBold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/Poppins-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("/fonts/Poppins-Black.ttf") format("truetype");
+}
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Public+Sans:wght@400;600;700&display=swap");
+
+:root {
+  /* ---- Brand ------------------------------------------- */
+  --primary-lighter:   #D8E7FE;
+  --primary-light:     #89AFFC;
+  --primary:           #3C6FF5;
+  --primary-dark:      #1E3EB0;
+  --primary-darker:    #0B1C75;
+  --primary-contrast:  #FFFFFF;
+
+  --secondary-lighter: #F8FDE4;
+  --secondary-light:   #E3F5AD;
+  --secondary:         #BEE072;
+  --secondary-dark:    #7AA139;
+  --secondary-darker:  #466B15;
+  --secondary-contrast:#1F2025;
+
+  /* ---- Neutrals (grey scale) --------------------------- */
+  --grey-100: #F8F9FB;
+  --grey-200: #E8ECF2;
+  --grey-300: #CACFD8;
+  --grey-400: #A3A8B1;
+  --grey-500: #71757E;
+  --grey-600: #656872;
+  --grey-700: #494C54;
+  --grey-800: #383A3F;
+  --grey-900: #26282D;
+
+  /* ---- Semantic ---------------------------------------- */
+  --success-lighter: #DBFBDB;
+  --success-light:   #90EBA3;
+  --success:         #43BE76;
+  --success-dark:    #218861;
+  --success-darker:  #0C5B4C;
+
+  --info-lighter:    #E3F7FD;
+  --info-light:      #AADDF6;
+  --info:            #65AEE8;
+  --info-dark:       #3767A3;
+  --info-darker:     #15326C;
+
+  --warning-lighter: #FEF7D8;
+  --warning-light:   #FAE18B;
+  --warning:         #E7B22B;
+  --warning-dark:    #AC7C1F;
+  --warning-darker:  #72490B;
+
+  --error-lighter:   #FEECDB;
+  --error-light:     #F9B593;
+  --error:           #EC684C;
+  --error-dark:      #A92926;
+  --error-darker:    #710E1B;
+
+  /* ---- Surfaces / text (light) ------------------------- */
+  --bg-default:   #FFFFFF;
+  --bg-neutral:   #F4F6F8;
+  --bg-paper:     #FFFFFF;
+  --bg-subtle:    #F8F9FB;
+  --bg-disabled:  rgba(145,158,171,0.24);
+
+  --text-primary:   #1F2025;
+  --text-secondary: #71757E;
+  --text-disabled:  #B3B9C5;
+  --text-inverse:   #FFFFFF;
+
+  --border-subtle: rgba(145,158,171,0.24);
+  --border-default: #E8ECF2;
+  --border-strong: #CACFD8;
+  --border-focus:  #3C6FF5;
+
+  /* ---- Shadows ----------------------------------------- */
+  --shadow-z1:   0 1px 2px 0 rgba(113,117,126,0.12);
+  --shadow-z4:   0 4px 8px 0 rgba(145,158,171,0.16);
+  --shadow-z8:   0 8px 16px 0 rgba(145,158,171,0.16);
+  --shadow-z12:  0 12px 24px -4px rgba(113,117,126,0.20);
+  --shadow-z16:  0 16px 32px -4px rgba(145,158,171,0.24);
+  --shadow-z20:  0 20px 40px -4px rgba(145,158,171,0.24);
+  --shadow-z24:  0 24px 48px 0 rgba(145,158,171,0.24);
+  --shadow-dialog:   -40px 40px 80px -8px rgba(145,158,171,0.24);
+  --shadow-dropdown: -20px 20px 40px -4px rgba(182,184,176,0.24), 0 0 2px 0 rgba(182,184,176,0.24);
+  --shadow-card:     0 0 2px 0 rgba(145,158,171,0.20), 0 12px 24px -4px rgba(145,158,171,0.12);
+
+  --shadow-primary: 0 8px 16px 0 rgba(60,111,245,0.24);
+  --shadow-success: 0 8px 16px 0 rgba(54,179,126,0.24);
+  --shadow-warning: 0 8px 16px 0 rgba(255,171,0,0.24);
+  --shadow-error:   0 8px 16px 0 rgba(255,86,48,0.24);
+
+  /* ---- Radii ------------------------------------------- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-pill: 9999px;
+
+  /* ---- Spacing ----------------------------------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* ---- Typography -------------------------------------- */
+  --font-sans: "Poppins", "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+  --font-display: "Inter", "Poppins", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace;
+
+  --fw-regular:   400;
+  --fw-medium:    500;
+  --fw-semibold:  600;
+  --fw-bold:      700;
+  --fw-extrabold: 800;
+
+  --h1-size: 40px;  --h1-lh: 56px;  --h1-weight: 700;
+  --h2-size: 24px;  --h2-lh: 36px;  --h2-weight: 700;
+  --h3-size: 20px;  --h3-lh: 28px;  --h3-weight: 700;
+  --h4-size: 18px;  --h4-lh: 24px;  --h4-weight: 700;
+  --h5-size: 16px;  --h5-lh: 24px;  --h5-weight: 700;
+  --subtitle-size: 14px; --subtitle-lh: 20px; --subtitle-weight: 600;
+  --body1-size: 16px;    --body1-lh: 24px;    --body1-weight: 400;
+  --body2-size: 14px;    --body2-lh: 20px;    --body2-weight: 400;
+  --body3-size: 12px;    --body3-lh: 16px;    --body3-weight: 400;
+  --button-size: 14px;   --button-lh: 22px;   --button-weight: 700;
+  --caption-size: 12px;  --caption-lh: 16px;  --caption-weight: 400;
+  --overline-size: 12px; --overline-lh: 16px; --overline-weight: 600;
+}
