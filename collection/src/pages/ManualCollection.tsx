@@ -29,6 +29,7 @@ import { SingleTokenPicker } from '@/components/TokenPicker';
 import CryptoBadge from '@/components/CryptoBadge';
 import EmptyState from '@/components/EmptyState';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import PageHeader from '@/components/PageHeader';
 import StatCard from '@/components/StatCard';
 import { TOKEN_AMOUNT_STEP, fmtDateTime, fmtTokenAmount, usd } from '@/utils/format';
 import { useStores } from '@/stores';
@@ -153,12 +154,11 @@ const ManualCollection = observer(function ManualCollection() {
   return (
     <Container maxWidth={ui.themeStretch ? false : 'xl'} disableGutters>
       <Stack spacing={4}>
-        <Stack spacing={0.5}>
-          <Typography variant="h2">手动归集</Typography>
-          <Typography variant="body2" color="text.secondary">
-            设置最小归集{conv ? '金额' : '数量'}并查询，查看正常 / 异常资产分布，确认后提交归集。
-          </Typography>
-        </Stack>
+        <PageHeader
+          crumbs={[{ label: '归集系统' }, { label: '手动归集' }]}
+          title="手动归集"
+          subtitle={`设置最小归集${conv ? '金额' : '数量'}并查询，查看正常 / 异常资产分布，确认后提交归集。`}
+        />
 
         {/* ===== Step 1 ===== */}
         <Card sx={{ p: 6, maxWidth: 1080 }}>

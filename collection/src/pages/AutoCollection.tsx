@@ -62,6 +62,7 @@ import {
 } from '@/components/AmountInput';
 import EmptyState from '@/components/EmptyState';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import PageHeader from '@/components/PageHeader';
 import StatCard from '@/components/StatCard';
 import { TableCard, TableToolbar } from '@/components/TableCard';
 import CryptoBadge from '@/components/CryptoBadge';
@@ -252,23 +253,24 @@ const AutoCollection = observer(function AutoCollection() {
   return (
     <Container maxWidth={ui.themeStretch ? false : 'xl'} disableGutters>
       <Stack spacing={4}>
-        {/* Header */}
-        <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          justifyContent="space-between"
-          alignItems={{ xs: 'flex-start', sm: 'center' }}
-          gap={2}
-        >
-          <Stack spacing={0.5}>
-            <Typography variant="h2">自动归集</Typography>
-            <Typography variant="body2" color="text.secondary">
-              配置定时或事件触发的自动归集任务，命中条件后自动将资产归集到系统热钱包。
-            </Typography>
-          </Stack>
-          <Button variant="contained" startIcon={<AddRounded />} onClick={openCreate}>
-            创建归集任务
-          </Button>
-        </Stack>
+        <PageHeader
+          crumbs={[{ label: '归集系统' }, { label: '自动归集' }]}
+          title="自动归集"
+          subtitle="配置定时或事件触发的自动归集任务，命中条件后自动将资产归集到系统热钱包。"
+          action={
+            <Stack direction="row" alignItems="center" gap={2}>
+              <Tooltip title="刷新">
+                <IconButton onClick={() => collection.loadAll()}>
+                  <RefreshRounded />
+                </IconButton>
+              </Tooltip>
+              <Button variant="contained" startIcon={<AddRounded />} onClick={openCreate}>
+                创建归集任务
+              </Button>
+            </Stack>
+          }
+        />
+
 
         {/* Stats */}
         <Box
@@ -358,6 +360,7 @@ const AutoCollection = observer(function AutoCollection() {
                     <TableCell>类型</TableCell>
                     <TableCell>目标 chain · token</TableCell>
                     <TableCell>关键参数</TableCell>
+                    <TableCell>上次执行</TableCell>
                     <TableCell>下次执行</TableCell>
                     <TableCell>状态</TableCell>
                     <TableCell align="right" sx={{ width: 130 }}>
@@ -415,6 +418,15 @@ const AutoCollection = observer(function AutoCollection() {
                         </Stack>
                       </TableCell>
                       <TableCell>{renderKeyParams(t)}</TableCell>
+                      <TableCell sx={{ fontSize: 12, fontFamily: 'monospace' }}>
+                        {t.lastRunAt ? (
+                          fmtDateTime(t.lastRunAt)
+                        ) : (
+                          <Typography component="span" color="text.disabled" sx={{ fontSize: 12 }}>
+                            —
+                          </Typography>
+                        )}
+                      </TableCell>
                       <TableCell sx={{ fontSize: 12, fontFamily: 'monospace' }}>
                         {t.type === 'large_deposit' || t.type === 'withdraw_short' ? (
                           <Typography variant="caption" color="text.secondary">

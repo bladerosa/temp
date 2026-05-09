@@ -116,7 +116,8 @@ const DashboardHeader = observer(function DashboardHeader() {
             </IconButton>
           </Tooltip>
 
-          {/* Account chip — 44h pill */}
+          {/* Account chip — appbar.html spec: 44h, padding 4 16 4 6,
+              filled `grey.100` (NOT pill-with-border), radius 8. */}
           <Stack
             direction="row"
             alignItems="center"
@@ -126,12 +127,11 @@ const DashboardHeader = observer(function DashboardHeader() {
               height: 44,
               pl: 1,        // 4
               pr: 4,        // 16
-              borderRadius: 30,
-              bgcolor: 'background.paper',
-              border: '1px solid rgba(145,158,171,0.24)',
+              borderRadius: 2, // 8
+              bgcolor: 'grey.100',
               cursor: 'pointer',
               transition: 'background 120ms ease-out',
-              '&:hover': { bgcolor: 'grey.100' },
+              '&:hover': { bgcolor: 'grey.200' },
             }}
           >
             <Avatar

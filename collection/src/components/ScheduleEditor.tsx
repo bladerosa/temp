@@ -69,18 +69,22 @@ export function ScheduleEditor({
           </Stack>
         </Stack>
 
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }}>
-          <Typography variant="body2" sx={{ minWidth: 80, fontWeight: 500 }}>
-            执行时刻
-          </Typography>
-          <TextField
-            type="time"
-            size="small"
-            value={value.anchorTime}
-            onChange={(e) => onChange({ ...value, anchorTime: e.target.value })}
-            sx={{ width: 140 }}
-          />
-        </Stack>
+        {/* Per PRD F4#3: 执行时刻 only renders when unit=day. Minute/hour
+            cycles don't have a meaningful wall-clock anchor. */}
+        {value.unit === 'day' && (
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }}>
+            <Typography variant="body2" sx={{ minWidth: 80, fontWeight: 500 }}>
+              执行时刻
+            </Typography>
+            <TextField
+              type="time"
+              size="small"
+              value={value.anchorTime}
+              onChange={(e) => onChange({ ...value, anchorTime: e.target.value })}
+              sx={{ width: 140 }}
+            />
+          </Stack>
+        )}
 
         {inactiveWindow && onInactiveWindowChange && (
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }}>

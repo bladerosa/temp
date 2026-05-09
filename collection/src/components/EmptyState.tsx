@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import { Box, Stack, Typography } from '@mui/material';
 
-// Centered empty-state block. Used inside table bodies and card content.
-// 48px vertical padding sits between two states the user already navigated
-// to — visually distinct, but not loud.
+// Centered empty-state block. Renders directly on the parent surface (paper)
+// — no tinted background block (that competes with the table chrome).
+// 64×64 illustration slot, subtitle1 700 title, optional CTA.
 
 export type EmptyStateProps = {
   icon: ReactNode;
@@ -16,17 +16,25 @@ export default function EmptyState({ icon, title, desc, action }: EmptyStateProp
   return (
     <Box
       sx={{
-        py: 12, // 48px (spacing=4 → 12 = 48)
+        py: 16, // 64
         px: 4,
-        backgroundColor: 'grey.100',
-        borderRadius: 3,
         display: 'flex',
         justifyContent: 'center',
       }}
     >
       <Stack alignItems="center" spacing={2} sx={{ maxWidth: 360, textAlign: 'center' }}>
-        <Box sx={{ color: 'text.secondary', fontSize: 0, lineHeight: 0 }}>{icon}</Box>
-        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+        <Box
+          sx={{
+            width: 64, height: 64, borderRadius: '50%',
+            bgcolor: 'grey.100', color: 'text.secondary',
+            display: 'grid', placeItems: 'center',
+            mb: 1,
+            '& svg': { fontSize: 32 },
+          }}
+        >
+          {icon}
+        </Box>
+        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'text.primary' }}>
           {title}
         </Typography>
         {desc && (
@@ -34,7 +42,7 @@ export default function EmptyState({ icon, title, desc, action }: EmptyStateProp
             {desc}
           </Typography>
         )}
-        {action}
+        {action && <Box sx={{ mt: 1 }}>{action}</Box>}
       </Stack>
     </Box>
   );

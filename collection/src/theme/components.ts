@@ -131,7 +131,10 @@ export const components: Components<Theme> = {
     },
   },
 
-  // -------- Dialog (preview/components/Dialog.html — 16 radius, dialog shadow) --------
+  // -------- Dialog (preview/components/Dialog.html) --------
+  // Spec: confirm/form default 480 wide; header 72h pad 24/12/24/24; title
+  // 18/28 700; body NO dividers (forbidden in Confirm/Acknowledge/Media);
+  // footer pad 24 with gap 12.
   MuiDialog: {
     styleOverrides: {
       paper: {
@@ -146,18 +149,24 @@ export const components: Components<Theme> = {
         padding: '20px 24px 12px',
         fontSize: 18,
         fontWeight: 700,
-        lineHeight: '24px',
+        lineHeight: '28px',
       },
     },
   },
   MuiDialogContent: {
     styleOverrides: {
-      root: { padding: '12px 24px 8px' },
+      root: {
+        padding: '12px 24px 8px',
+        // Force-disable dividers — DS forbids body dividers in confirm/form
+        // dialogs. If a use-case truly needs them (split-summary form variant)
+        // pass dividers=true and override locally.
+        '&.MuiDialogContent-dividers': { borderTop: 0, borderBottom: 0, padding: '12px 24px 8px' },
+      },
     },
   },
   MuiDialogActions: {
     styleOverrides: {
-      root: { padding: '16px 24px 20px', gap: 8 },
+      root: { padding: '16px 24px 24px', gap: 12 },
     },
   },
 
@@ -205,20 +214,26 @@ export const components: Components<Theme> = {
   },
 
   // -------- Menu (preview/components/Menu.html) --------
+  // Spec: 38h, radius 4, padding 8 symmetric, gap 4. Selected uses cool
+  // blue-grey #E8ECF2 fill with no color tint or weight bump (DS Don't
+  // explicitly forbids "invent extra hover affordances / show a check /
+  // colorize selected").
   MuiMenuItem: {
     styleOverrides: {
       root: {
-        borderRadius: 6,
+        borderRadius: 4,
         margin: '2px 6px',
-        fontSize: 13,
-        height: 36,
-        fontWeight: 500,
+        fontSize: 14,
+        minHeight: 38,
+        height: 38,
+        fontWeight: 400,
+        padding: '0 8px',
         '&:hover': { backgroundColor: 'rgba(145,158,171,0.12)' },
         '&.Mui-selected': {
-          backgroundColor: 'rgba(60,111,245,0.08)',
-          color: '#3C6FF5',
-          fontWeight: 600,
-          '&:hover': { backgroundColor: 'rgba(60,111,245,0.12)' },
+          backgroundColor: '#E8ECF2',
+          color: 'inherit',
+          fontWeight: 400,
+          '&:hover': { backgroundColor: '#DDE3EC' },
         },
       },
     },
@@ -245,14 +260,14 @@ export const components: Components<Theme> = {
       },
       label: { padding: '0 10px' },
       sizeSmall: { height: 22, fontSize: 11, '& .MuiChip-label': { padding: '0 8px' } },
-      // Soft semantic colors — these mirror Chip.html exactly. `colorX` covers
-      // both filled (default) and outlined variants since MUI applies palette
-      // mapping per variant on top of these base styles.
-      colorPrimary: { backgroundColor: 'rgba(60,111,245,0.16)',  color: '#1E3EB0' },
-      colorSuccess: { backgroundColor: 'rgba(67,190,118,0.16)',  color: '#0C5B4C' },
-      colorWarning: { backgroundColor: 'rgba(231,178,43,0.16)',  color: '#72490B' },
-      colorError:   { backgroundColor: 'rgba(236,104,76,0.16)',  color: '#710E1B' },
-      colorInfo:    { backgroundColor: 'rgba(101,174,232,0.16)', color: '#15326C' },
+      // Soft semantic colors — text colors recalibrated to Chip.html canonical
+      // (mid-darker, not the palette `darker`). `darker` is reserved for
+      // filled-on-light contrast and outlined chip text.
+      colorPrimary: { backgroundColor: 'rgba(60,111,245,0.16)',  color: 'rgb(38, 77, 196)' }, // brand-mid darker
+      colorSuccess: { backgroundColor: 'rgba(67,190,118,0.16)',  color: 'rgb(34, 128, 79)' },
+      colorWarning: { backgroundColor: 'rgba(231,178,43,0.16)',  color: 'rgb(165, 114, 15)' },
+      colorError:   { backgroundColor: 'rgba(236,104,76,0.16)',  color: 'rgb(184, 68, 46)' },
+      colorInfo:    { backgroundColor: 'rgba(101,174,232,0.16)', color: 'rgb(40, 114, 164)' },
     },
   },
 
@@ -285,8 +300,10 @@ export const components: Components<Theme> = {
         fontSize: 14,
         padding: '14px 16px',
       },
+      // Spec table.html: head bg = grey.100 (NOT white) so toolbar→head→body
+      // colour transition is continuous; uppercase mono-ish 11/12 secondary.
       head: {
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#F8F9FB',
         color: '#71757E',
         fontWeight: 500,
         fontSize: 12,

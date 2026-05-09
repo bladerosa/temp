@@ -36,19 +36,20 @@ export default function ConfirmDialog({
   onClose,
 }: ConfirmDialogProps) {
   return (
+    // DS Dialog spec: confirm width 480px (NOT MUI maxWidth="sm" = 600).
     <Dialog
       open={open}
       onClose={(_, reason) => {
         if (!dismissable && (reason === 'backdropClick' || reason === 'escapeKeyDown')) return;
         onClose();
       }}
-      fullWidth
-      maxWidth="sm"
+      disableEscapeKeyDown={!dismissable}
+      PaperProps={{ sx: { width: 480, maxWidth: 'calc(100vw - 32px)' } }}
     >
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>{body}</DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="inherit">
+        <Button onClick={onClose} variant="text" color="inherit">
           {cancelText}
         </Button>
         <Button onClick={onConfirm} color={tone} variant="contained">

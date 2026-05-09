@@ -60,26 +60,30 @@ export function AmountInput({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nonConvertibles.join(',')]);
 
+  // Per AC-001-1: when targets is empty AmountInput still renders the
+  // single-USD input as a placeholder (so users can pre-fill before picking
+  // tokens). Helper text explains the absent target.
   if (targets.length === 0) {
     return (
-      <Box>
-        <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-          {label}
-        </Typography>
-        <Box
-          sx={{
-            border: 1,
-            borderColor: 'divider',
-            borderRadius: 2,
-            backgroundColor: 'grey.100',
-            color: 'text.secondary',
-            p: 3,
-            fontSize: 13,
-          }}
-        >
-          请先在上方选择目标 chain · token
+      <Stack spacing={2}>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>{label}</Typography>
+        <Box>
+          <TextField
+            type="number"
+            value={value.usd}
+            onChange={(e) => onChange({ ...value, usd: round2(Number(e.target.value)) })}
+            inputProps={{ min: 0.01, step: 0.01 }}
+            InputProps={{
+              endAdornment: <InputAdornment position="end">USD</InputAdornment>,
+            }}
+            sx={{ maxWidth: 280, width: '100%' }}
+            placeholder="未选择目标 token"
+          />
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75 }}>
+            {helperText ?? '请先在上方选择目标 chain · token；阈值会按选中 token 是否可折算 USD 自动切换形态'}
+          </Typography>
         </Box>
-      </Box>
+      </Stack>
     );
   }
 
