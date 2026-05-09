@@ -13,14 +13,14 @@ import {
   Typography,
 } from '@mui/material';
 import {
-  HelpOutlineRounded,
-  LanguageRounded,
-  MenuRounded,
-  NotificationsNoneRounded,
-  SearchRounded,
-  SettingsRounded,
-  ChevronRightRounded,
-} from '@mui/icons-material';
+  HelpCircle,
+  Globe,
+  Menu,
+  Bell,
+  Search,
+  Settings,
+  ChevronRight,
+} from 'lucide-react';
 import { useStores } from '@/stores';
 
 // AppBar — strict implementation of preview/appbar.html.
@@ -54,7 +54,7 @@ const DashboardHeader = observer(function DashboardHeader() {
           title={hamburgerLabel}
           sx={{ width: 36, height: 36, color: 'grey.700' }}
         >
-          <MenuRounded sx={{ fontSize: 20 }} />
+          <Menu size={20} />
         </IconButton>
 
         {/* Search — bg-subtle pill, focus expands */}
@@ -71,7 +71,9 @@ const DashboardHeader = observer(function DashboardHeader() {
             transition: 'background 120ms, border-color 120ms',
           }}
         >
-          <SearchRounded sx={{ fontSize: 18, color: 'text.secondary', flexShrink: 0 }} />
+          <Box sx={{ color: 'text.secondary', flexShrink: 0, display: 'inline-flex' }}>
+            <Search size={18} />
+          </Box>
           <InputBase
             placeholder="搜索任务、地址、订单…"
             onFocus={() => setSearchFocused(true)}
@@ -90,17 +92,17 @@ const DashboardHeader = observer(function DashboardHeader() {
         <Stack direction="row" alignItems="center" gap={0.5}>
           <Tooltip title="语言">
             <IconButton sx={{ width: 36, height: 36, color: 'grey.700' }}>
-              <LanguageRounded sx={{ fontSize: 20 }} />
+              <Globe size={20} />
             </IconButton>
           </Tooltip>
           <Tooltip title="帮助">
             <IconButton sx={{ width: 36, height: 36, color: 'grey.700' }}>
-              <HelpOutlineRounded sx={{ fontSize: 20 }} />
+              <HelpCircle size={20} />
             </IconButton>
           </Tooltip>
           <Tooltip title="设置">
             <IconButton sx={{ width: 36, height: 36, color: 'grey.700' }}>
-              <SettingsRounded sx={{ fontSize: 20 }} />
+              <Settings size={20} />
             </IconButton>
           </Tooltip>
           <Tooltip title="通知">
@@ -111,7 +113,7 @@ const DashboardHeader = observer(function DashboardHeader() {
                 overlap="circular"
                 sx={{ '& .MuiBadge-dot': { boxShadow: '0 0 0 2px #fff', width: 8, height: 8, borderRadius: '50%' } }}
               >
-                <NotificationsNoneRounded sx={{ fontSize: 20 }} />
+                <Bell size={20} />
               </Badge>
             </IconButton>
           </Tooltip>
@@ -150,7 +152,9 @@ const DashboardHeader = observer(function DashboardHeader() {
                 Operations · Admin
               </Typography>
             </Box>
-            <ChevronRightRounded sx={{ fontSize: 14, color: 'text.secondary', display: { xs: 'none', sm: 'inline' } }} />
+            <Box sx={{ color: 'text.secondary', display: { xs: 'none', sm: 'inline-flex' } }}>
+              <ChevronRight size={14} />
+            </Box>
           </Stack>
         </Stack>
       </Toolbar>

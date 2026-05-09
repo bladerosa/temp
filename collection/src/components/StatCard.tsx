@@ -3,49 +3,55 @@ import type { ReactNode } from 'react';
 import { brandShadows } from '@/theme';
 
 // StatCard — strict implementation of preview/card.html §05A.
-// Anatomy:
-//   - 24px padding (no exception)
-//   - Label    = 13/secondary regular           (Poppins)
-//   - Value    = 32 / bold / -0.2 letter-spacing (Poppins, NOT 26)
-//   - Sub line = 12 / font-mono / semantic-darker (success-dark / warning-dark / secondary)
-//                Use deltaDir 'up'/'down' for ▲ +N / ▼ -N format,
-//                or pass `hint` as plain string for "— 3 awaiting verification" style.
+// Anatomy (default density):
+//   - 24px padding
+//   - Label    = 13/secondary regular
+//   - Value    = 32 / bold / -0.4 letter-spacing
+//   - Sub line = 12 / font-mono / semantic-darker
+// Compact density (for dense KPI strips like the Jobs page where >5 cards
+// share a row): pad 16, label 12, value 20, no sub line — keep the same
+// surface treatment + lead rail.
 // Card surface stays WHITE — DS Don't (§06): "Don't recolor the card surface".
-// The "lead" emphasis is achieved by adding a subtle 3px primary left rail
-// (`tone="lead"`), NOT by tinting the surface. This is the DS-compliant
-// alternative to the prior accent-gradient.
+// `tone="lead"` adds a 3px primary left rail (DS-allowed accent treatment).
 
 export type StatCardProps = {
   label: ReactNode;
   value: ReactNode;
-  /** Plain hint copy under value (12 mono, secondary). e.g. "73 个地址 · 平均 $848" */
   hint?: ReactNode;
-  /** Optional delta with ▲/▼ glyph and semantic color. Renders before hint. */
   delta?: { dir: 'up' | 'down'; text: ReactNode };
-  /** "lead" adds a 3px primary left rail (DS-allowed accent treatment). */
   tone?: 'default' | 'lead';
+  density?: 'default' | 'compact';
   sx?: SxProps;
 };
 
 const FONT_MONO = 'ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace';
 
+const DENSITY = {
+  default: { padding: 6, labelSize: 13, labelLh: '20px', valueSize: 32, valueLh: 1.2, valueLs: '-0.4px', minH: 0 },
+  compact: { padding: 4, labelSize: 12, labelLh: '16px', valueSize: 20, valueLh: 1.25, valueLs: '-0.2px', minH: 0 },
+} as const;
+
 export default function StatCard({
-  label, value, hint, delta, tone = 'default', sx,
+  label, value, hint, delta, tone = 'default', density = 'default', sx,
 }: StatCardProps) {
+  const D = DENSITY[density];
+
   return (
     <Box
       sx={{
         position: 'relative',
         bgcolor: 'background.paper',
-        borderRadius: 4,                              // 16
+        borderRadius: 4,
         boxShadow: brandShadows.card,
-        p: 6,                                         // 24 all sides per spec
-        // Lead rail — single allowed accent treatment per DS card.html §06.
+        p: D.padding,
+        // 3px primary left rail = DS-allowed accent treatment (preview/card.html §06).
         ...(tone === 'lead' && {
           '&::before': {
             content: '""',
             position: 'absolute',
-            left: 0, top: 16, bottom: 16,
+            left: 0,
+            top: density === 'compact' ? 12 : 16,
+            bottom: density === 'compact' ? 12 : 16,
             width: 3,
             borderRadius: 2,
             bgcolor: 'primary.main',
@@ -54,25 +60,27 @@ export default function StatCard({
         ...sx,
       }}
     >
-      <Stack spacing={0.5}>
+      <Stack spacing={density === 'compact' ? 0.25 : 0.5}>
         <Typography
           sx={{
-            fontSize: 13,
-            lineHeight: '20px',
+            fontSize: D.labelSize,
+            lineHeight: D.labelLh,
             fontWeight: 400,
             color: 'text.secondary',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}
         >
           {label}
         </Typography>
         <Typography
           sx={{
-            fontSize: 32,
-            lineHeight: 1.2,
+            fontSize: D.valueSize,
+            lineHeight: D.valueLh,
             fontWeight: 700,
-            letterSpacing: '-0.4px',
+            letterSpacing: D.valueLs,
             color: 'text.primary',
-            // Allow long-format numbers like "$1,234,567.89" to ellipsize gracefully
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -80,7 +88,7 @@ export default function StatCard({
         >
           {value}
         </Typography>
-        {(delta || hint) && (
+        {(delta || hint) && density === 'default' && (
           <Stack
             direction="row"
             alignItems="center"

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Box, IconButton, InputBase, Stack, Typography } from '@mui/material';
-import { ChevronLeftRounded, ChevronRightRounded } from '@mui/icons-material';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Pagination — strict implementation of preview/components/Pagination.html.
 //   - 64h footer bar inside the table card (TableCard's TableFooter wraps us)
@@ -128,7 +128,7 @@ export default function TablePager({ page, totalPages, onPageChange }: TablePage
             '&:hover': { bgcolor: 'rgba(145,158,171,0.12)' },
           }}
         >
-          <ChevronLeftRounded sx={{ fontSize: 20, strokeWidth: 1.75 }} />
+          <ChevronLeft size={20} />
         </IconButton>
         <IconButton
           aria-label="下一页"
@@ -140,7 +140,7 @@ export default function TablePager({ page, totalPages, onPageChange }: TablePage
             '&:hover': { bgcolor: 'rgba(145,158,171,0.12)' },
           }}
         >
-          <ChevronRightRounded sx={{ fontSize: 20, strokeWidth: 1.75 }} />
+          <ChevronRight size={20} />
         </IconButton>
       </Stack>
     </Stack>

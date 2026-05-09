@@ -27,18 +27,18 @@ import {
   Typography,
 } from '@mui/material';
 import {
-  AddRounded,
-  ArrowDownwardRounded,
-  ChevronRightRounded,
-  DeleteOutlineRounded,
-  EditOutlined,
-  ErrorOutlineRounded,
-  FileDownloadOutlined,
-  RefreshRounded,
-  ScaleOutlined,
-  ScheduleRounded,
-  SyncAltRounded,
-} from '@mui/icons-material';
+  Plus,
+  ArrowDown,
+  ChevronRight,
+  Trash2,
+  Pencil,
+  AlertCircle,
+  Download,
+  RefreshCw,
+  Scale,
+  Clock,
+  ArrowLeftRight,
+} from 'lucide-react';
 import {
   TASK_TYPE_META,
   type AutoTask,
@@ -71,10 +71,10 @@ import { fmtDateTime, unitName } from '@/utils/format';
 type Step = 'pick-type' | 'configure';
 
 const TASK_TYPE_ICON: Record<TaskType, React.ReactElement> = {
-  large_deposit: <ArrowDownwardRounded sx={{ fontSize: 18 }} />,
-  inactive: <ScheduleRounded sx={{ fontSize: 18 }} />,
-  balance_check: <ScaleOutlined sx={{ fontSize: 18 }} />,
-  withdraw_short: <SyncAltRounded sx={{ fontSize: 18 }} />,
+  large_deposit: <ArrowDown size={18} />,
+  inactive: <Clock size={18} />,
+  balance_check: <Scale size={18} />,
+  withdraw_short: <ArrowLeftRight size={18} />,
 };
 
 const TASK_TYPE_TONE: Record<TaskType, 'primary' | 'info' | 'success' | 'warning'> = {
@@ -261,10 +261,10 @@ const AutoCollection = observer(function AutoCollection() {
             <Stack direction="row" alignItems="center" gap={2}>
               <Tooltip title="刷新">
                 <IconButton onClick={() => collection.loadAll()}>
-                  <RefreshRounded />
+                  <RefreshCw />
                 </IconButton>
               </Tooltip>
-              <Button variant="contained" startIcon={<AddRounded />} onClick={openCreate}>
+              <Button variant="contained" startIcon={<Plus />} onClick={openCreate}>
                 创建归集任务
               </Button>
             </Stack>
@@ -331,12 +331,12 @@ const AutoCollection = observer(function AutoCollection() {
               <>
                 <Tooltip title="刷新">
                   <IconButton>
-                    <RefreshRounded />
+                    <RefreshCw />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="导出">
                   <IconButton>
-                    <FileDownloadOutlined />
+                    <Download />
                   </IconButton>
                 </Tooltip>
               </>
@@ -346,7 +346,7 @@ const AutoCollection = observer(function AutoCollection() {
           {filtered.length === 0 ? (
             <Box sx={{ p: 4 }}>
               <EmptyState
-                icon={<ScheduleRounded sx={{ fontSize: 36 }} />}
+                icon={<Clock size={36} />}
                 title="暂无任务"
                 desc="点击右上角「创建归集任务」开始配置自动归集。"
               />
@@ -452,7 +452,7 @@ const AutoCollection = observer(function AutoCollection() {
                       </TableCell>
                       <TableCell align="right">
                         <IconButton size="small" onClick={() => openEdit(t)} title="编辑">
-                          <EditOutlined sx={{ fontSize: 18 }} />
+                          <Pencil size={18} />
                         </IconButton>
                         <IconButton
                           size="small"
@@ -460,7 +460,7 @@ const AutoCollection = observer(function AutoCollection() {
                           title="删除"
                           sx={{ color: 'error.main' }}
                         >
-                          <DeleteOutlineRounded sx={{ fontSize: 18 }} />
+                          <Trash2 size={18} />
                         </IconButton>
                       </TableCell>
                     </TableRow>
@@ -532,7 +532,9 @@ const AutoCollection = observer(function AutoCollection() {
                             {meta.name}
                           </Typography>
                           <Box sx={{ flex: 1 }} />
-                          <ChevronRightRounded sx={{ color: 'text.disabled', fontSize: 18 }} />
+                          <Box sx={{ color: 'text.disabled', display: 'inline-flex' }}>
+                            <ChevronRight size={18} />
+                          </Box>
                         </Stack>
                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
                           {meta.desc}
@@ -554,7 +556,7 @@ const AutoCollection = observer(function AutoCollection() {
                   }}
                 />
                 {formError && (
-                  <Alert severity="error" icon={<ErrorOutlineRounded />} sx={{ mt: 2, whiteSpace: 'pre-line' }}>
+                  <Alert severity="error" icon={<AlertCircle />} sx={{ mt: 2, whiteSpace: 'pre-line' }}>
                     {formError}
                   </Alert>
                 )}
@@ -616,7 +618,7 @@ function ConfigureForm({
 
   return (
     <Stack spacing={3}>
-      <Alert severity="info" icon={<ErrorOutlineRounded />}>
+      <Alert severity="info" icon={<AlertCircle />}>
         <b>{meta.name}</b> · {meta.desc}
       </Alert>
 

@@ -21,7 +21,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { PlayArrowRounded, SearchRounded, ShieldOutlined } from '@mui/icons-material';
+import { Play, Search, ShieldCheck } from 'lucide-react';
 import { findChain, findToken, isConvertible } from '@/data/tokens';
 import { collectionApi } from '@/api/collection';
 import type { UncollectedAddress, UncollectedQueryResult } from '@/data/mockData';
@@ -244,7 +244,7 @@ const ManualCollection = observer(function ManualCollection() {
               onClick={runQuery}
               disabled={querying || !token || !minInputValid}
               startIcon={
-                querying ? <CircularProgress size={14} color="inherit" /> : <SearchRounded />
+                querying ? <CircularProgress size={14} color="inherit" /> : <Search />
               }
             >
               {querying ? '查询中…' : '查询未归集情况'}
@@ -378,7 +378,7 @@ const ManualCollection = observer(function ManualCollection() {
                     <TableRow>
                       <TableCell colSpan={5} sx={{ p: 0 }}>
                         <EmptyState
-                          icon={<ShieldOutlined sx={{ fontSize: 36 }} />}
+                          icon={<ShieldCheck size={36} />}
                           title="无符合条件的异常地址"
                           desc={
                             filtered.hiddenAbnormalCount > 0
@@ -426,7 +426,7 @@ const ManualCollection = observer(function ManualCollection() {
                   phase === 'submitting' ? (
                     <CircularProgress size={14} color="inherit" />
                   ) : (
-                    <PlayArrowRounded />
+                    <Play />
                   )
                 }
               >

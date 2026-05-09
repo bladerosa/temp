@@ -11,28 +11,29 @@ import {
   Typography,
 } from '@mui/material';
 import {
-  AdsClickRounded,
-  AssignmentOutlined,
-  BarChartRounded,
-  BlockRounded,
-  CampaignOutlined,
-  ChevronRightRounded,
-  CloseRounded,
-  DescriptionOutlined,
-  ExpandMoreRounded,
-  HandshakeOutlined,
-  HelpOutlineRounded,
-  LayersOutlined,
-  ListAltRounded,
-  MailOutlineRounded,
-  MonetizationOnOutlined,
-  NotificationsNoneRounded,
-  SecurityRounded,
-  StoreOutlined,
-  TollOutlined,
-  AccountBalanceWalletOutlined,
-  BoltOutlined,
-} from '@mui/icons-material';
+  MousePointerClick,
+  ClipboardCheck,
+  BarChart3,
+  Ban,
+  Megaphone,
+  ChevronRight,
+  X,
+  FileText,
+  ChevronDown,
+  Handshake,
+  HelpCircle,
+  Layers,
+  ListChecks,
+  Mail,
+  CircleDollarSign,
+  Bell,
+  Shield,
+  Store,
+  Coins,
+  Wallet,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react';
 import { useStores } from '@/stores';
 import { paths } from '@/routes/paths';
 
@@ -62,7 +63,7 @@ type Group = {
 type TopItem = {
   key: SidebarKey;
   label: string;
-  Icon: typeof BarChartRounded;
+  Icon: LucideIcon;
   routes?: { label: string; to: string }[];
   badge?: number;
 };
@@ -72,37 +73,37 @@ const groups: Group[] = [
   {
     label: '工作台',
     items: [
-      { key: 'dashboard',  label: '数据看板',         Icon: BarChartRounded },
-      { key: 'finance',    label: '财务数据看板',     Icon: AccountBalanceWalletOutlined },
-      { key: 'activity',   label: '活动中心',         Icon: CampaignOutlined },
-      { key: 'tx-query',   label: '交易查询',         Icon: ListAltRounded },
-      { key: 'risk-tx',    label: '风控交易管理',     Icon: SecurityRounded, badge: 4 },
+      { key: 'dashboard',  label: '数据看板',         Icon: BarChart3 },
+      { key: 'finance',    label: '财务数据看板',     Icon: Wallet },
+      { key: 'activity',   label: '活动中心',         Icon: Megaphone },
+      { key: 'tx-query',   label: '交易查询',         Icon: ListChecks },
+      { key: 'risk-tx',    label: '风控交易管理',     Icon: Shield, badge: 4 },
       {
         key: 'collection',
         label: '归集系统',
-        Icon: LayersOutlined,
+        Icon: Layers,
         routes: [
           { label: '自动归集', to: paths.dashboard.collection.auto },
           { label: '手动归集', to: paths.dashboard.collection.manual },
           { label: '归集任务', to: paths.dashboard.collection.jobs },
         ],
       },
-      { key: 'reconcile',  label: '对账',            Icon: AssignmentOutlined },
+      { key: 'reconcile',  label: '对账',            Icon: ClipboardCheck },
     ],
   },
   {
     label: '运营管理',
     items: [
-      { key: 'merchant',    label: '商户管理',         Icon: StoreOutlined },
-      { key: 'token-mgmt',  label: '代币 / 网络管理',  Icon: TollOutlined },
-      { key: 'trx-rent',    label: 'TRX 能量租赁',     Icon: BoltOutlined },
-      { key: 'placement',   label: '投放',            Icon: AdsClickRounded },
-      { key: 'partnership', label: '推广合作',         Icon: HandshakeOutlined },
-      { key: 'sell-usdt',   label: 'Sell USDT 申请',  Icon: MonetizationOnOutlined },
-      { key: 'notify',      label: '通知系统',         Icon: NotificationsNoneRounded },
-      { key: 'op-log',      label: '运营系统日志',     Icon: DescriptionOutlined },
-      { key: 'ban-ip',      label: '封禁 IP',          Icon: BlockRounded },
-      { key: 'mail-list',   label: '邮件验证码列表',   Icon: MailOutlineRounded },
+      { key: 'merchant',    label: '商户管理',         Icon: Store },
+      { key: 'token-mgmt',  label: '代币 / 网络管理',  Icon: Coins },
+      { key: 'trx-rent',    label: 'TRX 能量租赁',     Icon: Zap },
+      { key: 'placement',   label: '投放',            Icon: MousePointerClick },
+      { key: 'partnership', label: '推广合作',         Icon: Handshake },
+      { key: 'sell-usdt',   label: 'Sell USDT 申请',  Icon: CircleDollarSign },
+      { key: 'notify',      label: '通知系统',         Icon: Bell },
+      { key: 'op-log',      label: '运营系统日志',     Icon: FileText },
+      { key: 'ban-ip',      label: '封禁 IP',          Icon: Ban },
+      { key: 'mail-list',   label: '邮件验证码列表',   Icon: Mail },
     ],
   },
 ];
@@ -166,7 +167,9 @@ const DashboardSidebar = observer(function DashboardSidebar() {
           userSelect: 'none',
         }}
       >
-        <it.Icon sx={{ fontSize: 22, color: 'inherit', flexShrink: 0 }} />
+        <Box sx={{ color: 'inherit', flexShrink: 0, display: 'inline-flex' }}>
+          <it.Icon size={22} />
+        </Box>
         {!showCollapsed && (
           <>
             <Box component="span" sx={{ ml: 4, flex: 1 }}>{it.label}</Box>
@@ -176,7 +179,7 @@ const DashboardSidebar = observer(function DashboardSidebar() {
                   height: 24, px: 1, borderRadius: 1.5, // 6
                   bgcolor: 'rgba(60,111,245,0.16)',
                   color: 'primary.main',
-                  fontSize: 12, fontWeight: 700,
+                  fontSize: 12, fontWeight: 600, // nav.html L218: weight 600 (NOT 700)
                   display: 'inline-flex', alignItems: 'center',
                   ml: 1, lineHeight: 1,
                 }}
@@ -186,7 +189,7 @@ const DashboardSidebar = observer(function DashboardSidebar() {
             )}
             {isExpandable && (
               <Box component="span" sx={{ color: 'text.secondary', display: 'flex', ml: 1 }}>
-                {isOpen ? <ExpandMoreRounded sx={{ fontSize: 16 }} /> : <ChevronRightRounded sx={{ fontSize: 16 }} />}
+                {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
               </Box>
             )}
           </>
@@ -284,7 +287,7 @@ const DashboardSidebar = observer(function DashboardSidebar() {
         />
         {ui.isMobile && (
           <IconButton size="small" onClick={ui.closeDrawer} aria-label="关闭侧栏">
-            <CloseRounded sx={{ fontSize: 20 }} />
+            <X size={20} />
           </IconButton>
         )}
       </Stack>
@@ -330,7 +333,9 @@ const DashboardSidebar = observer(function DashboardSidebar() {
               <Typography sx={{ fontSize: 11, color: 'text.secondary', lineHeight: 1, mt: 0.5 }}>m_8f2a91c</Typography>
             </Box>
           </Stack>
-          <ChevronRightRounded sx={{ fontSize: 18, color: 'text.secondary', flexShrink: 0 }} />
+          <Box sx={{ color: 'text.secondary', flexShrink: 0, display: 'inline-flex' }}>
+            <ChevronRight size={18} />
+          </Box>
         </Stack>
       )}
 
@@ -374,7 +379,7 @@ const DashboardSidebar = observer(function DashboardSidebar() {
             '&:hover': { bgcolor: '#F8F9FB' },
           }}
         >
-          <HelpOutlineRounded sx={{ fontSize: 16 }} />
+          <HelpCircle size={16} />
           帮助 & 费率
         </Box>
       )}

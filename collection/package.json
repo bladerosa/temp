@@ -16,6 +16,7 @@
     "@mui/material": "^5.16.7",
     "@mui/x-date-pickers": "^7.22.2",
     "dayjs": "^1.11.13",
+    "lucide-react": "^1.14.0",
     "mobx": "^6.13.5",
     "mobx-react-lite": "^4.0.7",
     "react": "^18.3.1",

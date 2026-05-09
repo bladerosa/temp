@@ -10,10 +10,10 @@ import {
   Typography,
 } from '@mui/material';
 import {
-  CheckRounded,
-  CloseRounded,
-  SearchRounded,
-} from '@mui/icons-material';
+  Check,
+  X,
+  Search,
+} from 'lucide-react';
 import { CHAINS, TOKENS, findChain, findToken, tokensByChain } from '@/data/tokens';
 import CryptoBadge from './CryptoBadge';
 
@@ -98,7 +98,7 @@ export function MultiTokenPicker({ selected, onChange }: MultiTokenPickerProps) 
             color={allTokensSelected ? 'inherit' : 'primary'}
             onClick={allTokensSelected ? clearAll : selectAllEverywhere}
             startIcon={
-              allTokensSelected ? <CloseRounded sx={{ fontSize: 14 }} /> : <CheckRounded sx={{ fontSize: 14 }} />
+              allTokensSelected ? <X size={14} /> : <Check size={14} />
             }
           >
             {allTokensSelected ? '取消全选' : '全选所有 chain · token'}
@@ -136,13 +136,13 @@ export function MultiTokenPicker({ selected, onChange }: MultiTokenPickerProps) 
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchRounded sx={{ fontSize: 16 }} />
+                  <Search size={16} />
                 </InputAdornment>
               ),
               endAdornment: chainQuery ? (
                 <InputAdornment position="end">
                   <IconButton size="small" onClick={() => setChainQuery('')}>
-                    <CloseRounded sx={{ fontSize: 14 }} />
+                    <X size={14} />
                   </IconButton>
                 </InputAdornment>
               ) : null,
@@ -234,13 +234,13 @@ export function MultiTokenPicker({ selected, onChange }: MultiTokenPickerProps) 
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchRounded sx={{ fontSize: 16 }} />
+                  <Search size={16} />
                 </InputAdornment>
               ),
               endAdornment: tokenQuery ? (
                 <InputAdornment position="end">
                   <IconButton size="small" onClick={() => setTokenQuery('')}>
-                    <CloseRounded sx={{ fontSize: 14 }} />
+                    <X size={14} />
                   </IconButton>
                 </InputAdornment>
               ) : null,
@@ -291,7 +291,7 @@ export function MultiTokenPicker({ selected, onChange }: MultiTokenPickerProps) 
                       color: '#fff',
                     }}
                   >
-                    {isSel && <CheckRounded sx={{ fontSize: 12 }} />}
+                    {isSel && <Check size={12} />}
                   </Box>
                   <CryptoBadge symbol={t.symbol} color={t.color} size={20} />
                   <Box sx={{ flex: 1, fontSize: 13, fontWeight: 500 }}>{t.symbol}</Box>
@@ -329,7 +329,7 @@ export function MultiTokenPicker({ selected, onChange }: MultiTokenPickerProps) 
                   icon={<CryptoBadge symbol={t.symbol} color={t.color} size={16} />}
                   label={`${c.name} · ${t.symbol}`}
                   onDelete={() => toggle(id)}
-                  deleteIcon={<CloseRounded sx={{ fontSize: 14 }} />}
+                  deleteIcon={<X size={14} />}
                   sx={{ height: 26 }}
                 />
               );
@@ -396,13 +396,13 @@ export function SingleTokenPicker({ chainId, tokenId, onChange }: SingleTokenPic
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchRounded sx={{ fontSize: 16 }} />
+                <Search size={16} />
               </InputAdornment>
             ),
             endAdornment: chainQuery ? (
               <InputAdornment position="end">
                 <IconButton size="small" onClick={() => setChainQuery('')}>
-                  <CloseRounded sx={{ fontSize: 14 }} />
+                  <X size={14} />
                 </IconButton>
               </InputAdornment>
             ) : null,
@@ -456,13 +456,13 @@ export function SingleTokenPicker({ chainId, tokenId, onChange }: SingleTokenPic
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchRounded sx={{ fontSize: 16 }} />
+                <Search size={16} />
               </InputAdornment>
             ),
             endAdornment: tokenQuery ? (
               <InputAdornment position="end">
                 <IconButton size="small" onClick={() => setTokenQuery('')}>
-                  <CloseRounded sx={{ fontSize: 14 }} />
+                  <X size={14} />
                 </IconButton>
               </InputAdornment>
             ) : null,

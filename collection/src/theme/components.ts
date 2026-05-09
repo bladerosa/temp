@@ -25,8 +25,9 @@ export const components: Components<Theme> = {
         boxShadow: 'none',
         transition: 'background 120ms ease-out, box-shadow 120ms ease-out',
       },
+      // buttons.html L34-37: medium 11/20, sm 4/12, lg 11/24
       sizeSmall:  { padding: '4px 12px',  fontSize: 12, lineHeight: '22px' },
-      sizeMedium: { padding: '9px 20px',  fontSize: 14, lineHeight: '22px' },
+      sizeMedium: { padding: '11px 20px', fontSize: 14, lineHeight: '22px' },
       sizeLarge:  { padding: '11px 24px', fontSize: 16, lineHeight: '26px' },
       // Contained primary keeps the colored shadow at rest (per DS).
       containedPrimary: {
@@ -171,16 +172,21 @@ export const components: Components<Theme> = {
   },
 
   // -------- Text fields (preview/text-fields.html) --------
+  // Spec sizes (canonical .tf):
+  //   default M: 56h, font 16/24, padding 16/14
+  //   sm:        40h, font 14/24, padding 8/14
+  // Border at rest: rgba(145,158,171,0.32) — NOT #E8ECF2
+  // Default `size` removed: most form contexts want medium; toolbars / table
+  // cells pass size="small" explicitly.
   MuiTextField: {
-    defaultProps: { size: 'small', variant: 'outlined' },
+    defaultProps: { variant: 'outlined' },
   },
   MuiOutlinedInput: {
     styleOverrides: {
       root: {
         borderRadius: 8,
-        backgroundColor: '#FFFFFF',
         transition: 'box-shadow 120ms ease-out, border-color 120ms ease-out',
-        '& .MuiOutlinedInput-notchedOutline': { borderColor: '#E8ECF2' },
+        '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(145,158,171,0.32)' },
         '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#A3A8B1' },
         '&.Mui-focused': {
           boxShadow: '0 0 0 3px rgba(60,111,245,0.14)',
@@ -189,12 +195,19 @@ export const components: Components<Theme> = {
         '&.Mui-disabled': { backgroundColor: '#F8F9FB' },
       },
       input: {
-        fontSize: 14,
-        padding: '10px 12px',
-        '&::placeholder': { color: '#A3A8B1', opacity: 1 },
+        fontSize: 16,
+        lineHeight: '24px',
+        padding: '16px 14px',
+        height: 24,
+        '&::placeholder': { color: '#919FAB', opacity: 1 },
       },
+      // sm: 40h → padding 8/14, font 14/24
       sizeSmall: {
-        '& .MuiOutlinedInput-input': { padding: '8px 12px' },
+        '& .MuiOutlinedInput-input': {
+          fontSize: 14,
+          lineHeight: '24px',
+          padding: '8px 14px',
+        },
       },
     },
   },
@@ -339,15 +352,48 @@ export const components: Components<Theme> = {
     },
   },
 
+  // Switch — preview/controls.html canonical: M 36×20 r10, knob 14×14;
+  // sm 28×16 r8, knob 10×10. on-primary bg #3C6FF5.
   MuiSwitch: {
+    defaultProps: { disableRipple: false },
     styleOverrides: {
-      switchBase: {
-        '&.Mui-checked': {
-          color: '#FFFFFF',
-          '& + .MuiSwitch-track': { backgroundColor: '#3C6FF5', opacity: 1 },
-        },
+      root: {
+        width: 36,
+        height: 20,
+        padding: 0,
+        margin: 4,
+        overflow: 'visible',
       },
-      track: { borderRadius: 999, opacity: 1, backgroundColor: '#CACFD8' },
+      switchBase: {
+        padding: 3,
+        '&.Mui-checked': {
+          transform: 'translateX(16px)',
+          color: '#FFFFFF',
+          '& + .MuiSwitch-track': {
+            backgroundColor: '#3C6FF5',
+            opacity: 1,
+          },
+        },
+        '&.Mui-disabled + .MuiSwitch-track': { opacity: 0.6 },
+      },
+      thumb: {
+        width: 14,
+        height: 14,
+        boxShadow: '0 2px 4px 0 rgba(145,158,171,0.24)',
+      },
+      track: {
+        borderRadius: 10,
+        opacity: 1,
+        backgroundColor: 'rgba(145,158,171,0.48)',
+      },
+      sizeSmall: {
+        width: 28,
+        height: 16,
+        '& .MuiSwitch-switchBase': { padding: 3 },
+        '& .MuiSwitch-thumb': { width: 10, height: 10 },
+        '& .MuiSwitch-switchBase.Mui-checked': { transform: 'translateX(12px)' },
+        '& .MuiSwitch-track': { borderRadius: 8 },
+      },
     },
   },
 

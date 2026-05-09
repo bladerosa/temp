@@ -26,12 +26,12 @@ import {
   Typography,
 } from '@mui/material';
 import {
-  ChevronRightRounded,
-  CloseRounded,
-  ContentCopyOutlined,
-  LayersOutlined,
-  SearchRounded,
-} from '@mui/icons-material';
+  ChevronRight,
+  X,
+  Copy,
+  Layers,
+  Search,
+} from 'lucide-react';
 import {
   JOB_STATUS_META,
   type CollectionRecord,
@@ -187,16 +187,10 @@ const CollectionJobs = observer(function CollectionJobs() {
         (s, r) => s + (isTrxChain(r.chainId) ? r.trxConsumed ?? 0 : 0),
         0,
       ),
-      trxJobsCount: filtered.filter((r) => isTrxChain(r.chainId)).length,
     }),
     [filtered],
   );
 
-  const statusBreakdown = useMemo(() => {
-    const out: Record<JobStatus, number> = { pending: 0, running: 0, completed: 0, aborted: 0 };
-    for (const r of filtered) out[r.status]++;
-    return out;
-  }, [filtered]);
 
   const doAbort = async (r: CollectionRecord) => {
     // AC-008 dictates the exact reason string: "运营人员手动终止" (both pending & running).
@@ -219,68 +213,27 @@ const CollectionJobs = observer(function CollectionJobs() {
           subtitle="汇总自动 / 手动归集任务，每条 token 级原子归集独立成行；可对待执行 / 执行中任务进行终止。"
         />
 
-        {/* ===== Strip 1: 4 KPI cards over filtered results ===== */}
+        {/* ===== Single 7-card strip (compact). User-requested layout.
+            Hints removed: only label + value, matches v1.1 functional surface. ===== */}
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
-            gap: 5,
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(4, 1fr)',
+              lg: 'repeat(7, 1fr)',
+            },
+            gap: 3,
           }}
         >
-          <StatCard
-            tone="lead"
-            label="任务数"
-            value={stats.count}
-            hint={`完成 ${statusBreakdown.completed} · 执行中 ${statusBreakdown.running} · 待执行 ${statusBreakdown.pending}`}
-          />
-          <StatCard
-            label="归集总额"
-            value={usd(stats.totalUsd)}
-            hint={
-              stats.addresses > 0
-                ? `${stats.addresses} 个地址 · 平均 ${usd(stats.totalUsd / Math.max(1, stats.count))}`
-                : '尚无归集'
-            }
-          />
-          <StatCard
-            label="覆盖地址数"
-            value={stats.addresses}
-            hint={`涉及 ${stats.count} 笔归集任务`}
-          />
-          <StatCard
-            label="fee 消耗"
-            value={usd(stats.fee)}
-            hint={
-              stats.totalUsd > 0
-                ? `占归集总额 ${((stats.fee / stats.totalUsd) * 100).toFixed(2)}%`
-                : '—'
-            }
-          />
-        </Box>
-
-        {/* ===== Strip 2: 3 TRX-only cards ===== */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
-            gap: 5,
-          }}
-        >
-          <StatCard
-            label="能量消耗"
-            value={numFmt(stats.energy, 0)}
-            hint={`${stats.trxJobsCount} 笔 TRON 链归集累计`}
-          />
-          <StatCard
-            label="带宽消耗"
-            value={numFmt(stats.bandwidth, 0)}
-            hint={`${stats.trxJobsCount} 笔 TRON 链归集累计`}
-          />
-          <StatCard
-            label="trx 消耗"
-            value={`${numFmt(stats.trx, 2)} TRX`}
-            hint={`${stats.trxJobsCount} 笔 TRON 链归集累计`}
-          />
+          <StatCard tone="lead" density="compact" label="任务数"     value={stats.count} />
+          <StatCard density="compact" label="归集总额"   value={usd(stats.totalUsd)} />
+          <StatCard density="compact" label="覆盖地址数" value={stats.addresses} />
+          <StatCard density="compact" label="fee 消耗"   value={usd(stats.fee)} />
+          <StatCard density="compact" label="能量消耗"   value={numFmt(stats.energy, 0)} />
+          <StatCard density="compact" label="带宽消耗"   value={numFmt(stats.bandwidth, 0)} />
+          <StatCard density="compact" label="trx 消耗"   value={`${numFmt(stats.trx, 2)} TRX`} />
         </Box>
 
         {/* ===== Table ===== */}
@@ -296,7 +249,9 @@ const CollectionJobs = observer(function CollectionJobs() {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <SearchRounded sx={{ fontSize: 18, color: 'text.secondary' }} />
+                        <Box sx={{ color: 'text.secondary', display: 'inline-flex' }}>
+                          <Search size={18} />
+                        </Box>
                       </InputAdornment>
                     ),
                   }}
@@ -369,7 +324,7 @@ const CollectionJobs = observer(function CollectionJobs() {
           {filtered.length === 0 ? (
             <Box sx={{ p: 4 }}>
               <EmptyState
-                icon={<LayersOutlined />}
+                icon={<Layers />}
                 title="暂无任务记录"
                 desc="调整筛选条件后再试。"
               />
@@ -559,7 +514,7 @@ const CollectionJobs = observer(function CollectionJobs() {
                                 }}
                               >
                                 {r.addresses.length}
-                                <ChevronRightRounded sx={{ fontSize: 12 }} />
+                                <ChevronRight size={12} />
                               </Box>
                             ) : (
                               <Typography
@@ -677,7 +632,7 @@ const CollectionJobs = observer(function CollectionJobs() {
                                 size="small"
                                 variant="text"
                                 onClick={() => setConfirmAbort(r)}
-                                startIcon={<CloseRounded sx={{ fontSize: 14 }} />}
+                                startIcon={<X size={14} />}
                                 sx={{ color: 'error.dark' }}
                               >
                                 终止任务
@@ -734,7 +689,7 @@ const CollectionJobs = observer(function CollectionJobs() {
                 >
                   <span>归集地址明细</span>
                   <IconButton onClick={() => setDetail(null)} aria-label="关闭" size="small">
-                    <CloseRounded />
+                    <X />
                   </IconButton>
                 </DialogTitle>
                 <DialogContent dividers>
@@ -802,30 +757,11 @@ const CollectionJobs = observer(function CollectionJobs() {
                       mb: 3,
                     }}
                   >
-                    <StatCard
-                      label="覆盖地址数"
-                      value={detail.addresses.length}
-                      hint={detail.addresses.length > 0 ? `本次归集涉及` : '尚无地址'}
-                    />
-                    <StatCard
-                      label="归集总数量"
-                      value={fmtTokenAmount(detail.totalAmount)}
-                      hint={findToken(detail.tokenId)?.symbol ?? ''}
-                    />
-                    <StatCard
-                      label="归集总额（USD）"
-                      value={detail.totalUsd != null ? usd(detail.totalUsd) : '—'}
-                      hint={detail.totalUsd == null ? '该 token 无 USD 折算' : undefined}
-                    />
-                    <StatCard
-                      label="fee 消耗（USD）"
-                      value={usd(detail.feeUsd)}
-                      hint={
-                        detail.totalUsd != null && detail.totalUsd > 0
-                          ? `占归集 ${((detail.feeUsd / detail.totalUsd) * 100).toFixed(2)}%`
-                          : undefined
-                      }
-                    />
+                    {/* Detail modal: label + value only (no hint). v1.1 spec. */}
+                    <StatCard density="compact" label="覆盖地址数"      value={detail.addresses.length} />
+                    <StatCard density="compact" label="归集总数量"      value={fmtTokenAmount(detail.totalAmount)} />
+                    <StatCard density="compact" label="归集总额（USD）" value={detail.totalUsd != null ? usd(detail.totalUsd) : '—'} />
+                    <StatCard density="compact" label="fee 消耗（USD）" value={usd(detail.feeUsd)} />
                   </Box>
 
                   {trx && (
@@ -917,13 +853,13 @@ const CollectionJobs = observer(function CollectionJobs() {
                             }
                           }}
                         >
-                          <ContentCopyOutlined sx={{ fontSize: 16 }} />
+                          <Copy size={16} />
                         </IconButton>
                       </Box>
                     ))}
                     {detail.addresses.length === 0 && (
                       <EmptyState
-                        icon={<LayersOutlined />}
+                        icon={<Layers />}
                         title="尚无地址"
                         desc="该任务尚未开始执行"
                       />

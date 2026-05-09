@@ -1,12 +1,13 @@
 import { observer } from 'mobx-react-lite';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
 import {
-  CheckCircleOutline,
-  CloseRounded,
-  ErrorOutline,
-  InfoOutlined,
-  WarningAmberRounded,
-} from '@mui/icons-material';
+  CheckCircle2,
+  X,
+  AlertCircle,
+  Info,
+  AlertTriangle,
+  type LucideIcon,
+} from 'lucide-react';
 import { useStores } from '@/stores';
 import type { ToastTone } from '@/stores/ToastStore';
 
@@ -21,11 +22,11 @@ import type { ToastTone } from '@/stores/ToastStore';
 // component fighting our queue. Custom div + MobX queue is simpler and
 // matches the spec exactly.
 
-const TONE_META: Record<ToastTone, { color: string; bg: string; Icon: typeof CheckCircleOutline }> = {
-  success: { color: 'rgb(34, 128, 79)',  bg: 'rgba(67,190,118,0.16)',  Icon: CheckCircleOutline },
-  warning: { color: 'rgb(165, 114, 15)', bg: 'rgba(231,178,43,0.16)',  Icon: WarningAmberRounded },
-  error:   { color: 'rgb(184, 68, 46)',  bg: 'rgba(236,104,76,0.16)',  Icon: ErrorOutline },
-  info:    { color: 'rgb(40, 114, 164)', bg: 'rgba(101,174,232,0.16)', Icon: InfoOutlined },
+const TONE_META: Record<ToastTone, { color: string; bg: string; Icon: LucideIcon }> = {
+  success: { color: 'rgb(34, 128, 79)',  bg: 'rgba(67,190,118,0.16)',  Icon: CheckCircle2 },
+  warning: { color: 'rgb(165, 114, 15)', bg: 'rgba(231,178,43,0.16)',  Icon: AlertTriangle },
+  error:   { color: 'rgb(184, 68, 46)',  bg: 'rgba(236,104,76,0.16)',  Icon: AlertCircle },
+  info:    { color: 'rgb(40, 114, 164)', bg: 'rgba(101,174,232,0.16)', Icon: Info },
 };
 
 const ToastHost = observer(function ToastHost() {
@@ -76,7 +77,7 @@ const ToastHost = observer(function ToastHost() {
                 display: 'grid', placeItems: 'center', flexShrink: 0,
               }}
             >
-              <meta.Icon sx={{ fontSize: 22 }} />
+              <meta.Icon size={22} />
             </Box>
 
             <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -101,7 +102,7 @@ const ToastHost = observer(function ToastHost() {
               sx={{ width: 36, height: 36, color: 'text.secondary', flexShrink: 0 }}
               aria-label="关闭"
             >
-              <CloseRounded sx={{ fontSize: 18 }} />
+              <X size={18} />
             </IconButton>
           </Stack>
         );
