@@ -1,40 +1,97 @@
 import { useMemo, useState } from 'react';
-import { initialTasks } from '../data/mockData';
-import type {
-  AutoTask, BalanceCheckTask, InactiveTask, LargeDepositTask,
-  Schedule, TaskType, WithdrawShortTask,
-} from '../data/types';
-import { TASK_TYPE_META } from '../data/types';
-import { findChain, findToken, hasNonConvertible } from '../data/tokens';
-import { Modal, Switch, TokenPills, Stat, fmtDateTime } from '../components/Primitives';
-import { MultiTokenPicker } from '../components/TokenPicker';
-import { ScheduleEditor } from '../components/ScheduleEditor';
-import { AmountInput, defaultAmountSpec, formatAmountSpec, isAmountSpecValid } from '../components/AmountInput';
-import { useToast } from '../components/Toast';
+import { observer } from 'mobx-react-lite';
 import {
-  IconPlus, IconEdit, IconTrash, IconLayers, IconArrowDownCircle,
-  IconClock, IconScale, IconLowBattery, IconChevronRight,
-  IconAlert, IconInfo, IconRefresh,
-} from '../components/Icon';
+  Alert,
+  Box,
+  Button,
+  Card,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  MenuItem,
+  Stack,
+  Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material';
+import {
+  AddRounded,
+  ArrowDownwardRounded,
+  ChevronRightRounded,
+  DeleteOutlineRounded,
+  EditOutlined,
+  ErrorOutlineRounded,
+  HourglassEmptyRounded,
+  LayersOutlined,
+  ScaleOutlined,
+  ScheduleRounded,
+  SyncAltRounded,
+} from '@mui/icons-material';
+import {
+  TASK_TYPE_META,
+  type AutoTask,
+  type BalanceCheckTask,
+  type Cooldown,
+  type InactiveTask,
+  type LargeDepositTask,
+  type Schedule,
+  type TaskType,
+  type WithdrawShortTask,
+} from '@/data/types';
+import { findChain, findToken } from '@/data/tokens';
+import { useStores } from '@/stores';
+import { MultiTokenPicker } from '@/components/TokenPicker';
+import ScheduleEditor from '@/components/ScheduleEditor';
+import {
+  AmountInput,
+  defaultAmountSpec,
+  formatAmountSpec,
+  isAmountSpecValid,
+} from '@/components/AmountInput';
+import EmptyState from '@/components/EmptyState';
+import ConfirmDialog from '@/components/ConfirmDialog';
+import { fmtDateTime, unitName } from '@/utils/format';
 
 type Step = 'pick-type' | 'configure';
 
-const TASK_TYPE_ICON: Record<TaskType, () => JSX.Element> = {
-  large_deposit:  () => <IconArrowDownCircle size={16} />,
-  inactive:       () => <IconClock size={16} />,
-  balance_check:  () => <IconScale size={16} />,
-  withdraw_short: () => <IconLowBattery size={16} />,
+const TASK_TYPE_ICON: Record<TaskType, React.ReactElement> = {
+  large_deposit: <ArrowDownwardRounded sx={{ fontSize: 18 }} />,
+  inactive: <ScheduleRounded sx={{ fontSize: 18 }} />,
+  balance_check: <ScaleOutlined sx={{ fontSize: 18 }} />,
+  withdraw_short: <SyncAltRounded sx={{ fontSize: 18 }} />,
+};
+
+const TASK_TYPE_TONE: Record<TaskType, 'primary' | 'info' | 'success' | 'warning'> = {
+  large_deposit: 'primary',
+  inactive: 'info',
+  balance_check: 'success',
+  withdraw_short: 'warning',
 };
 
 const defaultSchedule: Schedule = { every: 1, unit: 'day', anchorTime: '03:00' };
 
-export default function AutoCollection() {
-  const toast = useToast();
-  const [tasks, setTasks] = useState<AutoTask[]>(initialTasks);
+const AutoCollection = observer(function AutoCollection() {
+  const { collection, ui, toast } = useStores();
+  const tasks = collection.tasks;
+
   const [filter, setFilter] = useState<'all' | TaskType>('all');
-  const [editor, setEditor] = useState<{ open: boolean; mode: 'create' | 'edit'; step: Step; draft: AutoTask | null }>({
-    open: false, mode: 'create', step: 'pick-type', draft: null,
-  });
+  const [editor, setEditor] = useState<{
+    open: boolean;
+    mode: 'create' | 'edit';
+    step: Step;
+    draft: AutoTask | null;
+  }>({ open: false, mode: 'create', step: 'pick-type', draft: null });
   const [formError, setFormError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<AutoTask | null>(null);
 
@@ -51,12 +108,10 @@ export default function AutoCollection() {
   const filtered = filter === 'all' ? tasks : tasks.filter((t) => t.type === filter);
 
   // ===== Open / save =====
-  const openCreate = () => {
+  const openCreate = () =>
     setEditor({ open: true, mode: 'create', step: 'pick-type', draft: null });
-  };
-  const openEdit = (t: AutoTask) => {
+  const openEdit = (t: AutoTask) =>
     setEditor({ open: true, mode: 'edit', step: 'configure', draft: { ...t } });
-  };
   const closeEditor = () => {
     setEditor((s) => ({ ...s, open: false }));
     setFormError(null);
@@ -64,26 +119,40 @@ export default function AutoCollection() {
 
   const pickType = (type: TaskType) => {
     const id = 'tk_' + Math.random().toString(36).slice(2, 8);
-    const base = { id, name: '', targets: [] as string[], enabled: false, createdAt: new Date().toISOString() };
+    const base = {
+      id,
+      name: '',
+      targets: [] as string[],
+      enabled: false,
+      createdAt: new Date().toISOString(),
+    };
     let draft: AutoTask;
     if (type === 'large_deposit') {
       draft = {
-        ...base, type,
+        ...base,
+        type,
         triggerAmount: defaultAmountSpec(5000),
         cooldown: { value: 1, unit: 'hour' },
       } as LargeDepositTask;
     } else if (type === 'inactive') {
       draft = {
-        ...base, type,
+        ...base,
+        type,
         inactiveWindow: { value: 30, unit: 'day' },
         minCollectAmount: defaultAmountSpec(50),
         schedule: { ...defaultSchedule },
       } as InactiveTask;
     } else if (type === 'balance_check') {
-      draft = { ...base, type, minCollectAmount: defaultAmountSpec(50), schedule: { ...defaultSchedule } } as BalanceCheckTask;
+      draft = {
+        ...base,
+        type,
+        minCollectAmount: defaultAmountSpec(50),
+        schedule: { ...defaultSchedule },
+      } as BalanceCheckTask;
     } else {
       draft = {
-        ...base, type,
+        ...base,
+        type,
         minCollectAmount: defaultAmountSpec(30),
         cooldown: { value: 6, unit: 'hour' },
       } as WithdrawShortTask;
@@ -105,13 +174,16 @@ export default function AutoCollection() {
         return '最小归集金额必须大于 0（每个目标 token 都需填写）';
       if (draft.type === 'withdraw_short' && !(draft.cooldown.value > 0))
         return '重复触发最短间隔必须大于 0';
+      if (draft.type === 'inactive' || draft.type === 'balance_check') {
+        if (!(draft.schedule.every >= 1)) return '检测周期必须 ≥ 1';
+      }
     }
 
     // Same-type tasks may not target the same token-id.
     const conflicts: string[] = [];
     for (const tokenId of draft.targets) {
       const dup = tasks.find(
-        (t) => t.id !== draft.id && t.type === draft.type && t.targets.includes(tokenId)
+        (t) => t.id !== draft.id && t.type === draft.type && t.targets.includes(tokenId),
       );
       if (dup) {
         const t = findToken(tokenId);
@@ -125,267 +197,437 @@ export default function AutoCollection() {
     return null;
   };
 
-  const saveDraft = () => {
+  const saveDraft = async () => {
     const draft = editor.draft;
     if (!draft) return;
     const err = validateDraft(draft);
-    if (err) { setFormError(err); return; }
+    if (err) {
+      setFormError(err);
+      return;
+    }
     setFormError(null);
-    setTasks((prev) => {
-      const exists = prev.some((t) => t.id === draft.id);
-      return exists ? prev.map((t) => (t.id === draft.id ? draft : t)) : [draft, ...prev];
-    });
-    closeEditor();
+    try {
+      if (editor.mode === 'create') {
+        await collection.addTask(draft);
+        toast.show({ title: '任务已创建', tone: 'success' });
+      } else {
+        await collection.updateTask(draft);
+        toast.show({ title: '任务已更新', tone: 'success' });
+      }
+      closeEditor();
+    } catch {
+      toast.show({ title: '保存失败，请重试', tone: 'error' });
+    }
   };
 
   // ===== Toggle / delete =====
-  const toggle = (id: string) => {
-    setTasks((prev) => {
-      const target = prev.find((t) => t.id === id);
-      if (target) {
-        const enabled = !target.enabled;
-        toast.show({
-          title: `任务「${target.name}」已${enabled ? '启用' : '停用'}`,
-          tone: enabled ? 'success' : 'info',
-          durationMs: 3000,
-        });
-      }
-      return prev.map((t) => (t.id === id ? { ...t, enabled: !t.enabled } : t));
-    });
+  const toggle = async (t: AutoTask) => {
+    const next = !t.enabled;
+    try {
+      await collection.toggleEnabled(t.id, next);
+      toast.show({
+        title: `任务「${t.name}」已${next ? '启用' : '停用'}`,
+        tone: next ? 'success' : 'info',
+        duration: 3000,
+      });
+    } catch {
+      toast.show({ title: '切换失败，请重试', tone: 'error' });
+    }
   };
-  const remove = (id: string) =>
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+
+  const remove = async (t: AutoTask) => {
+    try {
+      await collection.deleteTask(t.id);
+      toast.show({ title: `任务「${t.name}」已删除`, tone: 'info' });
+    } catch {
+      toast.show({ title: '删除失败，请重试', tone: 'error' });
+    }
+    setConfirmDelete(null);
+  };
 
   return (
-    <>
-      <div className="page-head">
-        <div>
-          <h2 className="page-title">自动归集</h2>
-          <div className="page-sub">配置定时或事件触发的自动归集任务，命中条件后自动将资产归集到系统热钱包。</div>
-        </div>
-        <div className="row gap-8">
-          <button className="btn outlined sm"><IconRefresh size={14}/> 刷新</button>
-          <button className="btn primary" onClick={openCreate}><IconPlus size={16}/> 新建任务</button>
-        </div>
-      </div>
+    <Container maxWidth={ui.themeStretch ? false : 'xl'} disableGutters>
+      <Stack spacing={4}>
+        {/* Header */}
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          justifyContent="space-between"
+          alignItems={{ xs: 'flex-start', sm: 'center' }}
+          gap={2}
+        >
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
+              自动归集
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              配置定时或事件触发的自动归集任务，命中条件后自动将资产归集到系统热钱包。
+            </Typography>
+          </Box>
+          <Button variant="contained" startIcon={<AddRounded />} onClick={openCreate}>
+            创建归集任务
+          </Button>
+        </Stack>
 
-      <div className="stat-strip">
-        <Stat label="总任务数"  value={stats.total}    hint="包含全部类型" tone="primary" icon={<IconLayers size={18}/>} />
-        <Stat label="运行中"    value={stats.enabled}  hint={`占比 ${stats.total ? Math.round(stats.enabled / stats.total * 100) : 0}%`} tone="success" icon={<IconScale size={18}/>} />
-        <Stat label="已停用"    value={stats.disabled} hint="可在列表内开启" tone="warning" icon={<IconLowBattery size={18}/>} />
-        <Stat label="任务类型数" value={stats.types}    hint="共 4 种类型可选" tone="info" icon={<IconClock size={18}/>} />
-      </div>
+        {/* Stats */}
+        <Grid container spacing={3}>
+          <Grid item xs={6} md={3}>
+            <StatCard
+              label="总任务数"
+              value={stats.total}
+              hint="包含全部类型"
+              tone="primary"
+              icon={<LayersOutlined />}
+            />
+          </Grid>
+          <Grid item xs={6} md={3}>
+            <StatCard
+              label="运行中"
+              value={stats.enabled}
+              hint={`占比 ${stats.total ? Math.round((stats.enabled / stats.total) * 100) : 0}%`}
+              tone="success"
+              icon={<ScaleOutlined />}
+            />
+          </Grid>
+          <Grid item xs={6} md={3}>
+            <StatCard
+              label="已停用"
+              value={stats.disabled}
+              hint="可在列表内开启"
+              tone="warning"
+              icon={<HourglassEmptyRounded />}
+            />
+          </Grid>
+          <Grid item xs={6} md={3}>
+            <StatCard
+              label="任务类型数"
+              value={stats.types}
+              hint="共 4 种类型可选"
+              tone="info"
+              icon={<ScheduleRounded />}
+            />
+          </Grid>
+        </Grid>
 
-      <div className="table-wrap">
-        <div className="table-toolbar">
-          <div className="left">
-            <select className="filter-select" value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)}>
-              <option value="all">全部类型</option>
+        {/* Table */}
+        <Card sx={{ overflow: 'hidden' }}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            gap={2}
+            sx={{ p: 4, borderBottom: 1, borderColor: 'divider' }}
+          >
+            <TextField
+              select
+              size="small"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value as 'all' | TaskType)}
+              sx={{ minWidth: 160 }}
+            >
+              <MenuItem value="all">全部类型</MenuItem>
               {(Object.keys(TASK_TYPE_META) as TaskType[]).map((k) => (
-                <option key={k} value={k}>{TASK_TYPE_META[k].name}</option>
+                <MenuItem key={k} value={k}>
+                  {TASK_TYPE_META[k].name}
+                </MenuItem>
               ))}
-            </select>
-            <span className="muted" style={{ fontSize: 12.5 }}>共 {filtered.length} 个任务</span>
-          </div>
-        </div>
+            </TextField>
+            <Typography variant="caption" color="text.secondary">
+              共 {filtered.length} 个任务
+            </Typography>
+          </Stack>
 
-        <table className="table">
-          <thead>
-            <tr>
-              <th style={{ width: 220 }}>任务</th>
-              <th>类型</th>
-              <th>目标 chain · token</th>
-              <th>关键参数</th>
-              <th>下次执行</th>
-              <th>状态</th>
-              <th style={{ width: 130, textAlign: 'right' }}>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((t) => (
-              <tr key={t.id}>
-                <td>
-                  <div style={{ fontWeight: 600 }}>{t.name}</div>
-                  <div className="mono muted" style={{ fontSize: 11 }}>{t.id}</div>
-                </td>
-                <td>
-                  <span className={`chip ${TASK_TYPE_META[t.type].cls as 'primary'}`}>
-                    <span className="dot" />{TASK_TYPE_META[t.type].name}
-                  </span>
-                </td>
-                <td>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxWidth: 280 }}>
-                    {t.targets.slice(0, 4).map((id) => {
-                      const tok = findToken(id);
-                      const c = tok ? findChain(tok.chainId) : null;
-                      return (
-                        <span key={id} className="chip neutral">
-                          {c?.name} · {tok?.symbol}
-                        </span>
-                      );
-                    })}
-                    {t.targets.length > 4 && (
-                      <span className="chip neutral">+{t.targets.length - 4}</span>
-                    )}
-                  </div>
-                </td>
-                <td>{renderKeyParams(t)}</td>
-                <td className="mono" style={{ fontSize: 12 }}>
-                  {t.type === 'large_deposit' || t.type === 'withdraw_short'
-                    ? <span className="muted">事件驱动</span>
-                    : t.nextRunAt ? fmtDateTime(t.nextRunAt) : <span className="muted">—</span>}
-                </td>
-                <td>
-                  <div className="row gap-8">
-                    <Switch checked={t.enabled} onChange={() => toggle(t.id)} />
-                    <span className={`chip ${t.enabled ? 'success' : 'neutral'}`} style={{ fontSize: 11 }}>
-                      <span className="dot"/>{t.enabled ? '运行中' : '已停用'}
-                    </span>
-                  </div>
-                </td>
-                <td className="actions-cell" style={{ textAlign: 'right' }}>
-                  <button className="btn ghost sm" onClick={() => openEdit(t)} title="编辑"><IconEdit size={14}/> 编辑</button>
-                  <button className="btn ghost sm" onClick={() => setConfirmDelete(t)} title="删除" style={{ color: 'var(--error-dark)' }}><IconTrash size={14}/></button>
-                </td>
-              </tr>
-            ))}
-            {filtered.length === 0 && (
-              <tr><td colSpan={7}><div className="empty">
-                <div className="empty-art"><IconLayers size={32}/></div>
-                <div className="title">暂无任务</div>
-                <div className="desc">点击右上角「新建任务」开始配置自动归集。</div>
-              </div></td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          {filtered.length === 0 ? (
+            <Box sx={{ p: 4 }}>
+              <EmptyState
+                icon={<LayersOutlined sx={{ fontSize: 36 }} />}
+                title="暂无任务"
+                desc="点击右上角「创建归集任务」开始配置自动归集。"
+              />
+            </Box>
+          ) : (
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ width: 220 }}>任务</TableCell>
+                    <TableCell>类型</TableCell>
+                    <TableCell>目标 chain · token</TableCell>
+                    <TableCell>关键参数</TableCell>
+                    <TableCell>下次执行</TableCell>
+                    <TableCell>状态</TableCell>
+                    <TableCell align="right" sx={{ width: 130 }}>
+                      操作
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filtered.map((t) => (
+                    <TableRow key={t.id} hover>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {t.name}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                          {t.id}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          size="small"
+                          color={TASK_TYPE_TONE[t.type]}
+                          label={TASK_TYPE_META[t.type].name}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ maxWidth: 280 }}>
+                          {t.targets.slice(0, 4).map((id) => {
+                            const tok = findToken(id);
+                            const c = tok ? findChain(tok.chainId) : null;
+                            return (
+                              <Chip
+                                key={id}
+                                size="small"
+                                variant="outlined"
+                                label={`${c?.name} · ${tok?.symbol}`}
+                              />
+                            );
+                          })}
+                          {t.targets.length > 4 && (
+                            <Chip
+                              size="small"
+                              variant="outlined"
+                              label={`+${t.targets.length - 4}`}
+                            />
+                          )}
+                        </Stack>
+                      </TableCell>
+                      <TableCell>{renderKeyParams(t)}</TableCell>
+                      <TableCell sx={{ fontSize: 12, fontFamily: 'monospace' }}>
+                        {t.type === 'large_deposit' || t.type === 'withdraw_short' ? (
+                          <Typography variant="caption" color="text.secondary">
+                            事件驱动
+                          </Typography>
+                        ) : t.nextRunAt ? (
+                          fmtDateTime(t.nextRunAt)
+                        ) : (
+                          <Typography variant="caption" color="text.secondary">
+                            —
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Stack direction="row" alignItems="center" gap={1}>
+                          <Switch checked={t.enabled} onChange={() => toggle(t)} size="small" />
+                          <Chip
+                            size="small"
+                            color={t.enabled ? 'success' : 'default'}
+                            label={t.enabled ? '运行中' : '已停用'}
+                          />
+                        </Stack>
+                      </TableCell>
+                      <TableCell align="right">
+                        <IconButton size="small" onClick={() => openEdit(t)} title="编辑">
+                          <EditOutlined sx={{ fontSize: 18 }} />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => setConfirmDelete(t)}
+                          title="删除"
+                          sx={{ color: 'error.main' }}
+                        >
+                          <DeleteOutlineRounded sx={{ fontSize: 18 }} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </Card>
+      </Stack>
 
-      {/* ===== Create / edit modal ===== */}
-      <Modal
-        open={editor.open}
-        onClose={closeEditor}
-        title={editor.mode === 'create' ? (editor.step === 'pick-type' ? '选择任务类型' : '新建归集任务') : '编辑归集任务'}
-        size="lg"
-        footer={
-          editor.step === 'configure' ? (
+      {/* ===== Create / edit dialog ===== */}
+      <Dialog open={editor.open} onClose={closeEditor} fullWidth maxWidth="md">
+        <DialogTitle>
+          {editor.mode === 'create'
+            ? editor.step === 'pick-type'
+              ? '选择任务类型'
+              : '新建归集任务'
+            : '编辑归集任务'}
+        </DialogTitle>
+        <DialogContent dividers>
+          {editor.step === 'pick-type' ? (
             <>
-              {editor.mode === 'create' && (
-                <button className="btn ghost" onClick={() => setEditor((s) => ({ ...s, step: 'pick-type', draft: null }))}>
-                  返回上一步
-                </button>
-              )}
-              <div style={{ flex: 1 }} />
-              <button className="btn ghost" onClick={closeEditor}>取消</button>
-              <button className="btn primary" onClick={saveDraft}>保存任务</button>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                选择一种触发方式，下一步将填写该类型的具体参数。允许多种类型并存运行；同类型对同一
+                chain·token 的配置不可重复。
+              </Typography>
+              <Grid container spacing={2}>
+                {(Object.keys(TASK_TYPE_META) as TaskType[]).map((k) => {
+                  const meta = TASK_TYPE_META[k];
+                  return (
+                    <Grid item xs={12} sm={6} key={k}>
+                      <Box
+                        component="button"
+                        type="button"
+                        onClick={() => pickType(k)}
+                        sx={{
+                          width: '100%',
+                          textAlign: 'left',
+                          backgroundColor: 'background.paper',
+                          border: 1,
+                          borderColor: 'divider',
+                          borderRadius: 2,
+                          p: 3,
+                          cursor: 'pointer',
+                          transition: 'all .15s ease',
+                          '&:hover': {
+                            borderColor: 'primary.main',
+                            boxShadow: 2,
+                          },
+                        }}
+                      >
+                        <Stack direction="row" alignItems="center" gap={1.5} sx={{ mb: 1 }}>
+                          <Box
+                            sx={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: 1.5,
+                              backgroundColor: `${TASK_TYPE_TONE[k]}.lighter`,
+                              color: `${TASK_TYPE_TONE[k]}.dark`,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            {TASK_TYPE_ICON[k]}
+                          </Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                            {meta.name}
+                          </Typography>
+                          <Box sx={{ flex: 1 }} />
+                          <ChevronRightRounded sx={{ color: 'text.disabled', fontSize: 18 }} />
+                        </Stack>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                          {meta.desc}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  );
+                })}
+              </Grid>
             </>
           ) : (
-            <>
-              <div style={{ flex: 1 }} />
-              <button className="btn ghost" onClick={closeEditor}>取消</button>
-            </>
-          )
-        }
-      >
-        {editor.step === 'pick-type' ? (
-          <>
-            <div className="muted mb-12" style={{ fontSize: 13 }}>
-              选择一种触发方式，下一步将填写该类型的具体参数。允许多种类型并存运行；同类型对同一 chain·token 的配置不可重复。
-            </div>
-            <div className="type-grid">
-              {(Object.keys(TASK_TYPE_META) as TaskType[]).map((k) => {
-                const meta = TASK_TYPE_META[k];
-                return (
-                  <button key={k} className="type-card" onClick={() => pickType(k)}>
-                    <div className="row gap-8">
-                      <span className="badge">{TASK_TYPE_ICON[k]()}</span>
-                      <span className="name">{meta.name}</span>
-                      <span style={{ flex: 1 }} />
-                      <IconChevronRight size={14} className="muted"/>
-                    </div>
-                    <div className="desc">{meta.desc}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </>
-        ) : (
-          editor.draft && <>
-            <ConfigureForm
-              draft={editor.draft}
-              onChange={(d) => { setEditor((s) => ({ ...s, draft: d })); if (formError) setFormError(null); }}
-            />
-            {formError && (
-              <div className="form-error mt-12" role="alert">
-                <IconAlert size={16} className="ico"/>
-                <div style={{ whiteSpace: 'pre-line' }}>{formError}</div>
-              </div>
-            )}
-          </>
-        )}
-      </Modal>
+            editor.draft && (
+              <>
+                <ConfigureForm
+                  draft={editor.draft}
+                  onChange={(d) => {
+                    setEditor((s) => ({ ...s, draft: d }));
+                    if (formError) setFormError(null);
+                  }}
+                />
+                {formError && (
+                  <Alert severity="error" icon={<ErrorOutlineRounded />} sx={{ mt: 2, whiteSpace: 'pre-line' }}>
+                    {formError}
+                  </Alert>
+                )}
+              </>
+            )
+          )}
+        </DialogContent>
+        <DialogActions>
+          {editor.step === 'configure' && editor.mode === 'create' && (
+            <Button
+              onClick={() => setEditor((s) => ({ ...s, step: 'pick-type', draft: null }))}
+              color="inherit"
+            >
+              返回上一步
+            </Button>
+          )}
+          <Box sx={{ flex: 1 }} />
+          <Button onClick={closeEditor} color="inherit">
+            取消
+          </Button>
+          {editor.step === 'configure' && (
+            <Button onClick={saveDraft} variant="contained">
+              保存任务
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
 
       {/* ===== Delete confirm ===== */}
-      <Modal
+      <ConfirmDialog
         open={!!confirmDelete}
-        onClose={() => setConfirmDelete(null)}
         title="删除归集任务"
+        confirmText="确认删除"
+        tone="error"
         dismissable={false}
-        footer={
-          <>
-            <div style={{ flex: 1 }} />
-            <button className="btn ghost" onClick={() => setConfirmDelete(null)}>取消</button>
-            <button className="btn danger" onClick={() => { if (confirmDelete) { remove(confirmDelete.id); setConfirmDelete(null); } }}>确认删除</button>
-          </>
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={() => confirmDelete && remove(confirmDelete)}
+        body={
+          <Alert severity="warning">
+            将删除任务「<b>{confirmDelete?.name}</b>
+            」。删除后该任务的循环执行将立即停止，已发生的归集记录会保留。
+          </Alert>
         }
-      >
-        <div className="warn-tip"><IconAlert size={16} className="ico"/>
-          <div>
-            将删除任务「<b>{confirmDelete?.name}</b>」。删除后该任务的循环执行将立即停止，已发生的归集记录会保留。
-          </div>
-        </div>
-      </Modal>
-    </>
+      />
+    </Container>
   );
-}
+});
 
-// ====== sub-components ======
+// ============ ConfigureForm ============
 
 function ConfigureForm({
-  draft, onChange,
-}: { draft: AutoTask; onChange: (next: AutoTask) => void }) {
+  draft,
+  onChange,
+}: {
+  draft: AutoTask;
+  onChange: (next: AutoTask) => void;
+}) {
   const meta = TASK_TYPE_META[draft.type];
 
   return (
-    <div className="field-grid full" style={{ gap: 18 }}>
-      <div className="tip">
-        <IconInfo size={16} className="ico"/>
-        <div><b>{meta.name}</b> · {meta.desc}</div>
-      </div>
+    <Stack spacing={3}>
+      <Alert severity="info" icon={<ErrorOutlineRounded />}>
+        <b>{meta.name}</b> · {meta.desc}
+      </Alert>
 
-      <div className="field-grid">
-        <div className="field">
-          <label>任务名称</label>
-          <input
-            className="input"
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={6}>
+          <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+            任务名称
+          </Typography>
+          <TextField
+            fullWidth
             placeholder="如：稳定币每日余额扫描"
             value={draft.name}
             onChange={(e) => onChange({ ...draft, name: e.target.value })}
           />
-        </div>
-        <div className="field">
-          <label>任务类型</label>
-          <input className="input" value={meta.name} readOnly style={{ background: 'var(--bg-subtle)' }}/>
-        </div>
-      </div>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+            任务类型
+          </Typography>
+          <TextField
+            fullWidth
+            value={meta.name}
+            InputProps={{ readOnly: true }}
+            sx={{ '& .MuiOutlinedInput-root': { backgroundColor: 'grey.100' } }}
+          />
+        </Grid>
+      </Grid>
 
-      <div className="field">
-        <label>目标 chain · token（多选）</label>
-        <TokenPills tokenIds={draft.targets} onRemove={(id) => onChange({ ...draft, targets: draft.targets.filter((x) => x !== id) })}/>
+      <Box>
+        <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+          目标 chain · token（多选）
+        </Typography>
         <MultiTokenPicker
-          value={draft.targets}
+          selected={draft.targets}
           onChange={(next) => onChange({ ...draft, targets: next })}
         />
-      </div>
+      </Box>
 
       {draft.type === 'large_deposit' && (
         <>
@@ -394,7 +636,7 @@ function ConfigureForm({
             targets={draft.targets}
             value={draft.triggerAmount}
             onChange={(s) => onChange({ ...draft, triggerAmount: s } as LargeDepositTask)}
-            hint="目标 token 上的入金 ≥ 此金额时立刻归集该笔资产到热钱包。"
+            helperText="目标 token 上的入金 ≥ 此金额时立刻归集该笔资产到热钱包。"
           />
           <CooldownField
             value={draft.cooldown}
@@ -406,40 +648,25 @@ function ConfigureForm({
 
       {draft.type === 'inactive' && (
         <>
-          <div className="field-grid">
-            <div className="field">
-              <label>未活跃时长</label>
-              <div className="row gap-8">
-                <input
-                  type="number" min={1} className="input" style={{ width: 100 }}
-                  value={draft.inactiveWindow.value}
-                  onChange={(e) => onChange({ ...draft, inactiveWindow: { ...draft.inactiveWindow, value: Math.max(1, Number(e.target.value) || 1) } } as InactiveTask)}
-                />
-                <select className="select" style={{ width: 110 }}
-                  value={draft.inactiveWindow.unit}
-                  onChange={(e) => onChange({ ...draft, inactiveWindow: { ...draft.inactiveWindow, unit: e.target.value as InactiveTask['inactiveWindow']['unit'] } } as InactiveTask)}
-                >
-                  <option value="day">天</option>
-                  <option value="week">周</option>
-                  <option value="month">月</option>
-                </select>
-              </div>
-              <span className="hint">在此时间范围内地址无任何出入金，则视为「未活跃」。</span>
-            </div>
-            <AmountInput
-              targets={draft.targets}
-              value={draft.minCollectAmount}
-              onChange={(s) => onChange({ ...draft, minCollectAmount: s } as InactiveTask)}
-              hint="仅归集余额 ≥ 此金额的地址。"
-            />
-          </div>
-          <div className="field">
-            <label>检测周期</label>
+          <AmountInput
+            targets={draft.targets}
+            value={draft.minCollectAmount}
+            onChange={(s) => onChange({ ...draft, minCollectAmount: s } as InactiveTask)}
+            helperText="仅归集余额 ≥ 此金额的地址。"
+          />
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+              检测周期
+            </Typography>
             <ScheduleEditor
               value={draft.schedule}
               onChange={(s) => onChange({ ...draft, schedule: s } as InactiveTask)}
+              inactiveWindow={draft.inactiveWindow}
+              onInactiveWindowChange={(w) =>
+                onChange({ ...draft, inactiveWindow: w } as InactiveTask)
+              }
             />
-          </div>
+          </Box>
         </>
       )}
 
@@ -449,15 +676,17 @@ function ConfigureForm({
             targets={draft.targets}
             value={draft.minCollectAmount}
             onChange={(s) => onChange({ ...draft, minCollectAmount: s } as BalanceCheckTask)}
-            hint="扫描所有地址中目标 token 的余额，达到此金额则归集。"
+            helperText="扫描所有地址中目标 token 的余额，达到此金额则归集。"
           />
-          <div className="field">
-            <label>检测周期</label>
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+              检测周期
+            </Typography>
             <ScheduleEditor
               value={draft.schedule}
               onChange={(s) => onChange({ ...draft, schedule: s } as BalanceCheckTask)}
             />
-          </div>
+          </Box>
         </>
       )}
 
@@ -467,94 +696,186 @@ function ConfigureForm({
             targets={draft.targets}
             value={draft.minCollectAmount}
             onChange={(s) => onChange({ ...draft, minCollectAmount: s } as WithdrawShortTask)}
-            hint="仅归集余额 ≥ 此金额的地址。"
+            helperText="仅归集余额 ≥ 此金额的地址。"
           />
           <CooldownField
             value={draft.cooldown}
             onChange={(c) => onChange({ ...draft, cooldown: c } as WithdrawShortTask)}
             hint="上一次归集完成后，需经过此时长才会再次触发本任务。"
           />
-          <div className="warn-tip">
-            <IconAlert size={16} className="ico"/>
-            <div style={{ lineHeight: 1.7 }}>
-              <b>触发条件</b>：当系统提现因热钱包余额不足失败，且检测到当前全量地址的「未归集金额」≥ 本次提现金额时，将异步发起一次目标 chain · token 的全地址归集请求。<br/>
+          <Alert severity="warning">
+            <Box sx={{ lineHeight: 1.7 }}>
+              <b>触发条件</b>
+              ：当系统提现因热钱包余额不足失败，且检测到当前全量地址的「未归集金额」≥
+              本次提现金额时，将异步发起一次目标 chain · token 的全地址归集请求。
+              <br />
               <b>间隔规则</b>：
               <ul style={{ margin: '4px 0 0', paddingLeft: 20 }}>
-                <li>上一次归集任务<b>处理中</b>时，对同 chain · token 的新提现不再触发本任务，<b>永远</b>跳过；</li>
-                <li>上一次归集完成后，需经过「重复触发最短间隔」时长，期间内对同 chain · token 的提现直接跳过本任务的检测与执行。</li>
+                <li>
+                  上一次归集任务<b>处理中</b>时，对同 chain · token 的新提现不再触发本任务，
+                  <b>永远</b>跳过；
+                </li>
+                <li>
+                  上一次归集完成后，需经过「重复触发最短间隔」时长，期间内对同 chain · token
+                  的提现直接跳过本任务的检测与执行。
+                </li>
               </ul>
-            </div>
-          </div>
+            </Box>
+          </Alert>
         </>
       )}
-    </div>
+    </Stack>
   );
 }
 
 function CooldownField({
-  value, onChange, hint,
-}: { value: { value: number; unit: 'minute' | 'hour' | 'day' }; onChange: (c: { value: number; unit: 'minute' | 'hour' | 'day' }) => void; hint: string }) {
+  value,
+  onChange,
+  hint,
+}: {
+  value: Cooldown;
+  onChange: (c: Cooldown) => void;
+  hint: string;
+}) {
   return (
-    <div className="field" style={{ maxWidth: 360 }}>
-      <label>重复触发最短间隔</label>
-      <div className="row gap-8">
-        <input
-          type="number" min={1} className="input" style={{ width: 110 }}
+    <Box sx={{ maxWidth: 380 }}>
+      <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+        重复触发最短间隔
+      </Typography>
+      <Stack direction="row" spacing={1} alignItems="center">
+        <TextField
+          type="number"
+          size="small"
           value={value.value}
           onChange={(e) => onChange({ ...value, value: Math.max(1, Number(e.target.value) || 1) })}
+          inputProps={{ min: 1 }}
+          sx={{ width: 110 }}
         />
-        <select
-          className="select" style={{ width: 110 }}
+        <TextField
+          select
+          size="small"
           value={value.unit}
-          onChange={(e) => onChange({ ...value, unit: e.target.value as 'minute' | 'hour' | 'day' })}
+          onChange={(e) => onChange({ ...value, unit: e.target.value as Cooldown['unit'] })}
+          sx={{ width: 110 }}
         >
-          <option value="minute">分钟</option>
-          <option value="hour">小时</option>
-          <option value="day">天</option>
-        </select>
-      </div>
-      <span className="hint">{hint}</span>
-    </div>
+          <MenuItem value="minute">分钟</MenuItem>
+          <MenuItem value="hour">小时</MenuItem>
+          <MenuItem value="day">天</MenuItem>
+        </TextField>
+      </Stack>
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75 }}>
+        {hint}
+      </Typography>
+    </Box>
   );
 }
 
 function renderKeyParams(t: AutoTask) {
   if (t.type === 'large_deposit') {
     return (
-      <div style={{ lineHeight: 1.5 }}>
-        <div><span className="muted">触发金额 </span> <b>{formatAmountSpec(t.triggerAmount, t.targets)}</b></div>
-        <div className="muted" style={{ fontSize: 11.5 }}>冷却 {t.cooldown.value} {unitName(t.cooldown.unit)}</div>
-      </div>
+      <Box sx={{ lineHeight: 1.5 }}>
+        <Box>
+          <Typography component="span" variant="caption" color="text.secondary">
+            触发金额{' '}
+          </Typography>
+          <Box component="b" sx={{ fontSize: 13 }}>
+            {formatAmountSpec(t.triggerAmount, t.targets)}
+          </Box>
+        </Box>
+        <Typography variant="caption" color="text.secondary">
+          冷却 {t.cooldown.value} {unitName(t.cooldown.unit)}
+        </Typography>
+      </Box>
     );
   }
   if (t.type === 'withdraw_short') {
     return (
-      <div style={{ lineHeight: 1.5 }}>
-        <div><span className="muted">最小归集 </span> <b>{formatAmountSpec(t.minCollectAmount, t.targets)}</b></div>
-        <div className="muted" style={{ fontSize: 11.5 }}>冷却 {t.cooldown.value} {unitName(t.cooldown.unit)}</div>
-      </div>
+      <Box sx={{ lineHeight: 1.5 }}>
+        <Box>
+          <Typography component="span" variant="caption" color="text.secondary">
+            最小归集{' '}
+          </Typography>
+          <Box component="b" sx={{ fontSize: 13 }}>
+            {formatAmountSpec(t.minCollectAmount, t.targets)}
+          </Box>
+        </Box>
+        <Typography variant="caption" color="text.secondary">
+          冷却 {t.cooldown.value} {unitName(t.cooldown.unit)}
+        </Typography>
+      </Box>
     );
   }
   if (t.type === 'balance_check') {
     return (
-      <div style={{ lineHeight: 1.5 }}>
-        <div><span className="muted">最小归集 </span> <b>{formatAmountSpec(t.minCollectAmount, t.targets)}</b></div>
-        <div className="muted" style={{ fontSize: 11.5 }}>每 {t.schedule.every} {unitName(t.schedule.unit)}@{t.schedule.anchorTime}</div>
-      </div>
+      <Box sx={{ lineHeight: 1.5 }}>
+        <Box>
+          <Typography component="span" variant="caption" color="text.secondary">
+            最小归集{' '}
+          </Typography>
+          <Box component="b" sx={{ fontSize: 13 }}>
+            {formatAmountSpec(t.minCollectAmount, t.targets)}
+          </Box>
+        </Box>
+        <Typography variant="caption" color="text.secondary">
+          每 {t.schedule.every} {unitName(t.schedule.unit)}@{t.schedule.anchorTime}
+        </Typography>
+      </Box>
     );
   }
   // inactive
   return (
-    <div style={{ lineHeight: 1.5 }}>
-      <div><span className="muted">未活跃</span> <b>{t.inactiveWindow.value} {unitName(t.inactiveWindow.unit)}</b> · <b>{formatAmountSpec(t.minCollectAmount, t.targets)}</b></div>
-      <div className="muted" style={{ fontSize: 11.5 }}>每 {t.schedule.every} {unitName(t.schedule.unit)}@{t.schedule.anchorTime}</div>
-    </div>
+    <Box sx={{ lineHeight: 1.5 }}>
+      <Box>
+        <Typography component="span" variant="caption" color="text.secondary">
+          未活跃
+        </Typography>{' '}
+        <Box component="b" sx={{ fontSize: 13 }}>
+          {t.inactiveWindow.value} {unitName(t.inactiveWindow.unit)}
+        </Box>{' '}
+        ·{' '}
+        <Box component="b" sx={{ fontSize: 13 }}>
+          {formatAmountSpec(t.minCollectAmount, t.targets)}
+        </Box>
+      </Box>
+      <Typography variant="caption" color="text.secondary">
+        每 {t.schedule.every} {unitName(t.schedule.unit)}@{t.schedule.anchorTime}
+      </Typography>
+    </Box>
   );
 }
 
-function unitName(u: 'minute' | 'hour' | 'day' | 'week' | 'month') {
-  return ({ minute: '分钟', hour: '小时', day: '天', week: '周', month: '月' } as const)[u];
+// ============ small stat card ============
+function StatCard({
+  label,
+  value,
+  hint,
+  tone,
+  icon,
+}: {
+  label: string;
+  value: string | number;
+  hint?: string;
+  tone: 'primary' | 'success' | 'warning' | 'info';
+  icon?: React.ReactNode;
+}) {
+  return (
+    <Card sx={{ p: 4, height: '100%' }}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+          {label}
+        </Typography>
+        <Box sx={{ color: `${tone}.main`, display: 'flex' }}>{icon}</Box>
+      </Stack>
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+        {value}
+      </Typography>
+      {hint && (
+        <Typography variant="caption" color="text.secondary">
+          {hint}
+        </Typography>
+      )}
+    </Card>
+  );
 }
 
-// satisfy unused-import linter when `hasNonConvertible` is referenced indirectly
-void hasNonConvertible;
+export default AutoCollection;
