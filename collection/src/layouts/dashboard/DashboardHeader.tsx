@@ -1,132 +1,157 @@
 import { observer } from 'mobx-react-lite';
+import { useState } from 'react';
 import {
   AppBar,
   Avatar,
   Badge,
   Box,
   IconButton,
-  InputAdornment,
+  InputBase,
   Stack,
-  TextField,
   Toolbar,
   Tooltip,
   Typography,
 } from '@mui/material';
 import {
   HelpOutlineRounded,
+  LanguageRounded,
   MenuRounded,
   NotificationsNoneRounded,
   SearchRounded,
   SettingsRounded,
+  ChevronRightRounded,
 } from '@mui/icons-material';
 import { useStores } from '@/stores';
 
-// Sticky AppBar atop the dashboard column. The hamburger label flips
-// between expand/collapse vs open/close depending on whether the viewport
-// is in mobile mode — copy from the original Layout.tsx so screenreader
-// behavior matches.
+// AppBar — strict implementation of preview/appbar.html.
+//   - 72h, bg-paper, bottom border default
+//   - Padding 12px 40px (12 vertical via flex centering, 40 horizontal on md+)
+//   - Search: bg-subtle pill, transparent border default → focus shows paper bg + primary border
+//   - Icon buttons: 36px circle, hover bg `rgba(145,158,171,0.08)`
+//   - Account chip: 44h pill, padding `4 16 4 6`, border-subtle, gradient avatar 32px
 
 const DashboardHeader = observer(function DashboardHeader() {
   const { ui } = useStores();
+  const [searchFocused, setSearchFocused] = useState(false);
 
   const hamburgerLabel = ui.isMobile
-    ? ui.drawerOpen
-      ? '关闭侧栏'
-      : '打开侧栏'
-    : ui.collapsed
-    ? '展开侧栏'
-    : '折叠侧栏';
+    ? (ui.drawerOpen ? '关闭侧栏' : '打开侧栏')
+    : (ui.collapsed ? '展开侧栏' : '折叠侧栏');
 
   return (
-    <AppBar
-      position="sticky"
-      elevation={0}
-      sx={{
-        bgcolor: 'rgba(255,255,255,0.92)',
-        backdropFilter: 'blur(8px)',
-        borderBottom: 1,
-        borderColor: 'divider',
-        color: 'text.primary',
-        zIndex: (t) => t.zIndex.appBar,
-      }}
-    >
+    <AppBar position="sticky">
       <Toolbar
         sx={{
-          minHeight: { xs: 64, md: 64 },
-          gap: 2,
-          px: { xs: 2, md: 4 },
+          minHeight: 72,
+          height: 72,
+          px: { xs: 4, md: 10 }, // 16 / 40
+          gap: 4, // 16
         }}
       >
         <IconButton
           onClick={ui.toggleSidebar}
           aria-label={hamburgerLabel}
           title={hamburgerLabel}
-          edge="start"
+          sx={{ width: 36, height: 36, color: 'grey.700' }}
         >
-          <MenuRounded />
+          <MenuRounded sx={{ fontSize: 20 }} />
         </IconButton>
 
-        <TextField
-          size="small"
-          placeholder="搜索任务、地址、订单…"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchRounded sx={{ fontSize: 18 }} />
-              </InputAdornment>
-            ),
-          }}
+        {/* Search — bg-subtle pill, focus expands */}
+        <Box
           sx={{
-            width: { xs: 0, sm: 240, md: 320 },
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiOutlinedInput-root': { backgroundColor: 'background.paper' },
+            display: 'flex', alignItems: 'center', gap: 1,
+            flex: 1, maxWidth: 360,
+            height: 40,
+            px: 3, // 12
+            borderRadius: 2, // 8
+            bgcolor: searchFocused ? 'background.paper' : 'grey.100',
+            border: '1px solid',
+            borderColor: searchFocused ? 'primary.main' : 'transparent',
+            transition: 'background 120ms, border-color 120ms',
           }}
-        />
+        >
+          <SearchRounded sx={{ fontSize: 18, color: 'text.secondary', flexShrink: 0 }} />
+          <InputBase
+            placeholder="搜索任务、地址、订单…"
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
+            sx={{
+              flex: 1,
+              fontSize: 14,
+              '& input::placeholder': { color: 'text.secondary', opacity: 1 },
+            }}
+          />
+        </Box>
 
         <Box sx={{ flex: 1 }} />
 
-        <Stack direction="row" alignItems="center" spacing={0.5}>
-          <Tooltip title="设置">
-            <IconButton size="medium">
-              <SettingsRounded sx={{ fontSize: 20 }} />
+        {/* Right cluster: icon buttons (36 circle) + account chip */}
+        <Stack direction="row" alignItems="center" gap={0.5}>
+          <Tooltip title="语言">
+            <IconButton sx={{ width: 36, height: 36, color: 'grey.700' }}>
+              <LanguageRounded sx={{ fontSize: 20 }} />
             </IconButton>
           </Tooltip>
           <Tooltip title="帮助">
-            <IconButton size="medium" sx={{ display: { xs: 'none', sm: 'inline-flex' } }}>
+            <IconButton sx={{ width: 36, height: 36, color: 'grey.700' }}>
               <HelpOutlineRounded sx={{ fontSize: 20 }} />
             </IconButton>
           </Tooltip>
+          <Tooltip title="设置">
+            <IconButton sx={{ width: 36, height: 36, color: 'grey.700' }}>
+              <SettingsRounded sx={{ fontSize: 20 }} />
+            </IconButton>
+          </Tooltip>
           <Tooltip title="通知">
-            <IconButton size="medium">
-              <Badge variant="dot" color="error">
+            <IconButton sx={{ width: 36, height: 36, color: 'grey.700' }}>
+              <Badge
+                variant="dot"
+                color="error"
+                overlap="circular"
+                sx={{ '& .MuiBadge-dot': { boxShadow: '0 0 0 2px #fff', width: 8, height: 8, borderRadius: '50%' } }}
+              >
                 <NotificationsNoneRounded sx={{ fontSize: 20 }} />
               </Badge>
             </IconButton>
           </Tooltip>
 
-          <Box
+          {/* Account chip — 44h pill */}
+          <Stack
+            direction="row"
+            alignItems="center"
+            gap={1.5}
             sx={{
-              display: { xs: 'none', md: 'flex' },
-              alignItems: 'center',
-              gap: 1.5,
-              ml: 1.5,
-              pl: 2,
-              borderLeft: 1,
-              borderColor: 'divider',
+              ml: 1,
+              height: 44,
+              pl: 1,        // 4
+              pr: 4,        // 16
+              borderRadius: 30,
+              bgcolor: 'background.paper',
+              border: '1px solid rgba(145,158,171,0.24)',
+              cursor: 'pointer',
+              transition: 'background 120ms ease-out',
+              '&:hover': { bgcolor: 'grey.100' },
             }}
           >
-            <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: 13, fontWeight: 700 }}>
+            <Avatar
+              sx={{
+                width: 32, height: 32, fontSize: 13, fontWeight: 700,
+                background: 'radial-gradient(circle at 30% 30%, #8B5CF6, #6D28D9)',
+              }}
+            >
               CC
             </Avatar>
-            <Box>
-              <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+            <Box sx={{ display: { xs: 'none', sm: 'flex' }, flexDirection: 'column', lineHeight: 1.1 }}>
+              <Typography sx={{ fontSize: 13, fontWeight: 700, color: 'text.primary', letterSpacing: '0.2px' }}>
                 CCPay 运营
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography sx={{ fontSize: 10, fontWeight: 500, color: 'grey.600', mt: 0.5, letterSpacing: '0.3px' }}>
                 Operations · Admin
               </Typography>
             </Box>
-          </Box>
+            <ChevronRightRounded sx={{ fontSize: 14, color: 'text.secondary', display: { xs: 'none', sm: 'inline' } }} />
+          </Stack>
         </Stack>
       </Toolbar>
     </AppBar>

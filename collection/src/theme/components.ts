@@ -1,6 +1,6 @@
-// Per-component MUI overrides — make every primitive feel native to CCPayment.
-// Anything that matters visually for the brand (button shape, card shadow,
-// table row dividers, chip variants, dialog elevation) is locked here.
+// Per-component MUI overrides — strict refactor against the CCPayment Design
+// System ui_kit (preview/components/*.html). Every recipe here points back to
+// the named DS spec frame so future audits can re-verify in one read.
 
 import type { Components, Theme } from '@mui/material';
 import { brandShadows } from './shadows';
@@ -14,6 +14,7 @@ export const components: Components<Theme> = {
     },
   },
 
+  // -------- buttons (preview/buttons.html) --------
   MuiButton: {
     defaultProps: { disableElevation: true },
     styleOverrides: {
@@ -22,33 +23,55 @@ export const components: Components<Theme> = {
         borderRadius: 8,
         fontWeight: 700,
         boxShadow: 'none',
+        transition: 'background 120ms ease-out, box-shadow 120ms ease-out',
       },
-      sizeSmall: { height: 30, padding: '0 10px', fontSize: 13 },
-      sizeMedium: { height: 36, padding: '0 16px' },
-      sizeLarge: { height: 48, padding: '0 22px', fontSize: 15 },
+      sizeSmall:  { padding: '4px 12px',  fontSize: 12, lineHeight: '22px' },
+      sizeMedium: { padding: '9px 20px',  fontSize: 14, lineHeight: '22px' },
+      sizeLarge:  { padding: '11px 24px', fontSize: 16, lineHeight: '26px' },
+      // Contained primary keeps the colored shadow at rest (per DS).
       containedPrimary: {
-        boxShadow: 'none',
+        boxShadow: brandShadows.primary,
         '&:hover': { boxShadow: brandShadows.primary, backgroundColor: '#1E3EB0' },
+        '&.Mui-disabled': { boxShadow: 'none', backgroundColor: '#CACFD8', color: '#71757E' },
       },
+      containedSuccess: { boxShadow: brandShadows.success, '&:hover': { boxShadow: brandShadows.success } },
+      containedWarning: { boxShadow: brandShadows.warning, color: '#1F2025', '&:hover': { boxShadow: brandShadows.warning, color: '#fff' } },
+      containedError:   { boxShadow: brandShadows.error,   '&:hover': { boxShadow: brandShadows.error } },
+      // Outlined uses inset box-shadow, not a normal border (DS pattern keeps height stable).
       outlined: {
-        borderColor: '#CACFD8',
-        '&:hover': { borderColor: '#3C6FF5', backgroundColor: 'rgba(60,111,245,0.04)' },
+        border: 0,
+        boxShadow: 'inset 0 0 0 1px #CACFD8',
+        color: '#1F2025',
+        '&:hover': { backgroundColor: 'rgba(60,111,245,0.04)', boxShadow: 'inset 0 0 0 1px #3C6FF5', border: 0 },
+      },
+      outlinedPrimary: {
+        boxShadow: 'inset 0 0 0 1px #3C6FF5',
+        color: '#3C6FF5',
+        '&:hover': { backgroundColor: 'rgba(60,111,245,0.08)', boxShadow: 'inset 0 0 0 1px #3C6FF5' },
       },
       text: {
+        '&:hover': { backgroundColor: 'rgba(145,158,171,0.08)' },
+      },
+      textPrimary: {
         '&:hover': { backgroundColor: 'rgba(60,111,245,0.08)' },
       },
     },
   },
 
+  // -------- icon button (preview/appbar.html: 36px circle) --------
   MuiIconButton: {
     styleOverrides: {
       root: {
-        borderRadius: 8,
+        borderRadius: '50%',
         '&:hover': { backgroundColor: 'rgba(145,158,171,0.08)' },
       },
+      sizeSmall: { width: 32, height: 32 },
+      sizeMedium: { width: 36, height: 36 },
+      sizeLarge: { width: 40, height: 40 },
     },
   },
 
+  // -------- card (preview/components/CardHeader.html — 16 radius, shadow-card) --------
   MuiCard: {
     defaultProps: { elevation: 0 },
     styleOverrides: {
@@ -56,6 +79,15 @@ export const components: Components<Theme> = {
         borderRadius: 16,
         backgroundColor: '#FFFFFF',
         boxShadow: brandShadows.card,
+        backgroundImage: 'none',
+      },
+    },
+  },
+  MuiCardContent: {
+    styleOverrides: {
+      root: {
+        padding: 24,
+        '&:last-child': { paddingBottom: 24 },
       },
     },
   },
@@ -68,14 +100,23 @@ export const components: Components<Theme> = {
     },
   },
 
+  // -------- AppBar (preview/appbar.html — 72h, white, bottom border) --------
   MuiAppBar: {
-    defaultProps: { color: 'default', elevation: 0 },
+    defaultProps: { color: 'inherit', elevation: 0 },
     styleOverrides: {
       root: {
-        backgroundColor: 'rgba(255,255,255,0.92)',
+        backgroundColor: '#FFFFFF',
         color: '#1F2025',
-        backdropFilter: 'blur(8px)',
-        borderBottom: '1px solid rgba(145,158,171,0.16)',
+        borderBottom: '1px solid #E8ECF2',
+        boxShadow: 'none',
+      },
+    },
+  },
+  MuiToolbar: {
+    styleOverrides: {
+      root: {
+        minHeight: 72,
+        '@media (min-width:600px)': { minHeight: 72 },
       },
     },
   },
@@ -84,11 +125,13 @@ export const components: Components<Theme> = {
     styleOverrides: {
       paper: {
         backgroundColor: '#FFFFFF',
-        borderRight: '1px solid rgba(145,158,171,0.16)',
+        borderRight: '1px solid #E8ECF2',
+        boxShadow: 'none',
       },
     },
   },
 
+  // -------- Dialog (preview/components/Dialog.html — 16 radius, dialog shadow) --------
   MuiDialog: {
     styleOverrides: {
       paper: {
@@ -97,7 +140,6 @@ export const components: Components<Theme> = {
       },
     },
   },
-
   MuiDialogTitle: {
     styleOverrides: {
       root: {
@@ -108,60 +150,70 @@ export const components: Components<Theme> = {
       },
     },
   },
-
   MuiDialogContent: {
     styleOverrides: {
-      root: {
-        padding: '12px 24px 8px',
-      },
+      root: { padding: '12px 24px 8px' },
     },
   },
-
   MuiDialogActions: {
     styleOverrides: {
-      root: {
-        padding: '16px 24px 20px',
-        gap: 8,
-      },
+      root: { padding: '16px 24px 20px', gap: 8 },
     },
   },
 
+  // -------- Text fields (preview/text-fields.html) --------
   MuiTextField: {
     defaultProps: { size: 'small', variant: 'outlined' },
   },
-
   MuiOutlinedInput: {
     styleOverrides: {
       root: {
         borderRadius: 8,
         backgroundColor: '#FFFFFF',
-        '& .MuiOutlinedInput-notchedOutline': { borderColor: '#CACFD8' },
+        transition: 'box-shadow 120ms ease-out, border-color 120ms ease-out',
+        '& .MuiOutlinedInput-notchedOutline': { borderColor: '#E8ECF2' },
         '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#A3A8B1' },
-        '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3C6FF5', borderWidth: 1 },
+        '&.Mui-focused': {
+          boxShadow: '0 0 0 3px rgba(60,111,245,0.14)',
+          '& .MuiOutlinedInput-notchedOutline': { borderColor: '#3C6FF5', borderWidth: 1 },
+        },
+        '&.Mui-disabled': { backgroundColor: '#F8F9FB' },
       },
-      input: { fontSize: 14, '&::placeholder': { color: '#A3A8B1', opacity: 1 } },
+      input: {
+        fontSize: 14,
+        padding: '10px 12px',
+        '&::placeholder': { color: '#A3A8B1', opacity: 1 },
+      },
+      sizeSmall: {
+        '& .MuiOutlinedInput-input': { padding: '8px 12px' },
+      },
     },
   },
-
   MuiInputLabel: {
     styleOverrides: {
-      root: { fontSize: 14, color: '#71757E' },
+      root: {
+        fontSize: 14, color: '#71757E',
+        '&.Mui-focused': { color: '#3C6FF5' },
+      },
     },
   },
-
   MuiSelect: {
+    defaultProps: { size: 'small' },
     styleOverrides: {
       select: { paddingTop: 8, paddingBottom: 8 },
     },
   },
 
+  // -------- Menu (preview/components/Menu.html) --------
   MuiMenuItem: {
     styleOverrides: {
       root: {
-        borderRadius: 8,
+        borderRadius: 6,
         margin: '2px 6px',
-        fontSize: 14,
-        '&:hover': { backgroundColor: 'rgba(145,158,171,0.08)' },
+        fontSize: 13,
+        height: 36,
+        fontWeight: 500,
+        '&:hover': { backgroundColor: 'rgba(145,158,171,0.12)' },
         '&.Mui-selected': {
           backgroundColor: 'rgba(60,111,245,0.08)',
           color: '#3C6FF5',
@@ -171,16 +223,36 @@ export const components: Components<Theme> = {
       },
     },
   },
+  MuiMenu: {
+    styleOverrides: {
+      paper: {
+        borderRadius: 12,
+        boxShadow: brandShadows.dropdown,
+        padding: 4,
+      },
+    },
+  },
 
+  // -------- Chip (preview/components/Chip.html: 26h, radius 9999, soft) --------
   MuiChip: {
     styleOverrides: {
       root: {
-        borderRadius: 6,
+        borderRadius: 9999,
         fontWeight: 600,
         fontSize: 12,
-        height: 22,
+        height: 26,
+        padding: 0,
       },
-      label: { padding: '0 8px' },
+      label: { padding: '0 10px' },
+      sizeSmall: { height: 22, fontSize: 11, '& .MuiChip-label': { padding: '0 8px' } },
+      // Soft semantic colors — these mirror Chip.html exactly. `colorX` covers
+      // both filled (default) and outlined variants since MUI applies palette
+      // mapping per variant on top of these base styles.
+      colorPrimary: { backgroundColor: 'rgba(60,111,245,0.16)',  color: '#1E3EB0' },
+      colorSuccess: { backgroundColor: 'rgba(67,190,118,0.16)',  color: '#0C5B4C' },
+      colorWarning: { backgroundColor: 'rgba(231,178,43,0.16)',  color: '#72490B' },
+      colorError:   { backgroundColor: 'rgba(236,104,76,0.16)',  color: '#710E1B' },
+      colorInfo:    { backgroundColor: 'rgba(101,174,232,0.16)', color: '#15326C' },
     },
   },
 
@@ -197,43 +269,56 @@ export const components: Components<Theme> = {
     },
   },
 
+  // -------- Table (preview/table.html) --------
+  // Note: the canonical "table-wrap" recipe (single card with grey-100 toolbar
+  // + grey-100 pagination strip) is composed at the page level — see
+  // src/components/TableCard.tsx for the recipe.
+  MuiTable: {
+    styleOverrides: {
+      root: { borderCollapse: 'collapse' },
+    },
+  },
   MuiTableCell: {
     styleOverrides: {
       root: {
         borderBottomColor: 'rgba(145,158,171,0.16)',
-        fontSize: 13.5,
-        padding: '14px 12px',
+        fontSize: 14,
+        padding: '14px 16px',
       },
       head: {
-        backgroundColor: '#F8F9FB',
+        backgroundColor: '#FFFFFF',
         color: '#71757E',
-        fontWeight: 600,
+        fontWeight: 500,
         fontSize: 12,
         lineHeight: '16px',
         textTransform: 'none',
-        padding: '12px 12px',
+        height: 56,
+        padding: '0 16px',
+        borderBottom: '1px solid #E8ECF2',
+        whiteSpace: 'nowrap',
       },
     },
   },
-
   MuiTableRow: {
     styleOverrides: {
       root: {
+        transition: 'background 120ms ease-out',
         '&:hover': { backgroundColor: '#F8F9FB' },
         '&:last-child td': { borderBottom: 'none' },
       },
     },
   },
-
   MuiTablePagination: {
     styleOverrides: {
       root: {
-        borderTop: '1px solid rgba(145,158,171,0.16)',
+        borderTop: '1px solid #E8ECF2',
         backgroundColor: '#F8F9FB',
+        minHeight: 64,
       },
-      toolbar: { minHeight: 56 },
-      selectLabel: { fontSize: 12, color: '#71757E' },
-      displayedRows: { fontSize: 12, color: '#71757E' },
+      toolbar: { minHeight: 64, paddingLeft: 16, paddingRight: 16 },
+      selectLabel: { fontSize: 13, color: '#71757E' },
+      displayedRows: { fontSize: 13, color: '#71757E' },
+      input: { fontSize: 13 },
     },
   },
 
@@ -269,16 +354,36 @@ export const components: Components<Theme> = {
         fontSize: 14,
         alignItems: 'flex-start',
       },
-      standardSuccess: { backgroundColor: '#DBFBDB', color: '#0C5B4C' },
-      standardWarning: { backgroundColor: '#FEF7D8', color: '#72490B' },
-      standardError:   { backgroundColor: '#FEECDB', color: '#710E1B' },
-      standardInfo:    { backgroundColor: '#E3F7FD', color: '#15326C' },
+      standardSuccess: { backgroundColor: 'rgba(67,190,118,0.16)',  color: '#0C5B4C' },
+      standardWarning: { backgroundColor: 'rgba(231,178,43,0.16)',  color: '#72490B' },
+      standardError:   { backgroundColor: 'rgba(236,104,76,0.16)',  color: '#710E1B' },
+      standardInfo:    { backgroundColor: 'rgba(101,174,232,0.16)', color: '#15326C' },
     },
   },
 
   MuiDivider: {
     styleOverrides: {
       root: { borderColor: 'rgba(145,158,171,0.16)' },
+    },
+  },
+
+  MuiLinearProgress: {
+    styleOverrides: {
+      root: { borderRadius: 999 },
+    },
+  },
+
+  // -------- Lists (used in sidebar fallback only — sidebar itself is custom now) --------
+  MuiListItemButton: {
+    styleOverrides: {
+      root: {
+        borderRadius: 8,
+        '&.Mui-selected': {
+          backgroundColor: 'rgba(60,111,245,0.08)',
+          color: '#3C6FF5',
+          '&:hover': { backgroundColor: 'rgba(60,111,245,0.12)' },
+        },
+      },
     },
   },
 };

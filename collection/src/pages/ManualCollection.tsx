@@ -21,13 +21,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import {
-  PlayArrowRounded,
-  SearchRounded,
-  ShieldOutlined,
-  ScaleOutlined,
-  LayersOutlined,
-} from '@mui/icons-material';
+import { PlayArrowRounded, SearchRounded, ShieldOutlined } from '@mui/icons-material';
 import { findChain, findToken, isConvertible } from '@/data/tokens';
 import { collectionApi } from '@/api/collection';
 import type { UncollectedAddress, UncollectedQueryResult } from '@/data/mockData';
@@ -35,6 +29,7 @@ import { SingleTokenPicker } from '@/components/TokenPicker';
 import CryptoBadge from '@/components/CryptoBadge';
 import EmptyState from '@/components/EmptyState';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import StatCard from '@/components/StatCard';
 import { TOKEN_AMOUNT_STEP, fmtDateTime, fmtTokenAmount, usd } from '@/utils/format';
 import { useStores } from '@/stores';
 
@@ -158,20 +153,18 @@ const ManualCollection = observer(function ManualCollection() {
   return (
     <Container maxWidth={ui.themeStretch ? false : 'xl'} disableGutters>
       <Stack spacing={4}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-            手动归集
-          </Typography>
+        <Stack spacing={0.5}>
+          <Typography variant="h2">手动归集</Typography>
           <Typography variant="body2" color="text.secondary">
             设置最小归集{conv ? '金额' : '数量'}并查询，查看正常 / 异常资产分布，确认后提交归集。
           </Typography>
-        </Box>
+        </Stack>
 
         {/* ===== Step 1 ===== */}
         <Card sx={{ p: 6, maxWidth: 1080 }}>
-          <Stack direction="row" alignItems="center" gap={1.5} sx={{ mb: 3 }}>
+          <Stack direction="row" alignItems="center" gap={1.5} sx={{ mb: 4 }}>
             <Chip size="small" color="primary" label="Step 1" />
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            <Typography sx={{ fontSize: 16, fontWeight: 600 }}>
               选择 chain · token、设置最小归集{conv ? '金额' : '数量'}并查询
             </Typography>
           </Stack>
@@ -267,10 +260,10 @@ const ManualCollection = observer(function ManualCollection() {
               alignItems="center"
               gap={1.5}
               flexWrap="wrap"
-              sx={{ mb: 3 }}
+              sx={{ mb: 4 }}
             >
               <Chip size="small" color="primary" label="Step 2" />
-              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              <Typography sx={{ fontSize: 16, fontWeight: 600 }}>
                 未归集情况 — 阈值 ≥{' '}
                 {conv ? usd(minUsd) : `${fmtTokenAmount(minAmount)} ${tokenSymbol}`}
               </Typography>
@@ -280,49 +273,43 @@ const ManualCollection = observer(function ManualCollection() {
               </Typography>
             </Stack>
 
-            <Grid container spacing={3} sx={{ mb: 3 }}>
-              <Grid item xs={12} md={4}>
-                <StatCard
-                  tone="primary"
-                  label="总未归集"
-                  value={`${fmtTokenAmount(filtered.totalAmount)} ${tokenSymbol}`}
-                  hint={
-                    (filtered.totalUsd != null ? `${usd(filtered.totalUsd)} · ` : '') +
-                    `${filtered.total} 个地址`
-                  }
-                  icon={<LayersOutlined />}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <StatCard
-                  tone="success"
-                  label="正常数量"
-                  value={`${fmtTokenAmount(filtered.normalAmount)} ${tokenSymbol}`}
-                  hint={
-                    (filtered.normalUsd != null ? `${usd(filtered.normalUsd)} · ` : '') +
-                    `${filtered.normal.length} 个 · 占比 ${(filtered.normalRatio * 100).toFixed(1)}%`
-                  }
-                  icon={<ScaleOutlined />}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <StatCard
-                  tone="warning"
-                  label="异常数量"
-                  value={`${fmtTokenAmount(filtered.abnormalAmount)} ${tokenSymbol}`}
-                  hint={
-                    (filtered.abnormalUsd != null ? `${usd(filtered.abnormalUsd)} · ` : '') +
-                    `${filtered.abnormal.length} 个 · 占比 ${(filtered.abnormalRatio * 100).toFixed(1)}%`
-                  }
-                  icon={<ShieldOutlined />}
-                />
-              </Grid>
-            </Grid>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
+                gap: 5,
+                mb: 4,
+              }}
+            >
+              <StatCard
+                tone="accent"
+                label="总未归集"
+                value={`${fmtTokenAmount(filtered.totalAmount)} ${tokenSymbol}`}
+                hint={
+                  (filtered.totalUsd != null ? `${usd(filtered.totalUsd)} · ` : '') +
+                  `${filtered.total} 个地址`
+                }
+              />
+              <StatCard
+                label="正常数量"
+                value={`${fmtTokenAmount(filtered.normalAmount)} ${tokenSymbol}`}
+                hint={
+                  (filtered.normalUsd != null ? `${usd(filtered.normalUsd)} · ` : '') +
+                  `${filtered.normal.length} 个 · 占比 ${(filtered.normalRatio * 100).toFixed(1)}%`
+                }
+              />
+              <StatCard
+                label="异常数量"
+                value={`${fmtTokenAmount(filtered.abnormalAmount)} ${tokenSymbol}`}
+                hint={
+                  (filtered.abnormalUsd != null ? `${usd(filtered.abnormalUsd)} · ` : '') +
+                  `${filtered.abnormal.length} 个 · 占比 ${(filtered.abnormalRatio * 100).toFixed(1)}%`
+                }
+              />
+            </Box>
 
             <Stack direction="row" alignItems="center" gap={1} sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                异常金额地址表
-              </Typography>
+              <Typography sx={{ fontSize: 16, fontWeight: 600 }}>异常金额地址表</Typography>
               <Typography variant="caption" color="text.secondary">
                 · 仅供参考，不会被归集
               </Typography>
@@ -480,40 +467,5 @@ const ManualCollection = observer(function ManualCollection() {
     </Container>
   );
 });
-
-// ============ local helpers ============
-
-function StatCard({
-  label,
-  value,
-  hint,
-  tone,
-  icon,
-}: {
-  label: string;
-  value: string;
-  hint?: string;
-  tone: 'primary' | 'success' | 'warning' | 'info';
-  icon?: React.ReactNode;
-}) {
-  return (
-    <Card sx={{ p: 4, height: '100%' }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-          {label}
-        </Typography>
-        <Box sx={{ color: `${tone}.main`, display: 'flex' }}>{icon}</Box>
-      </Stack>
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-        {value}
-      </Typography>
-      {hint && (
-        <Typography variant="caption" color="text.secondary">
-          {hint}
-        </Typography>
-      )}
-    </Card>
-  );
-}
 
 export default ManualCollection;

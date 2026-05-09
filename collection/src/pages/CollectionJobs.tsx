@@ -4,17 +4,16 @@ import {
   Alert,
   Box,
   Button,
-  Card,
   Chip,
   Container,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
   IconButton,
   InputAdornment,
   MenuItem,
+  Select,
   Stack,
   Table,
   TableBody,
@@ -25,18 +24,18 @@ import {
   TableRow,
   TableSortLabel,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import {
   ArrowDownwardRounded,
-  BoltOutlined,
   CloseRounded,
   ContentCopyRounded,
   ErrorOutlineRounded,
+  FileDownloadOutlined,
   LayersOutlined,
-  ScaleOutlined,
+  RefreshRounded,
   SearchRounded,
-  TollOutlined,
 } from '@mui/icons-material';
 import {
   JOB_STATUS_META,
@@ -44,12 +43,14 @@ import {
   type JobStatus,
   type RecordTrigger,
 } from '@/data/types';
-import { CHAINS, TOKENS, findChain, findToken, isTrxChain, tokensByChain } from '@/data/tokens';
+import { CHAINS, TOKENS, findChain, findToken, tokensByChain } from '@/data/tokens';
 import { useStores } from '@/stores';
 import CryptoBadge from '@/components/CryptoBadge';
 import EmptyState from '@/components/EmptyState';
 import ConfirmDialog from '@/components/ConfirmDialog';
-import { fmtDateTime, fmtTokenAmount, numFmt, usd } from '@/utils/format';
+import StatCard from '@/components/StatCard';
+import { TableCard, TableToolbar, TableFooter } from '@/components/TableCard';
+import { fmtDateTime, fmtTokenAmount, usd } from '@/utils/format';
 
 const TRIGGER_LABEL: Record<RecordTrigger, { name: string; color: 'primary' | 'info' | 'success' | 'warning' | 'default' }> = {
   auto_large_deposit: { name: '自动 · 大额充值检测', color: 'primary' },
@@ -64,6 +65,13 @@ const STATUS_COLOR: Record<JobStatus, 'default' | 'info' | 'success' | 'error'> 
   running: 'info',
   completed: 'success',
   aborted: 'error',
+};
+
+const STATUS_DOT_COLOR: Record<JobStatus, string> = {
+  pending: '#71757E',
+  running: '#3767A3',
+  completed: '#218861',
+  aborted: '#A92926',
 };
 
 type SortKey = 'occurredAt' | 'addressCount' | 'totalAmount' | 'totalUsd' | 'feeUsd';
@@ -159,8 +167,6 @@ const CollectionJobs = observer(function CollectionJobs() {
       completed: records.filter((r) => r.status === 'completed').length,
       aborted: records.filter((r) => r.status === 'aborted').length,
       totalUsd24: sumIf(last24, (r) => r.totalUsd ?? 0),
-      gas24: sumIf(last24, (r) => r.feeUsd),
-      trxEnergy24: sumIf(last24, (r) => (isTrxChain(r.chainId) ? r.energy ?? 0 : 0)),
     };
   }, [records]);
 
@@ -181,137 +187,123 @@ const CollectionJobs = observer(function CollectionJobs() {
   return (
     <Container maxWidth={ui.themeStretch ? false : 'xl'} disableGutters>
       <Stack spacing={4}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-            归集任务
-          </Typography>
+        <Stack spacing={0.5}>
+          <Typography variant="h2">归集任务</Typography>
           <Typography variant="body2" color="text.secondary">
             汇总自动 / 手动归集任务，每条 token
             级原子归集独立成行；可对待执行 / 执行中任务进行终止。
           </Typography>
+        </Stack>
+
+        {/* ===== 5 stat cards strip ===== */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(5, 1fr)' },
+            gap: 5,
+          }}
+        >
+          <StatCard tone="accent" label="待执行" value={stats.pending} />
+          <StatCard label="执行中" value={stats.running} />
+          <StatCard label="已完成" value={stats.completed} />
+          <StatCard label="已终止" value={stats.aborted} />
+          <StatCard label="24h 总归集 USD" value={usd(stats.totalUsd24)} />
         </Box>
 
-        {/* ===== 7 stat cards strip ===== */}
-        <Grid container spacing={3}>
-          <Grid item xs={6} sm={4} md={3} lg>
-            <StatCard label="待执行" value={stats.pending} tone="default" icon={<LayersOutlined />} />
-          </Grid>
-          <Grid item xs={6} sm={4} md={3} lg>
-            <StatCard label="执行中" value={stats.running} tone="info" icon={<ScaleOutlined />} />
-          </Grid>
-          <Grid item xs={6} sm={4} md={3} lg>
-            <StatCard label="已完成" value={stats.completed} tone="success" icon={<ScaleOutlined />} />
-          </Grid>
-          <Grid item xs={6} sm={4} md={3} lg>
-            <StatCard label="已终止" value={stats.aborted} tone="error" icon={<CloseRounded />} />
-          </Grid>
-          <Grid item xs={6} sm={4} md={3} lg>
-            <StatCard
-              label="24h 总归集 USD"
-              value={usd(stats.totalUsd24)}
-              tone="primary"
-              icon={<ScaleOutlined />}
-            />
-          </Grid>
-          <Grid item xs={6} sm={4} md={3} lg>
-            <StatCard label="24h gas" value={usd(stats.gas24)} tone="warning" icon={<TollOutlined />} />
-          </Grid>
-          <Grid item xs={6} sm={4} md={3} lg>
-            <StatCard
-              label="TRX 能量消耗"
-              value={numFmt(stats.trxEnergy24, 0)}
-              tone="info"
-              icon={<BoltOutlined />}
-            />
-          </Grid>
-        </Grid>
-
         {/* ===== Table ===== */}
-        <Card sx={{ overflow: 'hidden' }}>
-          <Stack
-            direction={{ xs: 'column', md: 'row' }}
-            gap={2}
-            alignItems={{ md: 'center' }}
-            sx={{ p: 4, borderBottom: 1, borderColor: 'divider' }}
-          >
-            <TextField
-              size="small"
-              placeholder="搜索任务、地址、tx"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchRounded sx={{ fontSize: 16 }} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ minWidth: 220 }}
-            />
-            <TextField
-              select
-              size="small"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as 'all' | JobStatus)}
-              sx={{ minWidth: 140 }}
-            >
-              <MenuItem value="all">全部状态</MenuItem>
-              {(Object.keys(JOB_STATUS_META) as JobStatus[]).map((k) => (
-                <MenuItem key={k} value={k}>
-                  {JOB_STATUS_META[k].name}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField
-              select
-              size="small"
-              value={chainFilter}
-              onChange={(e) => {
-                setChainFilter(e.target.value);
-                setTokenFilter('all');
-              }}
-              sx={{ minWidth: 140 }}
-            >
-              <MenuItem value="all">全部 chain</MenuItem>
-              {CHAINS.map((c) => (
-                <MenuItem key={c.id} value={c.id}>
-                  {c.name}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField
-              select
-              size="small"
-              value={tokenFilter}
-              onChange={(e) => setTokenFilter(e.target.value)}
-              sx={{ minWidth: 160 }}
-            >
-              <MenuItem value="all">全部 token</MenuItem>
-              {(chainFilter === 'all' ? TOKENS : tokensByChain(chainFilter)).map((t) => (
-                <MenuItem key={t.id} value={t.id}>
-                  {findChain(t.chainId)?.name} · {t.symbol}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField
-              select
-              size="small"
-              value={triggerFilter}
-              onChange={(e) => setTriggerFilter(e.target.value as 'all' | RecordTrigger)}
-              sx={{ minWidth: 180 }}
-            >
-              <MenuItem value="all">全部触发方式</MenuItem>
-              {(Object.keys(TRIGGER_LABEL) as RecordTrigger[]).map((k) => (
-                <MenuItem key={k} value={k}>
-                  {TRIGGER_LABEL[k].name}
-                </MenuItem>
-              ))}
-            </TextField>
-            <Box sx={{ flex: 1 }} />
-            <Typography variant="caption" color="text.secondary">
-              共 {filtered.length} 条
-            </Typography>
-          </Stack>
+        <TableCard>
+          <TableToolbar
+            left={
+              <>
+                <TextField
+                  size="small"
+                  placeholder="搜索…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchRounded sx={{ fontSize: 18, color: 'text.secondary' }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ width: 240 }}
+                />
+                <Select
+                  size="small"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as 'all' | JobStatus)}
+                  sx={{ minWidth: 120 }}
+                >
+                  <MenuItem value="all">全部状态</MenuItem>
+                  {(Object.keys(JOB_STATUS_META) as JobStatus[]).map((k) => (
+                    <MenuItem key={k} value={k}>
+                      {JOB_STATUS_META[k].name}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <Select
+                  size="small"
+                  value={chainFilter}
+                  onChange={(e) => {
+                    setChainFilter(e.target.value);
+                    setTokenFilter('all');
+                  }}
+                  sx={{ minWidth: 120 }}
+                >
+                  <MenuItem value="all">全部 chain</MenuItem>
+                  {CHAINS.map((c) => (
+                    <MenuItem key={c.id} value={c.id}>
+                      {c.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <Select
+                  size="small"
+                  value={tokenFilter}
+                  onChange={(e) => setTokenFilter(e.target.value)}
+                  sx={{ minWidth: 120 }}
+                >
+                  <MenuItem value="all">全部 token</MenuItem>
+                  {(chainFilter === 'all' ? TOKENS : tokensByChain(chainFilter)).map((t) => (
+                    <MenuItem key={t.id} value={t.id}>
+                      {findChain(t.chainId)?.name} · {t.symbol}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <Select
+                  size="small"
+                  value={triggerFilter}
+                  onChange={(e) => setTriggerFilter(e.target.value as 'all' | RecordTrigger)}
+                  sx={{ minWidth: 120 }}
+                >
+                  <MenuItem value="all">全部触发方式</MenuItem>
+                  {(Object.keys(TRIGGER_LABEL) as RecordTrigger[]).map((k) => (
+                    <MenuItem key={k} value={k}>
+                      {TRIGGER_LABEL[k].name}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <Typography variant="caption" color="text.secondary">
+                  共 {filtered.length} 条
+                </Typography>
+              </>
+            }
+            right={
+              <>
+                <Tooltip title="刷新">
+                  <IconButton>
+                    <RefreshRounded />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="导出">
+                  <IconButton>
+                    <FileDownloadOutlined />
+                  </IconButton>
+                </Tooltip>
+              </>
+            }
+          />
 
           {filtered.length === 0 ? (
             <Box sx={{ p: 4 }}>
@@ -323,8 +315,8 @@ const CollectionJobs = observer(function CollectionJobs() {
             </Box>
           ) : (
             <>
-              <TableContainer>
-                <Table>
+              <TableContainer sx={{ overflowX: 'auto' }}>
+                <Table size="medium">
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ width: 170 }}>
@@ -368,7 +360,7 @@ const CollectionJobs = observer(function CollectionJobs() {
                           总归集数量
                         </SortHeader>
                       </TableCell>
-                      <TableCell sx={{ width: 100 }}>状态</TableCell>
+                      <TableCell sx={{ width: 110 }}>状态</TableCell>
                       <TableCell align="right" sx={{ width: 120 }}>
                         操作
                       </TableCell>
@@ -462,7 +454,28 @@ const CollectionJobs = observer(function CollectionJobs() {
                             <Chip
                               size="small"
                               color={STATUS_COLOR[r.status]}
-                              label={JOB_STATUS_META[r.status].name}
+                              label={
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 0.75,
+                                  }}
+                                >
+                                  <Box
+                                    component="span"
+                                    sx={{
+                                      width: 7,
+                                      height: 7,
+                                      borderRadius: '50%',
+                                      bgcolor: STATUS_DOT_COLOR[r.status],
+                                      display: 'inline-block',
+                                    }}
+                                  />
+                                  {JOB_STATUS_META[r.status].name}
+                                </Box>
+                              }
                             />
                           </TableCell>
                           <TableCell align="right">
@@ -477,7 +490,7 @@ const CollectionJobs = observer(function CollectionJobs() {
                                 终止任务
                               </Button>
                             ) : (
-                              <Typography component="span" color="text.disabled">
+                              <Typography sx={{ color: 'text.disabled', fontSize: 14 }}>
                                 —
                               </Typography>
                             )}
@@ -488,23 +501,25 @@ const CollectionJobs = observer(function CollectionJobs() {
                   </TableBody>
                 </Table>
               </TableContainer>
-              <TablePagination
-                component="div"
-                count={filtered.length}
-                page={page}
-                onPageChange={(_, p) => setPage(p)}
-                rowsPerPage={rowsPerPage}
-                onRowsPerPageChange={(e) => {
-                  setRowsPerPage(parseInt(e.target.value, 10));
-                  setPage(0);
-                }}
-                rowsPerPageOptions={[10, 20, 50]}
-                labelRowsPerPage="每页"
-                labelDisplayedRows={({ from, to, count }) => `第 ${from}–${to} 条 / 共 ${count} 条`}
-              />
+              <TableFooter>
+                <TablePagination
+                  component="div"
+                  count={filtered.length}
+                  page={page}
+                  onPageChange={(_, p) => setPage(p)}
+                  rowsPerPage={rowsPerPage}
+                  onRowsPerPageChange={(e) => {
+                    setRowsPerPage(parseInt(e.target.value, 10));
+                    setPage(0);
+                  }}
+                  rowsPerPageOptions={[10, 20, 50]}
+                  labelRowsPerPage="每页"
+                  labelDisplayedRows={({ from, to, count }) => `第 ${from}–${to} 条 / 共 ${count} 条`}
+                />
+              </TableFooter>
             </>
           )}
-        </Card>
+        </TableCard>
       </Stack>
 
       {/* ===== Address detail modal ===== */}
@@ -532,7 +547,6 @@ const CollectionJobs = observer(function CollectionJobs() {
                     {c && (
                       <Chip
                         size="small"
-                        variant="outlined"
                         icon={<CryptoBadge symbol={c.id} color={c.color} size={16} />}
                         label={c.name}
                       />
@@ -540,7 +554,6 @@ const CollectionJobs = observer(function CollectionJobs() {
                     {t && (
                       <Chip
                         size="small"
-                        variant="outlined"
                         icon={<CryptoBadge symbol={t.symbol} color={t.color} size={16} />}
                         label={t.symbol}
                       />
@@ -553,24 +566,20 @@ const CollectionJobs = observer(function CollectionJobs() {
                     />
                   </Stack>
 
-                  <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid item xs={6}>
-                      <StatCard
-                        label="总 USD"
-                        value={detail.totalUsd != null ? usd(detail.totalUsd) : '—'}
-                        tone="success"
-                        icon={<ScaleOutlined />}
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <StatCard
-                        label="总数量"
-                        value={fmtTokenAmount(detail.totalAmount)}
-                        tone="primary"
-                        icon={<LayersOutlined />}
-                      />
-                    </Grid>
-                  </Grid>
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
+                      gap: 5,
+                      mb: 3,
+                    }}
+                  >
+                    <StatCard
+                      label="总 USD"
+                      value={detail.totalUsd != null ? usd(detail.totalUsd) : '—'}
+                    />
+                    <StatCard label="总数量" value={fmtTokenAmount(detail.totalAmount)} />
+                  </Box>
 
                   {detail.status === 'aborted' && detail.abortedReason && (
                     <Alert severity="error" sx={{ mb: 3 }}>
@@ -719,41 +728,6 @@ function SortHeader({
     >
       {children}
     </TableSortLabel>
-  );
-}
-
-// ============ Stat card ============
-function StatCard({
-  label,
-  value,
-  tone,
-  icon,
-}: {
-  label: string;
-  value: string | number;
-  tone: 'primary' | 'success' | 'warning' | 'info' | 'error' | 'default';
-  icon?: React.ReactNode;
-}) {
-  return (
-    <Card sx={{ p: 3, height: '100%' }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 0.5 }}>
-        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-          {label}
-        </Typography>
-        <Box
-          sx={{
-            color:
-              tone === 'default' ? 'text.secondary' : `${tone}.main`,
-            display: 'flex',
-          }}
-        >
-          {icon}
-        </Box>
-      </Stack>
-      <Typography variant="h6" sx={{ fontWeight: 700 }}>
-        {value}
-      </Typography>
-    </Card>
   );
 }
 

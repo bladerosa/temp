@@ -37,8 +37,10 @@ const DashboardLayout = observer(function DashboardLayout() {
           component="main"
           sx={{
             flex: 1,
-            py: { xs: 4, md: 6 },
-            px: { xs: 4, md: 6 },
+            // preview/dashboard scroll padding: 28/32/48 → MUI spacing 7/8/12
+            pt: { xs: 5, md: 7 },
+            pb: { xs: 8, md: 12 },
+            px: { xs: 4, md: 8 },
           }}
         >
           <Outlet />

@@ -4,7 +4,6 @@ import {
   Alert,
   Box,
   Button,
-  Card,
   Chip,
   Container,
   Dialog,
@@ -14,6 +13,7 @@ import {
   Grid,
   IconButton,
   MenuItem,
+  Select,
   Stack,
   Switch,
   Table,
@@ -23,6 +23,7 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import {
@@ -32,8 +33,8 @@ import {
   DeleteOutlineRounded,
   EditOutlined,
   ErrorOutlineRounded,
-  HourglassEmptyRounded,
-  LayersOutlined,
+  FileDownloadOutlined,
+  RefreshRounded,
   ScaleOutlined,
   ScheduleRounded,
   SyncAltRounded,
@@ -61,6 +62,9 @@ import {
 } from '@/components/AmountInput';
 import EmptyState from '@/components/EmptyState';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import StatCard from '@/components/StatCard';
+import { TableCard, TableToolbar } from '@/components/TableCard';
+import CryptoBadge from '@/components/CryptoBadge';
 import { fmtDateTime, unitName } from '@/utils/format';
 
 type Step = 'pick-type' | 'configure';
@@ -255,97 +259,99 @@ const AutoCollection = observer(function AutoCollection() {
           alignItems={{ xs: 'flex-start', sm: 'center' }}
           gap={2}
         >
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-              自动归集
-            </Typography>
+          <Stack spacing={0.5}>
+            <Typography variant="h2">自动归集</Typography>
             <Typography variant="body2" color="text.secondary">
               配置定时或事件触发的自动归集任务，命中条件后自动将资产归集到系统热钱包。
             </Typography>
-          </Box>
+          </Stack>
           <Button variant="contained" startIcon={<AddRounded />} onClick={openCreate}>
             创建归集任务
           </Button>
         </Stack>
 
         {/* Stats */}
-        <Grid container spacing={3}>
-          <Grid item xs={6} md={3}>
-            <StatCard
-              label="总任务数"
-              value={stats.total}
-              hint="包含全部类型"
-              tone="primary"
-              icon={<LayersOutlined />}
-            />
-          </Grid>
-          <Grid item xs={6} md={3}>
-            <StatCard
-              label="运行中"
-              value={stats.enabled}
-              hint={`占比 ${stats.total ? Math.round((stats.enabled / stats.total) * 100) : 0}%`}
-              tone="success"
-              icon={<ScaleOutlined />}
-            />
-          </Grid>
-          <Grid item xs={6} md={3}>
-            <StatCard
-              label="已停用"
-              value={stats.disabled}
-              hint="可在列表内开启"
-              tone="warning"
-              icon={<HourglassEmptyRounded />}
-            />
-          </Grid>
-          <Grid item xs={6} md={3}>
-            <StatCard
-              label="任务类型数"
-              value={stats.types}
-              hint="共 4 种类型可选"
-              tone="info"
-              icon={<ScheduleRounded />}
-            />
-          </Grid>
-        </Grid>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+            gap: 5,
+          }}
+        >
+          <StatCard
+            tone="accent"
+            label="总任务数"
+            value={stats.total}
+            hint="包含全部类型"
+          />
+          <StatCard
+            label="运行中"
+            value={stats.enabled}
+            hint={`占比 ${stats.total ? Math.round((stats.enabled / stats.total) * 100) : 0}%`}
+          />
+          <StatCard
+            label="已停用"
+            value={stats.disabled}
+            hint="可在列表内开启"
+          />
+          <StatCard
+            label="任务类型数"
+            value={stats.types}
+            hint="共 4 种类型可选"
+          />
+        </Box>
 
         {/* Table */}
-        <Card sx={{ overflow: 'hidden' }}>
-          <Stack
-            direction="row"
-            alignItems="center"
-            gap={2}
-            sx={{ p: 4, borderBottom: 1, borderColor: 'divider' }}
-          >
-            <TextField
-              select
-              size="small"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value as 'all' | TaskType)}
-              sx={{ minWidth: 160 }}
-            >
-              <MenuItem value="all">全部类型</MenuItem>
-              {(Object.keys(TASK_TYPE_META) as TaskType[]).map((k) => (
-                <MenuItem key={k} value={k}>
-                  {TASK_TYPE_META[k].name}
-                </MenuItem>
-              ))}
-            </TextField>
-            <Typography variant="caption" color="text.secondary">
-              共 {filtered.length} 个任务
-            </Typography>
-          </Stack>
+        <TableCard>
+          <TableToolbar
+            left={
+              <>
+                <Typography sx={{ fontSize: 16, fontWeight: 700 }}>归集任务列表</Typography>
+                <Select
+                  size="small"
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value as 'all' | TaskType)}
+                  sx={{ minWidth: 160 }}
+                >
+                  <MenuItem value="all">全部类型</MenuItem>
+                  {(Object.keys(TASK_TYPE_META) as TaskType[]).map((k) => (
+                    <MenuItem key={k} value={k}>
+                      {TASK_TYPE_META[k].name}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <Typography variant="caption" color="text.secondary">
+                  共 {filtered.length} 个任务
+                </Typography>
+              </>
+            }
+            right={
+              <>
+                <Tooltip title="刷新">
+                  <IconButton>
+                    <RefreshRounded />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="导出">
+                  <IconButton>
+                    <FileDownloadOutlined />
+                  </IconButton>
+                </Tooltip>
+              </>
+            }
+          />
 
           {filtered.length === 0 ? (
             <Box sx={{ p: 4 }}>
               <EmptyState
-                icon={<LayersOutlined sx={{ fontSize: 36 }} />}
+                icon={<ScheduleRounded sx={{ fontSize: 36 }} />}
                 title="暂无任务"
                 desc="点击右上角「创建归集任务」开始配置自动归集。"
               />
             </Box>
           ) : (
-            <TableContainer>
-              <Table>
+            <TableContainer sx={{ overflowX: 'auto' }}>
+              <Table size="medium">
                 <TableHead>
                   <TableRow>
                     <TableCell sx={{ width: 220 }}>任务</TableCell>
@@ -366,7 +372,11 @@ const AutoCollection = observer(function AutoCollection() {
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
                           {t.name}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ fontFamily: 'monospace' }}
+                        >
                           {t.id}
                         </Typography>
                       </TableCell>
@@ -378,7 +388,7 @@ const AutoCollection = observer(function AutoCollection() {
                         />
                       </TableCell>
                       <TableCell>
-                        <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ maxWidth: 280 }}>
+                        <Stack direction="row" flexWrap="wrap" gap={1} sx={{ maxWidth: 320 }}>
                           {t.targets.slice(0, 4).map((id) => {
                             const tok = findToken(id);
                             const c = tok ? findChain(tok.chainId) : null;
@@ -386,17 +396,21 @@ const AutoCollection = observer(function AutoCollection() {
                               <Chip
                                 key={id}
                                 size="small"
-                                variant="outlined"
+                                icon={
+                                  tok ? (
+                                    <CryptoBadge
+                                      symbol={tok.symbol}
+                                      color={tok.color}
+                                      size={16}
+                                    />
+                                  ) : undefined
+                                }
                                 label={`${c?.name} · ${tok?.symbol}`}
                               />
                             );
                           })}
                           {t.targets.length > 4 && (
-                            <Chip
-                              size="small"
-                              variant="outlined"
-                              label={`+${t.targets.length - 4}`}
-                            />
+                            <Chip size="small" label={`+${t.targets.length - 4}`} />
                           )}
                         </Stack>
                       </TableCell>
@@ -443,7 +457,7 @@ const AutoCollection = observer(function AutoCollection() {
               </Table>
             </TableContainer>
           )}
-        </Card>
+        </TableCard>
       </Stack>
 
       {/* ===== Create / edit dialog ===== */}
@@ -817,7 +831,7 @@ function renderKeyParams(t: AutoTask) {
           </Box>
         </Box>
         <Typography variant="caption" color="text.secondary">
-          每 {t.schedule.every} {unitName(t.schedule.unit)}@{t.schedule.anchorTime}
+          ≥ 每 {t.schedule.every} {unitName(t.schedule.unit)} / {t.schedule.anchorTime}
         </Typography>
       </Box>
     );
@@ -827,10 +841,11 @@ function renderKeyParams(t: AutoTask) {
     <Box sx={{ lineHeight: 1.5 }}>
       <Box>
         <Typography component="span" variant="caption" color="text.secondary">
-          未活跃
-        </Typography>{' '}
+          未活跃{' '}
+        </Typography>
         <Box component="b" sx={{ fontSize: 13 }}>
-          {t.inactiveWindow.value} {unitName(t.inactiveWindow.unit)}
+          {t.inactiveWindow.value}
+          {unitName(t.inactiveWindow.unit)}
         </Box>{' '}
         ·{' '}
         <Box component="b" sx={{ fontSize: 13 }}>
@@ -838,43 +853,9 @@ function renderKeyParams(t: AutoTask) {
         </Box>
       </Box>
       <Typography variant="caption" color="text.secondary">
-        每 {t.schedule.every} {unitName(t.schedule.unit)}@{t.schedule.anchorTime}
+        每 {t.schedule.every} {unitName(t.schedule.unit)} / {t.schedule.anchorTime}
       </Typography>
     </Box>
-  );
-}
-
-// ============ small stat card ============
-function StatCard({
-  label,
-  value,
-  hint,
-  tone,
-  icon,
-}: {
-  label: string;
-  value: string | number;
-  hint?: string;
-  tone: 'primary' | 'success' | 'warning' | 'info';
-  icon?: React.ReactNode;
-}) {
-  return (
-    <Card sx={{ p: 4, height: '100%' }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-          {label}
-        </Typography>
-        <Box sx={{ color: `${tone}.main`, display: 'flex' }}>{icon}</Box>
-      </Stack>
-      <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
-        {value}
-      </Typography>
-      {hint && (
-        <Typography variant="caption" color="text.secondary">
-          {hint}
-        </Typography>
-      )}
-    </Card>
   );
 }
 

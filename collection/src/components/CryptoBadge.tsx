@@ -49,20 +49,19 @@ function CryptoBadgeImpl({ symbol, color, size = 32 }: CryptoBadgeProps) {
       sx={{
         width: size,
         height: size,
-        borderRadius: 9999,
+        borderRadius: '50%',
         backgroundColor: color ?? NEUTRAL_BG,
-        color: color ? '#fff' : '#71757E',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        color: color ? '#FFFFFF' : '#71757E',
+        display: 'inline-grid',
+        placeItems: 'center',
+        fontFamily: '"Poppins", "PingFang SC", sans-serif',
         fontWeight: 800,
         fontSize,
         lineHeight: 1,
         flexShrink: 0,
-        // ui_kit recipe: subtle inset gloss for non-placeholder badges.
-        boxShadow: color
-          ? 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.08)'
-          : 'none',
+        // ui_kit recipe (preview/components/Crypto-icons.html): subtle inset gloss
+        // for color-filled badges, none for the bg-subtle placeholder.
+        boxShadow: color ? 'inset 0 -2px 4px rgba(0,0,0,0.12)' : 'none',
         userSelect: 'none',
       }}
       aria-label={upper}
