@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, Dialog, IconButton, InputBase, Stack, Typography } from '@mui/material';
 import { AlertTriangle, Plus, X } from 'lucide-react';
+import { sanitizeFeeInput } from '@/utils/pricing';
 
 export type ConfirmActionModalProps = {
   open: boolean;
@@ -20,14 +21,8 @@ export type ConfirmActionModalProps = {
   onConfirm: () => void;
 };
 
-function sanitizeAmountInput(raw: string): string {
-  let s = raw.replace(/[^\d.]/g, '');
-  const i = s.indexOf('.');
-  if (i !== -1) {
-    s = s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g, '');
-  }
-  return s;
-}
+// Re-use the global rule: digits + at most 2 decimals.
+const sanitizeAmountInput = sanitizeFeeInput;
 
 export function ConfirmActionModal(props: ConfirmActionModalProps) {
   const {
