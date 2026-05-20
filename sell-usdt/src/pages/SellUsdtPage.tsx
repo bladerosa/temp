@@ -20,17 +20,22 @@ import {
   REJECTED_ROWS,
   TRANSFER_PENDING_ROWS,
 } from '@/data/mockData';
-import type { SellOrderRaw, FeeConfig } from '@/data/types';
+import type { SellOrderRaw, FeeConfig, CompletedRow } from '@/data/types';
 import { deriveRow, fmtFiat, fmtMarketRate, fmtUSDT } from '@/utils/pricing';
 import { FeeSettingsModal } from '@/components/FeeSettingsModal';
-import { OrderDetailModal, type DetailStatusSection } from '@/components/OrderDetailModal';
+import {
+  OrderDetailModal,
+  type DetailStatusSection,
+  type CwalletTransferSection,
+  type PaymentSection,
+} from '@/components/OrderDetailModal';
 import { ApproveOrderModal } from '@/components/ApproveOrderModal';
 import { SearchBox } from '@/components/SearchBox';
 import { Pagination } from '@/components/Pagination';
 import { ProofIcon } from '@/components/ProofIcon';
 
 type TabKey = 'pending' | 'transfer-pending' | 'paying' | 'rejected' | 'completed';
-type DetailKind = 'pending' | 'transfer-pending' | 'paying';
+type DetailKind = 'pending' | 'transfer-pending' | 'paying' | 'completed';
 
 const TABS: Array<{ key: TabKey; label: string }> = [
   { key: 'pending', label: '待审核' },
@@ -58,29 +63,70 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             ? REJECTED_ROWS.length
             : COMPLETED_ROWS.length;
 
-  const detailModalProps = detail
-    ? detail.kind === 'transfer-pending'
-      ? {
+  const detailModalProps: {
+    title: string;
+    statusSection?: DetailStatusSection;
+    cwalletSection?: CwalletTransferSection;
+    paymentSection?: PaymentSection;
+  } = (() => {
+    if (!detail) return { title: '付款单信息' };
+    const row = detail.row;
+    switch (detail.kind) {
+      case 'pending':
+        return { title: '付款单信息' };
+      case 'transfer-pending':
+        return {
           title: '供应商转账单信息',
           statusSection: {
             title: '已通过审核',
             timeLabel: '过审时间',
-            time: detail.row.time,
-            operator: detail.row.operator ?? '',
-          } satisfies DetailStatusSection,
-        }
-      : detail.kind === 'paying'
-        ? {
-            title: '付款单信息',
-            statusSection: {
-              title: '已发送Lark消息',
-              timeLabel: '标记时间',
-              time: detail.row.time,
-              operator: detail.row.operator ?? '',
-            } satisfies DetailStatusSection,
-          }
-        : { title: '付款单信息' as const, statusSection: undefined }
-    : { title: '付款单信息' as const, statusSection: undefined };
+            time: row.time,
+            operator: row.operator ?? '',
+          },
+          cwalletSection: {
+            amount: row.cwalletAmt ?? '',
+            id: row.cwalletId ?? '',
+            time: '',
+            status: '转账中',
+            showRepush: true,
+          },
+        };
+      case 'paying':
+        return {
+          title: '付款单信息',
+          statusSection: {
+            title: '已发送Lark消息',
+            timeLabel: '标记时间',
+            time: row.time,
+            operator: row.operator ?? '',
+          },
+        };
+      case 'completed': {
+        const c = row as CompletedRow;
+        return {
+          title: '付款单信息',
+          statusSection: {
+            title: '已通过审核',
+            timeLabel: '过审时间',
+            time: c.approvedAt,
+            operator: c.approvedBy,
+          },
+          cwalletSection: {
+            amount: c.cwalletAmt,
+            id: c.cwalletId,
+            time: c.transferAt,
+            status: '已完成',
+            showRepush: false,
+          },
+          paymentSection: {
+            proofId: c.proofId,
+            completedAt: c.completedAt,
+            operator: c.operator ?? '',
+          },
+        };
+      }
+    }
+  })();
 
   return (
     <Box sx={{ pt: 2 }}>
@@ -236,7 +282,9 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
           />
         )}
         {tab === 'rejected' && <RejectedTable />}
-        {tab === 'completed' && <CompletedTable />}
+        {tab === 'completed' && (
+          <CompletedTable onDetail={(r) => setDetail({ row: r, kind: 'completed' })} />
+        )}
 
         <Pagination total={total} />
       </Box>
@@ -257,6 +305,8 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
         fee={fee.config}
         title={detailModalProps.title}
         statusSection={detailModalProps.statusSection}
+        cwalletSection={detailModalProps.cwalletSection}
+        paymentSection={detailModalProps.paymentSection}
         onClose={() => setDetail(null)}
       />
 
@@ -483,7 +533,7 @@ function RejectedTable() {
   );
 }
 
-function CompletedTable() {
+function CompletedTable({ onDetail }: { onDetail: (row: CompletedRow) => void }) {
   return (
     <TableContainer sx={{ overflowX: 'auto' }}>
       <Table sx={{ width: '100%', fontSize: 13.5 }}>
@@ -510,8 +560,8 @@ function CompletedTable() {
         <TableBody>
           {COMPLETED_ROWS.map((r, i) => (
             <TableRow key={i} sx={{ transition: 'background 120ms ease-out', '&:hover': { bgcolor: '#FAFBFD' } }}>
-              <TableCell sx={bodyCellSx}>{r.time}</TableCell>
-              <TableCell sx={bodyCellSx}>{r.orderId}</TableCell>
+              <TableCell sx={bodyCellSx}>{r.completedAt}</TableCell>
+              <TableCell sx={bodyCellSx}>{r.recordId}</TableCell>
               <TableCell sx={bodyCellSx}>{r.mid}</TableCell>
               <TableCell sx={bodyCellSx}>{r.fiatPaid}</TableCell>
               <TableCell sx={bodyCellSx}>{r.payBank}</TableCell>
@@ -535,11 +585,13 @@ function CompletedTable() {
                   </Box>
                 </Box>
               </TableCell>
-              <TableCell sx={bodyCellSx}>{r.cwalletTo}</TableCell>
+              <TableCell sx={bodyCellSx}>{r.cwalletAmt}</TableCell>
               <TableCell sx={bodyCellSx}>{r.cwalletId}</TableCell>
               <TableCell sx={bodyCellSx}>{r.operator}</TableCell>
               <TableCell sx={bodyCellSx}>
-                <ActionButton variant="outlined">详情</ActionButton>
+                <ActionButton variant="outlined" onClick={() => onDetail(r)}>
+                  详情
+                </ActionButton>
               </TableCell>
             </TableRow>
           ))}

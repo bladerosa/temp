@@ -10,6 +10,21 @@ export type DetailStatusSection = {
   operator: string;
 };
 
+export type CwalletTransferSection = {
+  amount: string;
+  id: string;
+  time: string;        // empty when status === '转账中'
+  status: '转账中' | '已完成';
+  showRepush?: boolean;
+  onRepush?: () => void;
+};
+
+export type PaymentSection = {
+  proofId: string;
+  completedAt: string;
+  operator: string;
+};
+
 export function OrderDetailModal({
   open,
   row,
@@ -17,6 +32,8 @@ export function OrderDetailModal({
   onClose,
   title = '付款单信息',
   statusSection,
+  cwalletSection,
+  paymentSection,
 }: {
   open: boolean;
   row: SellOrderRaw | null;
@@ -24,6 +41,8 @@ export function OrderDetailModal({
   onClose: () => void;
   title?: string;
   statusSection?: DetailStatusSection;
+  cwalletSection?: CwalletTransferSection;
+  paymentSection?: PaymentSection;
 }) {
   if (!row) return null;
 
@@ -48,6 +67,8 @@ export function OrderDetailModal({
       >
         <OrderDetailContent row={row} fee={fee} />
         {statusSection && <StatusSection section={statusSection} />}
+        {cwalletSection && <CwalletSection section={cwalletSection} />}
+        {paymentSection && <PaymentSectionView section={paymentSection} />}
       </Box>
 
       <Stack direction="row" justifyContent="center" sx={{ p: '16px 24px 20px' }}>
@@ -61,6 +82,56 @@ export function OrderDetailModal({
 
 function StatusSection({ section }: { section: DetailStatusSection }) {
   return (
+    <CardShell>
+      <CardHeader title={section.title} />
+      <DetailRow k={section.timeLabel} v={section.time} />
+      <DetailRow k="操作人" v={section.operator} />
+    </CardShell>
+  );
+}
+
+function CwalletSection({ section }: { section: CwalletTransferSection }) {
+  return (
+    <CardShell>
+      <CardHeader
+        title="向Cwallet运营账户转账"
+        trailing={
+          section.showRepush ? (
+            <Button
+              variant="outlined"
+              onClick={section.onRepush}
+              sx={{ height: 28, minHeight: 28, px: 2.5, fontSize: 13, fontWeight: 600 }}
+            >
+              重推
+            </Button>
+          ) : null
+        }
+      />
+      <DetailRow k="转账金额" v={section.amount} />
+      <DetailRow k="转账ID" v={section.id} />
+      <DetailRow k="转账时间" v={section.time} />
+      <DetailRow
+        k="转账状态"
+        v={section.status}
+        valueColor={section.status === '已完成' ? 'success.dark' : 'warning.dark'}
+      />
+    </CardShell>
+  );
+}
+
+function PaymentSectionView({ section }: { section: PaymentSection }) {
+  return (
+    <CardShell>
+      <CardHeader title="已付款" />
+      <DetailRow k="付款凭证ID" v={section.proofId} />
+      <DetailRow k="完成时间" v={section.completedAt} />
+      <DetailRow k="操作人" v={section.operator} />
+    </CardShell>
+  );
+}
+
+function CardShell({ children }: { children: React.ReactNode }) {
+  return (
     <Box
       sx={{
         border: '1px solid',
@@ -72,14 +143,37 @@ function StatusSection({ section }: { section: DetailStatusSection }) {
         gap: 3,
       }}
     >
-      <Box sx={{ fontSize: 18, fontWeight: 700, color: 'text.primary', mb: 1 }}>{section.title}</Box>
-      <DetailRow k={section.timeLabel} v={section.time} />
-      <DetailRow k="操作人" v={section.operator} />
+      {children}
     </Box>
   );
 }
 
-function DetailRow({ k, v }: { k: string; v: string }) {
+function CardHeader({ title, trailing }: { title: string; trailing?: React.ReactNode }) {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        mb: 1,
+        minHeight: 32,
+      }}
+    >
+      <Box sx={{ fontSize: 18, fontWeight: 700, color: 'text.primary' }}>{title}</Box>
+      {trailing}
+    </Box>
+  );
+}
+
+function DetailRow({
+  k,
+  v,
+  valueColor,
+}: {
+  k: string;
+  v: string;
+  valueColor?: string;
+}) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
       <Box component="span" sx={{ flex: '0 0 44%', color: 'grey.600', fontSize: 14 }}>
@@ -87,7 +181,14 @@ function DetailRow({ k, v }: { k: string; v: string }) {
       </Box>
       <Box
         component="span"
-        sx={{ flex: 1, textAlign: 'right', color: 'text.primary', fontSize: 14, wordBreak: 'break-all' }}
+        sx={{
+          flex: 1,
+          textAlign: 'right',
+          color: valueColor ?? 'text.primary',
+          fontWeight: valueColor ? 600 : 400,
+          fontSize: 14,
+          wordBreak: 'break-all',
+        }}
       >
         {v}
       </Box>
