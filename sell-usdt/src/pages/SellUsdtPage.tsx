@@ -638,8 +638,6 @@ function CompletedTable({ onDetail }: { onDetail: (row: CompletedRow) => void })
               '法币付款',
               '付款银行',
               '付款凭证号',
-              '向Cwallet转帐',
-              'Cwallet转帐ID',
               '操作人',
               '',
             ].map((h, i) => (
@@ -677,8 +675,6 @@ function CompletedTable({ onDetail }: { onDetail: (row: CompletedRow) => void })
                   </Box>
                 </Box>
               </TableCell>
-              <TableCell sx={bodyCellSx}>{r.cwalletAmt}</TableCell>
-              <TableCell sx={bodyCellSx}>{r.cwalletId}</TableCell>
               <TableCell sx={bodyCellSx}>{r.operator}</TableCell>
               <TableCell sx={bodyCellSx}>
                 <ActionButton variant="outlined" onClick={() => onDetail(r)}>
