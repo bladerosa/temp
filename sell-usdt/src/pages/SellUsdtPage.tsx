@@ -72,7 +72,33 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
         >
           Sell USDT 申请
         </Typography>
-        <Stack direction="row" alignItems="center" spacing={4}>
+        <Stack direction="row" alignItems="center" spacing={4} sx={{ flexWrap: 'wrap', rowGap: 2 }}>
+          <Box sx={{ display: 'inline-flex', alignItems: 'baseline', gap: 1, fontSize: 13, color: 'grey.700' }}>
+            cwallet运营账户id：
+            <Box
+              component="span"
+              sx={{
+                color: 'text.primary',
+                fontWeight: 600,
+                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace',
+              }}
+            >
+              9527321
+            </Box>
+          </Box>
+          <Box sx={{ display: 'inline-flex', alignItems: 'baseline', gap: 1, fontSize: 13, color: 'grey.700' }}>
+            cwallet供应商账户id：
+            <Box
+              component="span"
+              sx={{
+                color: 'text.primary',
+                fontWeight: 600,
+                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace',
+              }}
+            >
+              34575837
+            </Box>
+          </Box>
           <Box sx={{ display: 'inline-flex', alignItems: 'baseline', gap: 1, fontSize: 13, color: 'grey.700' }}>
             供应商汇率加点：
             <Box component="span" sx={{ color: 'text.primary', fontWeight: 600 }}>
