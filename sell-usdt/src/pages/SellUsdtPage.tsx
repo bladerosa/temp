@@ -156,6 +156,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             status: '已完成',
           },
           supplierCwalletSection: {
+            transferId: row.supplierTransferId ?? '',
             uploadedAt: row.proofUploadedAt ?? '',
             uploadedBy: row.proofUploadedBy ?? '',
           },
@@ -177,6 +178,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             status: '已完成',
           },
           supplierCwalletSection: {
+            transferId: c.supplierTransferId ?? '',
             uploadedAt: c.proofUploadedAt ?? '',
             uploadedBy: c.proofUploadedBy ?? '',
           },

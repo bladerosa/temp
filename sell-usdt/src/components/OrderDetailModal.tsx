@@ -20,6 +20,7 @@ export type CwalletTransferSection = {
 };
 
 export type SupplierCwalletInfoSection = {
+  transferId: string;
   uploadedAt: string;
   uploadedBy: string;
 };
@@ -135,6 +136,7 @@ function SupplierCwalletInfoSectionView({ section }: { section: SupplierCwalletI
   return (
     <CardShell>
       <CardHeader title="供应商cwallet账户转账信息" />
+      <DetailRow k="转账记录id" v={section.transferId} />
       <DetailRow k="凭证上传时间" v={section.uploadedAt} />
       <DetailRow k="上传人" v={section.uploadedBy} />
     </CardShell>

@@ -30,6 +30,8 @@ export type SellOrderRaw = {
   /** 凭证上传时间 / 上传人 — supplier cwallet 转账凭证 (paying rows). */
   proofUploadedAt?: string;
   proofUploadedBy?: string;
+  /** 供应商 cwallet 转账记录id (operator entered at 确认转账). */
+  supplierTransferId?: string;
 };
 
 export type RejectedRow = {
