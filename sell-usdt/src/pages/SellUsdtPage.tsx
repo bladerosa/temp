@@ -79,7 +79,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
     // payment (法币提现)
     return {
       title: '法币提现',
-      subtitle: '请核对转账信息并填写转账凭证号以完成本交易。',
+      subtitle: '联系供应商收集法币转账凭证信息并在此页面进行记录以完成本交易',
       cardTitle: '收款信息',
       cardRows: [
         { k: 'Bank Name:', v: row.bank },
@@ -89,12 +89,13 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
         { k: 'Bank Address:', v: '1.1' },
         { k: 'Recipient’s Address:', v: '1.1' },
       ],
-      uploadHint: '上传付款凭证截图(最多5张，非必传)',
-      uploadRequired: false,
+      uploadHint: '上传付款凭证截图(最多5张，必传)',
+      uploadRequired: true,
       proofLabel: '付款凭证号',
       amountLabel: '付款金额',
       amountSuffix: row.ccy,
-      warning: '商家已冻结资产将在确认后，划转至Cwallet收单号中。',
+      warning:
+        '商家已冻结资产将在确认后在余额中扣除，划转给系统热钱包平对cwallet运营账户的USDT支出以及记录平台服务费收入。',
     };
   })();
 
@@ -316,6 +317,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             fee={fee.config}
             timeLabel="提交时间"
             primaryAction="通过并发送至Lark"
+            rejectLabel="拒绝"
             onDetail={(r) => setDetail({ row: r, kind: 'pending' })}
             onPrimary={setApproveRow}
           />
@@ -326,7 +328,6 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             fee={fee.config}
             timeLabel="过审时间"
             primaryAction="确认转账"
-            showReject={false}
             onDetail={(r) => setDetail({ row: r, kind: 'transfer-pending' })}
             onPrimary={(r) => setConfirm({ row: r, kind: 'transfer' })}
             canPrimary={(r) => r.transferStatus === '已完成'}
@@ -338,6 +339,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             fee={fee.config}
             timeLabel="标记时间"
             primaryAction="确认付款"
+            rejectLabel="供应商退款"
             onDetail={(r) => setDetail({ row: r, kind: 'paying' })}
             onPrimary={(r) => setConfirm({ row: r, kind: 'payment' })}
           />
@@ -433,7 +435,7 @@ function PendingPayingTable({
   fee,
   timeLabel,
   primaryAction,
-  showReject = true,
+  rejectLabel,
   onDetail,
   onPrimary,
   canPrimary,
@@ -442,7 +444,8 @@ function PendingPayingTable({
   fee: FeeConfig;
   timeLabel: string;
   primaryAction: string;
-  showReject?: boolean;
+  /** Label for the trailing danger button (e.g. 拒绝 / 供应商退款). Omit to hide it entirely. */
+  rejectLabel?: string;
   onDetail: (row: SellOrderRaw) => void;
   onPrimary?: (row: SellOrderRaw) => void;
   /** Per-row predicate: when it returns false, the primary action button is hidden for that row. */
@@ -526,7 +529,7 @@ function PendingPayingTable({
                         {primaryAction}
                       </ActionButton>
                     )}
-                    {showReject && <ActionButton variant="danger">拒绝</ActionButton>}
+                    {rejectLabel && <ActionButton variant="danger">{rejectLabel}</ActionButton>}
                   </Stack>
                 </TableCell>
               </TableRow>
