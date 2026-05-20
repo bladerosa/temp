@@ -28,7 +28,7 @@ import {
   type DetailStatusSection,
   type CwalletTransferSection,
   type SupplierCwalletInfoSection,
-  type PaymentSection,
+  type FiatProofSection,
 } from '@/components/OrderDetailModal';
 import { ApproveOrderModal } from '@/components/ApproveOrderModal';
 import { ConfirmActionModal } from '@/components/ConfirmActionModal';
@@ -76,9 +76,9 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
         warning: undefined as string | undefined,
       };
     }
-    // payment (法币提现)
+    // payment (供应商法币履约凭证)
     return {
-      title: '法币提现',
+      title: '供应商法币履约凭证',
       subtitle: '联系供应商收集法币转账凭证信息并在此页面进行记录以完成本交易',
       cardTitle: '收款信息',
       cardRows: [
@@ -115,7 +115,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
     statusSection?: DetailStatusSection;
     cwalletSection?: CwalletTransferSection;
     supplierCwalletSection?: SupplierCwalletInfoSection;
-    paymentSection?: PaymentSection;
+    fiatProofSection?: FiatProofSection;
   } = (() => {
     if (!detail) return { title: '付款单信息' };
     const row = detail.row;
@@ -156,9 +156,6 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             status: '已完成',
           },
           supplierCwalletSection: {
-            accountId: '34575837',
-            currency: 'USDT',
-            amount: row.cwalletAmt ?? '',
             uploadedAt: row.proofUploadedAt ?? '',
             uploadedBy: row.proofUploadedBy ?? '',
           },
@@ -179,10 +176,14 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             time: c.transferAt,
             status: '已完成',
           },
-          paymentSection: {
+          supplierCwalletSection: {
+            uploadedAt: c.proofUploadedAt ?? '',
+            uploadedBy: c.proofUploadedBy ?? '',
+          },
+          fiatProofSection: {
             proofId: c.proofId,
-            completedAt: c.completedAt,
-            operator: c.operator ?? '',
+            uploadedAt: c.completedAt,
+            uploadedBy: c.operator ?? '',
           },
         };
       }
@@ -372,7 +373,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
         statusSection={detailModalProps.statusSection}
         cwalletSection={detailModalProps.cwalletSection}
         supplierCwalletSection={detailModalProps.supplierCwalletSection}
-        paymentSection={detailModalProps.paymentSection}
+        fiatProofSection={detailModalProps.fiatProofSection}
         onClose={() => setDetail(null)}
       />
 

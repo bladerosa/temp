@@ -20,17 +20,14 @@ export type CwalletTransferSection = {
 };
 
 export type SupplierCwalletInfoSection = {
-  accountId: string;
-  currency: string;
-  amount: string;
   uploadedAt: string;
   uploadedBy: string;
 };
 
-export type PaymentSection = {
+export type FiatProofSection = {
   proofId: string;
-  completedAt: string;
-  operator: string;
+  uploadedAt: string;
+  uploadedBy: string;
 };
 
 export function OrderDetailModal({
@@ -42,7 +39,7 @@ export function OrderDetailModal({
   statusSection,
   cwalletSection,
   supplierCwalletSection,
-  paymentSection,
+  fiatProofSection,
 }: {
   open: boolean;
   row: SellOrderRaw | null;
@@ -52,7 +49,7 @@ export function OrderDetailModal({
   statusSection?: DetailStatusSection;
   cwalletSection?: CwalletTransferSection;
   supplierCwalletSection?: SupplierCwalletInfoSection;
-  paymentSection?: PaymentSection;
+  fiatProofSection?: FiatProofSection;
 }) {
   if (!row) return null;
 
@@ -79,7 +76,7 @@ export function OrderDetailModal({
         {statusSection && <StatusSection section={statusSection} />}
         {cwalletSection && <CwalletSection section={cwalletSection} />}
         {supplierCwalletSection && <SupplierCwalletInfoSectionView section={supplierCwalletSection} />}
-        {paymentSection && <PaymentSectionView section={paymentSection} />}
+        {fiatProofSection && <FiatProofSectionView section={fiatProofSection} />}
       </Box>
 
       <Stack direction="row" justifyContent="center" sx={{ p: '16px 24px 20px' }}>
@@ -138,22 +135,19 @@ function SupplierCwalletInfoSectionView({ section }: { section: SupplierCwalletI
   return (
     <CardShell>
       <CardHeader title="供应商cwallet账户转账信息" />
-      <DetailRow k="cwallet账户id" v={section.accountId} />
-      <DetailRow k="转账币种" v={section.currency} />
-      <DetailRow k="转账数量" v={section.amount} />
       <DetailRow k="凭证上传时间" v={section.uploadedAt} />
       <DetailRow k="上传人" v={section.uploadedBy} />
     </CardShell>
   );
 }
 
-function PaymentSectionView({ section }: { section: PaymentSection }) {
+function FiatProofSectionView({ section }: { section: FiatProofSection }) {
   return (
     <CardShell>
-      <CardHeader title="已付款" />
+      <CardHeader title="供应商法币履约凭证" />
       <DetailRow k="付款凭证ID" v={section.proofId} />
-      <DetailRow k="完成时间" v={section.completedAt} />
-      <DetailRow k="操作人" v={section.operator} />
+      <DetailRow k="凭证上传时间" v={section.uploadedAt} />
+      <DetailRow k="上传人" v={section.uploadedBy} />
     </CardShell>
   );
 }
