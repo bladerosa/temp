@@ -638,7 +638,7 @@ function CompletedTable({ onDetail }: { onDetail: (row: CompletedRow) => void })
               '法币付款',
               '付款银行',
               '付款凭证号',
-              '操作人',
+              '上传人',
               '',
             ].map((h, i) => (
               <TableCell key={i} sx={headCellSx}>
