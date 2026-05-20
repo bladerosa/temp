@@ -23,6 +23,8 @@ export type SupplierCwalletInfoSection = {
   accountId: string;
   currency: string;
   amount: string;
+  uploadedAt: string;
+  uploadedBy: string;
 };
 
 export type PaymentSection = {
@@ -139,6 +141,8 @@ function SupplierCwalletInfoSectionView({ section }: { section: SupplierCwalletI
       <DetailRow k="cwallet账户id" v={section.accountId} />
       <DetailRow k="转账币种" v={section.currency} />
       <DetailRow k="转账数量" v={section.amount} />
+      <DetailRow k="凭证上传时间" v={section.uploadedAt} />
+      <DetailRow k="上传人" v={section.uploadedBy} />
     </CardShell>
   );
 }

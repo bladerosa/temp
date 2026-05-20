@@ -159,6 +159,8 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             accountId: '34575837',
             currency: 'USDT',
             amount: row.cwalletAmt ?? '',
+            uploadedAt: row.proofUploadedAt ?? '',
+            uploadedBy: row.proofUploadedBy ?? '',
           },
         };
       case 'completed': {

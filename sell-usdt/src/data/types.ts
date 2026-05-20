@@ -27,6 +27,9 @@ export type SellOrderRaw = {
   /** 已通过审核段 — 过审时间 / 操作人 (paying / completed rows). */
   approvedAt?: string;
   approvedBy?: string;
+  /** 凭证上传时间 / 上传人 — supplier cwallet 转账凭证 (paying rows). */
+  proofUploadedAt?: string;
+  proofUploadedBy?: string;
 };
 
 export type RejectedRow = {
