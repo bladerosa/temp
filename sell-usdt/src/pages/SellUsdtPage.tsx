@@ -30,6 +30,7 @@ import {
   type PaymentSection,
 } from '@/components/OrderDetailModal';
 import { ApproveOrderModal } from '@/components/ApproveOrderModal';
+import { ConfirmActionModal } from '@/components/ConfirmActionModal';
 import { SearchBox } from '@/components/SearchBox';
 import { Pagination } from '@/components/Pagination';
 import { ProofIcon } from '@/components/ProofIcon';
@@ -51,6 +52,50 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
   const [feeOpen, setFeeOpen] = useState(false);
   const [detail, setDetail] = useState<{ row: SellOrderRaw; kind: DetailKind } | null>(null);
   const [approveRow, setApproveRow] = useState<SellOrderRaw | null>(null);
+  const [confirm, setConfirm] = useState<{ row: SellOrderRaw; kind: 'transfer' | 'payment' } | null>(null);
+
+  const confirmModalConfig = (() => {
+    if (!confirm) return null;
+    const row = confirm.row;
+    if (confirm.kind === 'transfer') {
+      return {
+        title: '转账给供应商凭证',
+        subtitle: '请核对向供应商cwallet账户的转账信息并填写转账凭证',
+        cardTitle: '供应商cwallet账户转账信息',
+        cardRows: [
+          { k: 'cwallet账户id', v: '34575837' },
+          { k: '转账币种', v: 'USDT' },
+          { k: '转账数量', v: row.cwalletAmt ?? '' },
+        ],
+        uploadHint: '上传转账凭证截图(最多5张，必传)',
+        uploadRequired: true,
+        proofLabel: '转账记录id号',
+        amountLabel: '转账数量',
+        amountSuffix: 'USDT',
+        warning: undefined as string | undefined,
+      };
+    }
+    // payment (法币提现)
+    return {
+      title: '法币提现',
+      subtitle: '请核对转账信息并填写转账凭证号以完成本交易。',
+      cardTitle: '收款信息',
+      cardRows: [
+        { k: 'Bank Name:', v: row.bank },
+        { k: 'Account Holder:', v: 'Jasee' },
+        { k: 'BIC/SWIFT:', v: '000009527' },
+        { k: 'IBAN/Account Number:', v: '000000001' },
+        { k: 'Bank Address:', v: '1.1' },
+        { k: 'Recipient’s Address:', v: '1.1' },
+      ],
+      uploadHint: '上传付款凭证截图(最多5张，非必传)',
+      uploadRequired: false,
+      proofLabel: '付款凭证号',
+      amountLabel: '付款金额',
+      amountSuffix: row.ccy,
+      warning: '商家已冻结资产将在确认后，划转至Cwallet收单号中。',
+    };
+  })();
 
   const total =
     tab === 'pending'
@@ -270,6 +315,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             primaryAction="确认转账"
             showReject={false}
             onDetail={(r) => setDetail({ row: r, kind: 'transfer-pending' })}
+            onPrimary={(r) => setConfirm({ row: r, kind: 'transfer' })}
           />
         )}
         {tab === 'paying' && (
@@ -279,6 +325,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             timeLabel="标记时间"
             primaryAction="确认付款"
             onDetail={(r) => setDetail({ row: r, kind: 'paying' })}
+            onPrimary={(r) => setConfirm({ row: r, kind: 'payment' })}
           />
         )}
         {tab === 'rejected' && <RejectedTable />}
@@ -318,6 +365,25 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
         onApprove={() => setApproveRow(null)}
         onReject={() => setApproveRow(null)}
       />
+
+      {confirmModalConfig && confirm && (
+        <ConfirmActionModal
+          open={!!confirm}
+          rowKey={`${confirm.kind}-${confirm.row.recordId}`}
+          title={confirmModalConfig.title}
+          subtitle={confirmModalConfig.subtitle}
+          cardTitle={confirmModalConfig.cardTitle}
+          cardRows={confirmModalConfig.cardRows}
+          uploadHint={confirmModalConfig.uploadHint}
+          uploadRequired={confirmModalConfig.uploadRequired}
+          proofLabel={confirmModalConfig.proofLabel}
+          amountLabel={confirmModalConfig.amountLabel}
+          amountSuffix={confirmModalConfig.amountSuffix}
+          warning={confirmModalConfig.warning}
+          onClose={() => setConfirm(null)}
+          onConfirm={() => setConfirm(null)}
+        />
+      )}
     </Box>
   );
 });
