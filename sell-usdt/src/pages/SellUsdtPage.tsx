@@ -61,16 +61,16 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
     if (confirm.kind === 'transfer') {
       return {
         title: '转账给供应商凭证',
-        subtitle: '请核对向供应商cwallet账户的转账信息并填写转账凭证',
-        cardTitle: '供应商cwallet账户转账信息',
+        subtitle: '请核对向供应商Cwallet账户的转账信息并填写转账凭证',
+        cardTitle: '供应商Cwallet账户转账信息',
         cardRows: [
-          { k: 'cwallet账户id', v: '34575837' },
+          { k: 'Cwallet账户ID', v: '34575837' },
           { k: '转账币种', v: 'USDT' },
           { k: '转账数量', v: row.cwalletAmt ?? '' },
         ],
         uploadHint: '上传转账凭证截图(最多5张，必传)',
         uploadRequired: true,
-        proofLabel: '转账记录id号',
+        proofLabel: '转账记录ID号',
         amountLabel: '转账数量',
         amountSuffix: 'USDT',
         warning: undefined as string | undefined,
@@ -95,7 +95,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
       amountLabel: '付款金额',
       amountSuffix: row.ccy,
       warning:
-        '商家已冻结资产将在确认后在余额中扣除，划转给系统热钱包平对cwallet运营账户的USDT支出以及记录平台服务费收入。',
+        '商家已冻结资产将在确认后在余额中扣除，划转给系统热钱包平对Cwallet运营账户的USDT支出以及记录平台服务费收入。',
     };
   })();
 
@@ -213,7 +213,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
         </Typography>
         <Stack direction="row" alignItems="center" spacing={4} sx={{ flexWrap: 'wrap', rowGap: 2 }}>
           <Box sx={{ display: 'inline-flex', alignItems: 'baseline', gap: 1, fontSize: 13, color: 'grey.700' }}>
-            cwallet运营账户id：
+            Cwallet运营账户ID：
             <Box
               component="span"
               sx={{
@@ -226,7 +226,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             </Box>
           </Box>
           <Box sx={{ display: 'inline-flex', alignItems: 'baseline', gap: 1, fontSize: 13, color: 'grey.700' }}>
-            cwallet供应商账户id：
+            Cwallet供应商账户ID：
             <Box
               component="span"
               sx={{
@@ -600,7 +600,7 @@ function RejectedTable() {
       <Table sx={{ width: '100%', fontSize: 13.5 }}>
         <TableHead>
           <TableRow>
-            {['拒绝时间', 'Record Id', '商户ID', '已返还代币', '拒绝原因', '拒绝人', ''].map((h, i) => (
+            {['拒绝时间', 'Record ID', '商户ID', '已返还代币', '拒绝原因', '拒绝人', ''].map((h, i) => (
               <TableCell key={i} sx={headCellSx}>
                 {h}
               </TableCell>
@@ -635,7 +635,7 @@ function CompletedTable({ onDetail }: { onDetail: (row: CompletedRow) => void })
           <TableRow>
             {[
               '完成时间',
-              'Order id',
+              'Order ID',
               '商户ID',
               '法币付款',
               '付款银行',

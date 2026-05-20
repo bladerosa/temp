@@ -27,10 +27,10 @@ export type SellOrderRaw = {
   /** 已通过审核段 — 过审时间 / 操作人 (paying / completed rows). */
   approvedAt?: string;
   approvedBy?: string;
-  /** 凭证上传时间 / 上传人 — supplier cwallet 转账凭证 (paying rows). */
+  /** 凭证上传时间 / 上传人 — supplier Cwallet 转账凭证 (paying rows). */
   proofUploadedAt?: string;
   proofUploadedBy?: string;
-  /** 供应商 cwallet 转账记录id (operator entered at 确认转账). */
+  /** 供应商 Cwallet 转账记录ID (operator entered at 确认转账). */
   supplierTransferId?: string;
 };
 

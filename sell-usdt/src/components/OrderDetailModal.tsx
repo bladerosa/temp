@@ -135,8 +135,8 @@ function CwalletSection({ section }: { section: CwalletTransferSection }) {
 function SupplierCwalletInfoSectionView({ section }: { section: SupplierCwalletInfoSection }) {
   return (
     <CardShell>
-      <CardHeader title="供应商cwallet账户转账信息" />
-      <DetailRow k="转账记录id" v={section.transferId} />
+      <CardHeader title="供应商Cwallet账户转账信息" />
+      <DetailRow k="转账记录ID" v={section.transferId} />
       <DetailRow k="凭证上传时间" v={section.uploadedAt} />
       <DetailRow k="上传人" v={section.uploadedBy} />
     </CardShell>

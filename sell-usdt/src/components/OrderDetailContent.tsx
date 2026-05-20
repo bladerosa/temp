@@ -24,7 +24,7 @@ export function OrderDetailContent({
     <>
       <DetailSection title="Order Info">
         <DetailRow k="Create At:" v={row.time} />
-        <DetailRow k="Record Id:" v={String(row.recordId).replace(/\.\.\./, '')} />
+        <DetailRow k="Record ID:" v={String(row.recordId).replace(/\.\.\./, '')} />
         <DetailRow k="Merchant ID:" v={row.mid} />
         <DetailRow k="Sell Amount:" v={fmtUSDT(row.sellAmt)} />
         <DetailRow k="外显服务费:" v={fmtUSDT(d.extFee)} />
