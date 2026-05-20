@@ -27,6 +27,7 @@ import {
   OrderDetailModal,
   type DetailStatusSection,
   type CwalletTransferSection,
+  type SupplierCwalletInfoSection,
   type PaymentSection,
 } from '@/components/OrderDetailModal';
 import { ApproveOrderModal } from '@/components/ApproveOrderModal';
@@ -112,6 +113,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
     title: string;
     statusSection?: DetailStatusSection;
     cwalletSection?: CwalletTransferSection;
+    supplierCwalletSection?: SupplierCwalletInfoSection;
     paymentSection?: PaymentSection;
   } = (() => {
     if (!detail) return { title: '付款单信息' };
@@ -119,7 +121,8 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
     switch (detail.kind) {
       case 'pending':
         return { title: '付款单信息' };
-      case 'transfer-pending':
+      case 'transfer-pending': {
+        const status = row.transferStatus ?? '转账中';
         return {
           title: '付款单信息',
           statusSection: {
@@ -131,19 +134,30 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
           cwalletSection: {
             amount: row.cwalletAmt ?? '',
             id: row.cwalletId ?? '',
-            time: '',
-            status: '转账中',
-            showRepush: true,
+            time: status === '已完成' ? (row.transferAt ?? '') : '',
+            status,
           },
         };
+      }
       case 'paying':
         return {
           title: '付款单信息',
           statusSection: {
-            title: '已发送Lark消息',
-            timeLabel: '标记时间',
-            time: row.time,
-            operator: row.operator ?? '',
+            title: '已通过审核',
+            timeLabel: '过审时间',
+            time: row.approvedAt ?? '',
+            operator: row.approvedBy ?? '',
+          },
+          cwalletSection: {
+            amount: row.cwalletAmt ?? '',
+            id: row.cwalletId ?? '',
+            time: row.transferAt ?? '',
+            status: '已完成',
+          },
+          supplierCwalletSection: {
+            accountId: '34575837',
+            currency: 'USDT',
+            amount: row.cwalletAmt ?? '',
           },
         };
       case 'completed': {
@@ -161,7 +175,6 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             id: c.cwalletId,
             time: c.transferAt,
             status: '已完成',
-            showRepush: false,
           },
           paymentSection: {
             proofId: c.proofId,
@@ -316,6 +329,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             showReject={false}
             onDetail={(r) => setDetail({ row: r, kind: 'transfer-pending' })}
             onPrimary={(r) => setConfirm({ row: r, kind: 'transfer' })}
+            canPrimary={(r) => r.transferStatus === '已完成'}
           />
         )}
         {tab === 'paying' && (
@@ -353,6 +367,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
         title={detailModalProps.title}
         statusSection={detailModalProps.statusSection}
         cwalletSection={detailModalProps.cwalletSection}
+        supplierCwalletSection={detailModalProps.supplierCwalletSection}
         paymentSection={detailModalProps.paymentSection}
         onClose={() => setDetail(null)}
       />
@@ -421,6 +436,7 @@ function PendingPayingTable({
   showReject = true,
   onDetail,
   onPrimary,
+  canPrimary,
 }: {
   rows: SellOrderRaw[];
   fee: FeeConfig;
@@ -429,6 +445,8 @@ function PendingPayingTable({
   showReject?: boolean;
   onDetail: (row: SellOrderRaw) => void;
   onPrimary?: (row: SellOrderRaw) => void;
+  /** Per-row predicate: when it returns false, the primary action button is hidden for that row. */
+  canPrimary?: (row: SellOrderRaw) => boolean;
 }) {
   return (
     <TableContainer sx={{ overflowX: 'auto' }}>
@@ -503,9 +521,11 @@ function PendingPayingTable({
                     <ActionButton variant="outlined" onClick={() => onDetail(r)}>
                       详情
                     </ActionButton>
-                    <ActionButton variant="primary" onClick={onPrimary ? () => onPrimary(r) : undefined}>
-                      {primaryAction}
-                    </ActionButton>
+                    {(!canPrimary || canPrimary(r)) && (
+                      <ActionButton variant="primary" onClick={onPrimary ? () => onPrimary(r) : undefined}>
+                        {primaryAction}
+                      </ActionButton>
+                    )}
                     {showReject && <ActionButton variant="danger">拒绝</ActionButton>}
                   </Stack>
                 </TableCell>

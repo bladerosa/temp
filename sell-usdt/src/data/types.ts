@@ -1,3 +1,5 @@
+export type CwalletTransferStatus = '转账中' | '转账失败' | '已完成';
+
 export type SellOrderRaw = {
   /** Tab-dependent timestamp:
    *  - pending: 提交时间
@@ -18,6 +20,13 @@ export type SellOrderRaw = {
   cwalletAmt?: string;
   /** Cwallet 转账ID. */
   cwalletId?: string;
+  /** Cwallet 运营账户转账状态. */
+  transferStatus?: CwalletTransferStatus;
+  /** Cwallet 转账时间 (空当 transferStatus !== '已完成'). */
+  transferAt?: string;
+  /** 已通过审核段 — 过审时间 / 操作人 (paying / completed rows). */
+  approvedAt?: string;
+  approvedBy?: string;
 };
 
 export type RejectedRow = {
@@ -33,11 +42,10 @@ export type CompletedRow = SellOrderRaw & {
   /** SellOrderRaw.time = createAt for completed rows. */
   cwalletAmt: string;
   cwalletId: string;
-  /** Cwallet 转账时间. */
   transferAt: string;
-  /** 已通过审核段. */
   approvedAt: string;
   approvedBy: string;
+  transferStatus: CwalletTransferStatus;
   /** 已付款段. */
   proofId: string;
   completedAt: string;

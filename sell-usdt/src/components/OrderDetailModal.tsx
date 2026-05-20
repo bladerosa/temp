@@ -1,6 +1,6 @@
 import { Box, Button, Dialog, IconButton, Stack } from '@mui/material';
 import { X } from 'lucide-react';
-import type { SellOrderRaw, FeeConfig } from '@/data/types';
+import type { SellOrderRaw, FeeConfig, CwalletTransferStatus } from '@/data/types';
 import { OrderDetailContent } from './OrderDetailContent';
 
 export type DetailStatusSection = {
@@ -13,10 +13,16 @@ export type DetailStatusSection = {
 export type CwalletTransferSection = {
   amount: string;
   id: string;
-  time: string;        // empty when status === '转账中'
-  status: '转账中' | '已完成';
+  time: string;        // empty when status !== '已完成'
+  status: CwalletTransferStatus;
   showRepush?: boolean;
   onRepush?: () => void;
+};
+
+export type SupplierCwalletInfoSection = {
+  accountId: string;
+  currency: string;
+  amount: string;
 };
 
 export type PaymentSection = {
@@ -33,6 +39,7 @@ export function OrderDetailModal({
   title = '付款单信息',
   statusSection,
   cwalletSection,
+  supplierCwalletSection,
   paymentSection,
 }: {
   open: boolean;
@@ -42,6 +49,7 @@ export function OrderDetailModal({
   title?: string;
   statusSection?: DetailStatusSection;
   cwalletSection?: CwalletTransferSection;
+  supplierCwalletSection?: SupplierCwalletInfoSection;
   paymentSection?: PaymentSection;
 }) {
   if (!row) return null;
@@ -68,6 +76,7 @@ export function OrderDetailModal({
         <OrderDetailContent row={row} fee={fee} />
         {statusSection && <StatusSection section={statusSection} />}
         {cwalletSection && <CwalletSection section={cwalletSection} />}
+        {supplierCwalletSection && <SupplierCwalletInfoSectionView section={supplierCwalletSection} />}
         {paymentSection && <PaymentSectionView section={paymentSection} />}
       </Box>
 
@@ -91,12 +100,20 @@ function StatusSection({ section }: { section: DetailStatusSection }) {
 }
 
 function CwalletSection({ section }: { section: CwalletTransferSection }) {
+  const showRepush =
+    section.showRepush !== false && section.status !== '已完成';
+  const statusColor =
+    section.status === '已完成'
+      ? 'success.dark'
+      : section.status === '转账失败'
+        ? 'error.dark'
+        : 'warning.dark';
   return (
     <CardShell>
       <CardHeader
         title="向Cwallet运营账户转账"
         trailing={
-          section.showRepush ? (
+          showRepush ? (
             <Button
               variant="outlined"
               onClick={section.onRepush}
@@ -110,11 +127,18 @@ function CwalletSection({ section }: { section: CwalletTransferSection }) {
       <DetailRow k="转账金额" v={section.amount} />
       <DetailRow k="转账ID" v={section.id} />
       <DetailRow k="转账时间" v={section.time} />
-      <DetailRow
-        k="转账状态"
-        v={section.status}
-        valueColor={section.status === '已完成' ? 'success.dark' : 'warning.dark'}
-      />
+      <DetailRow k="转账状态" v={section.status} valueColor={statusColor} />
+    </CardShell>
+  );
+}
+
+function SupplierCwalletInfoSectionView({ section }: { section: SupplierCwalletInfoSection }) {
+  return (
+    <CardShell>
+      <CardHeader title="供应商cwallet账户转账信息" />
+      <DetailRow k="cwallet账户id" v={section.accountId} />
+      <DetailRow k="转账币种" v={section.currency} />
+      <DetailRow k="转账数量" v={section.amount} />
     </CardShell>
   );
 }
