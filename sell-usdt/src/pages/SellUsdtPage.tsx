@@ -23,6 +23,7 @@ import type { SellOrderRaw, FeeConfig } from '@/data/types';
 import { deriveRow, fmtFiat, fmtMarketRate, fmtUSDT } from '@/utils/pricing';
 import { FeeSettingsModal } from '@/components/FeeSettingsModal';
 import { OrderDetailModal } from '@/components/OrderDetailModal';
+import { ApproveOrderModal } from '@/components/ApproveOrderModal';
 import { SearchBox } from '@/components/SearchBox';
 import { Pagination } from '@/components/Pagination';
 import { ProofIcon } from '@/components/ProofIcon';
@@ -41,6 +42,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
   const [tab, setTab] = useState<TabKey>('pending');
   const [feeOpen, setFeeOpen] = useState(false);
   const [detailRow, setDetailRow] = useState<SellOrderRaw | null>(null);
+  const [approveRow, setApproveRow] = useState<SellOrderRaw | null>(null);
 
   const total =
     tab === 'pending'
@@ -156,6 +158,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             timeLabel="提交时间"
             primaryAction="通过并发送至Lark"
             onDetail={setDetailRow}
+            onPrimary={setApproveRow}
           />
         )}
         {tab === 'paying' && (
@@ -188,6 +191,15 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
         row={detailRow}
         fee={fee.config}
         onClose={() => setDetailRow(null)}
+      />
+
+      <ApproveOrderModal
+        open={!!approveRow}
+        row={approveRow}
+        fee={fee.config}
+        onClose={() => setApproveRow(null)}
+        onApprove={() => setApproveRow(null)}
+        onReject={() => setApproveRow(null)}
       />
     </Box>
   );
@@ -224,12 +236,14 @@ function PendingPayingTable({
   timeLabel,
   primaryAction,
   onDetail,
+  onPrimary,
 }: {
   rows: SellOrderRaw[];
   fee: FeeConfig;
   timeLabel: string;
   primaryAction: string;
   onDetail: (row: SellOrderRaw) => void;
+  onPrimary?: (row: SellOrderRaw) => void;
 }) {
   return (
     <TableContainer sx={{ overflowX: 'auto' }}>
@@ -304,7 +318,9 @@ function PendingPayingTable({
                     <ActionButton variant="outlined" onClick={() => onDetail(r)}>
                       详情
                     </ActionButton>
-                    <ActionButton variant="primary">{primaryAction}</ActionButton>
+                    <ActionButton variant="primary" onClick={onPrimary ? () => onPrimary(r) : undefined}>
+                      {primaryAction}
+                    </ActionButton>
                     <ActionButton variant="danger">拒绝</ActionButton>
                   </Stack>
                 </TableCell>
