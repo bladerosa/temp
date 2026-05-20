@@ -16,15 +16,24 @@ export const PENDING_ROWS: SellOrderRaw[] = [
 ];
 
 export const PAYING_ROWS: SellOrderRaw[] = [
-  { time: '19 Aug 2025 18:01:39', recordId: '202507...370816', mid: 'CP16882', sellAmt: 100000, market: 0.85639,  ccy: 'EUR', bank: 'Bank transfer' },
-  { time: '23 Jun 2025 16:15:36', recordId: '202505...228032', mid: 'CP15243', sellAmt: 100022, market: 0.88314,  ccy: 'EUR', bank: 'Bank transfer' },
-  { time: '27 Feb 2025 15:14:55', recordId: '202502...619264', mid: 'CP16451', sellAmt: 100000, market: 0.955055, ccy: 'EUR', bank: 'Bank transfer' },
-  { time: '15 May 2025 19:38:26', recordId: '202412...201088', mid: 'CP16451', sellAmt: 100010, market: 0.961115, ccy: 'EUR', bank: 'Bank transfer' },
-  { time: '21 Nov 2024 20:23:11', recordId: '202411...836608', mid: 'CP15641', sellAmt: 100,    market: 1,        ccy: 'USD', bank: 'TrueMoney (…' },
-  { time: '31 Dec 2024 11:31:27', recordId: '202411...729664', mid: 'CP16236', sellAmt: 100,    market: 1,        ccy: 'USD', bank: 'FasterPay' },
-  { time: '12 Sep 2024 17:38:44', recordId: '202409...822016', mid: 'CP15641', sellAmt: 100,    market: 1,        ccy: 'USD', bank: 'Global66' },
-  { time: '16 May 2025 14:46:56', recordId: '202409...272064', mid: 'CP16236', sellAmt: 100,    market: 1,        ccy: 'USD', bank: 'KHQR' },
-  { time: '08 Jul 2025 14:15:19', recordId: '202408...638976', mid: 'CP16236', sellAmt: 200,    market: 1,        ccy: 'USD', bank: 'FasterPay' },
+  { time: '19 Aug 2025 18:01:39', recordId: '202507...370816', mid: 'CP16882', sellAmt: 100000, market: 0.85639,  ccy: 'EUR', bank: 'Bank transfer', operator: 'shirley13' },
+  { time: '23 Jun 2025 16:15:36', recordId: '202505...228032', mid: 'CP15243', sellAmt: 100022, market: 0.88314,  ccy: 'EUR', bank: 'Bank transfer', operator: 'shirley13' },
+  { time: '27 Feb 2025 15:14:55', recordId: '202502...619264', mid: 'CP16451', sellAmt: 100000, market: 0.955055, ccy: 'EUR', bank: 'Bank transfer', operator: 'shirley13' },
+  { time: '15 May 2025 19:38:26', recordId: '202412...201088', mid: 'CP16451', sellAmt: 100010, market: 0.961115, ccy: 'EUR', bank: 'Bank transfer', operator: 'gliu29514' },
+  { time: '21 Nov 2024 20:23:11', recordId: '202411...836608', mid: 'CP15641', sellAmt: 100,    market: 1,        ccy: 'USD', bank: 'TrueMoney (…',  operator: 'gliu29514' },
+  { time: '31 Dec 2024 11:31:27', recordId: '202411...729664', mid: 'CP16236', sellAmt: 100,    market: 1,        ccy: 'USD', bank: 'FasterPay',     operator: 'shirley13' },
+  { time: '12 Sep 2024 17:38:44', recordId: '202409...822016', mid: 'CP15641', sellAmt: 100,    market: 1,        ccy: 'USD', bank: 'Global66',      operator: 'gliu29514' },
+  { time: '16 May 2025 14:46:56', recordId: '202409...272064', mid: 'CP16236', sellAmt: 100,    market: 1,        ccy: 'USD', bank: 'KHQR',          operator: 'shirley13' },
+  { time: '08 Jul 2025 14:15:19', recordId: '202408...638976', mid: 'CP16236', sellAmt: 200,    market: 1,        ccy: 'USD', bank: 'FasterPay',     operator: 'shirley13' },
+];
+
+export const TRANSFER_PENDING_ROWS: SellOrderRaw[] = [
+  { time: '14 Sep 2024 09:12:08', recordId: '202409...771840', mid: 'CP14732', sellAmt: 222,    market: 1,        ccy: 'USD', bank: 'TrueMoney (Thai…', operator: 'shirley13' },
+  { time: '14 Sep 2024 09:15:43', recordId: '202409...108160', mid: 'CP14732', sellAmt: 100,    market: 1,        ccy: 'USD', bank: 'TrueMoney (Thai…', operator: 'shirley13' },
+  { time: '01 Sep 2024 11:30:24', recordId: '202409...532032', mid: 'CP15641', sellAmt: 130,    market: 1,        ccy: 'USD', bank: 'Ecopayz',           operator: 'gliu29514' },
+  { time: '01 Sep 2024 14:08:33', recordId: '202408...050240', mid: 'CP16451', sellAmt: 101,    market: 0.902797, ccy: 'EUR', bank: 'FCM Bank',          operator: 'shirley13' },
+  { time: '31 Aug 2024 16:20:55', recordId: '202408...605000', mid: 'CP15641', sellAmt: 200,    market: 0.903295, ccy: 'EUR', bank: 'NLB',               operator: 'shirley13' },
+  { time: '31 Aug 2024 12:48:11', recordId: '202408...248320', mid: 'CP15641', sellAmt: 100,    market: 1,        ccy: 'USD', bank: 'Ecopayz',           operator: 'gliu29514' },
 ];
 
 export const REJECTED_ROWS: RejectedRow[] = [

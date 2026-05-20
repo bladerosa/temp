@@ -6,6 +6,8 @@ export type SellOrderRaw = {
   market: number;
   ccy: 'USD' | 'EUR' | string;
   bank: string;
+  /** Operator who took the last relevant action — set for transfer-pending / paying rows. */
+  operator?: string;
 };
 
 export type RejectedRow = {

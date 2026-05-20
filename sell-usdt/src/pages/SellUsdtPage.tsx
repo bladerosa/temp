@@ -18,21 +18,24 @@ import {
   PAYING_ROWS,
   PENDING_ROWS,
   REJECTED_ROWS,
+  TRANSFER_PENDING_ROWS,
 } from '@/data/mockData';
 import type { SellOrderRaw, FeeConfig } from '@/data/types';
 import { deriveRow, fmtFiat, fmtMarketRate, fmtUSDT } from '@/utils/pricing';
 import { FeeSettingsModal } from '@/components/FeeSettingsModal';
-import { OrderDetailModal } from '@/components/OrderDetailModal';
+import { OrderDetailModal, type DetailStatusSection } from '@/components/OrderDetailModal';
 import { ApproveOrderModal } from '@/components/ApproveOrderModal';
 import { SearchBox } from '@/components/SearchBox';
 import { Pagination } from '@/components/Pagination';
 import { ProofIcon } from '@/components/ProofIcon';
 
-type TabKey = 'pending' | 'paying' | 'rejected' | 'completed';
+type TabKey = 'pending' | 'transfer-pending' | 'paying' | 'rejected' | 'completed';
+type DetailKind = 'pending' | 'transfer-pending' | 'paying';
 
 const TABS: Array<{ key: TabKey; label: string }> = [
   { key: 'pending', label: '待审核' },
-  { key: 'paying', label: '付款中' },
+  { key: 'transfer-pending', label: '待转账给供应商' },
+  { key: 'paying', label: '待供应商付款' },
   { key: 'rejected', label: '已拒绝' },
   { key: 'completed', label: '已完成' },
 ];
@@ -41,17 +44,43 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
   const { fee } = useStores();
   const [tab, setTab] = useState<TabKey>('pending');
   const [feeOpen, setFeeOpen] = useState(false);
-  const [detailRow, setDetailRow] = useState<SellOrderRaw | null>(null);
+  const [detail, setDetail] = useState<{ row: SellOrderRaw; kind: DetailKind } | null>(null);
   const [approveRow, setApproveRow] = useState<SellOrderRaw | null>(null);
 
   const total =
     tab === 'pending'
       ? PENDING_ROWS.length
-      : tab === 'paying'
-        ? PAYING_ROWS.length
-        : tab === 'rejected'
-          ? REJECTED_ROWS.length
-          : COMPLETED_ROWS.length;
+      : tab === 'transfer-pending'
+        ? TRANSFER_PENDING_ROWS.length
+        : tab === 'paying'
+          ? PAYING_ROWS.length
+          : tab === 'rejected'
+            ? REJECTED_ROWS.length
+            : COMPLETED_ROWS.length;
+
+  const detailModalProps = detail
+    ? detail.kind === 'transfer-pending'
+      ? {
+          title: '供应商转账单信息',
+          statusSection: {
+            title: '已通过审核',
+            timeLabel: '过审时间',
+            time: detail.row.time,
+            operator: detail.row.operator ?? '',
+          } satisfies DetailStatusSection,
+        }
+      : detail.kind === 'paying'
+        ? {
+            title: '付款单信息',
+            statusSection: {
+              title: '已发送Lark消息',
+              timeLabel: '标记时间',
+              time: detail.row.time,
+              operator: detail.row.operator ?? '',
+            } satisfies DetailStatusSection,
+          }
+        : { title: '付款单信息' as const, statusSection: undefined }
+    : { title: '付款单信息' as const, statusSection: undefined };
 
   return (
     <Box sx={{ pt: 2 }}>
@@ -183,8 +212,18 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             fee={fee.config}
             timeLabel="提交时间"
             primaryAction="通过并发送至Lark"
-            onDetail={setDetailRow}
+            onDetail={(r) => setDetail({ row: r, kind: 'pending' })}
             onPrimary={setApproveRow}
+          />
+        )}
+        {tab === 'transfer-pending' && (
+          <PendingPayingTable
+            rows={TRANSFER_PENDING_ROWS}
+            fee={fee.config}
+            timeLabel="过审时间"
+            primaryAction="确认转账"
+            showReject={false}
+            onDetail={(r) => setDetail({ row: r, kind: 'transfer-pending' })}
           />
         )}
         {tab === 'paying' && (
@@ -193,7 +232,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             fee={fee.config}
             timeLabel="标记时间"
             primaryAction="确认付款"
-            onDetail={setDetailRow}
+            onDetail={(r) => setDetail({ row: r, kind: 'paying' })}
           />
         )}
         {tab === 'rejected' && <RejectedTable />}
@@ -213,10 +252,12 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
       />
 
       <OrderDetailModal
-        open={!!detailRow}
-        row={detailRow}
+        open={!!detail}
+        row={detail?.row ?? null}
         fee={fee.config}
-        onClose={() => setDetailRow(null)}
+        title={detailModalProps.title}
+        statusSection={detailModalProps.statusSection}
+        onClose={() => setDetail(null)}
       />
 
       <ApproveOrderModal
@@ -261,6 +302,7 @@ function PendingPayingTable({
   fee,
   timeLabel,
   primaryAction,
+  showReject = true,
   onDetail,
   onPrimary,
 }: {
@@ -268,6 +310,7 @@ function PendingPayingTable({
   fee: FeeConfig;
   timeLabel: string;
   primaryAction: string;
+  showReject?: boolean;
   onDetail: (row: SellOrderRaw) => void;
   onPrimary?: (row: SellOrderRaw) => void;
 }) {
@@ -347,7 +390,7 @@ function PendingPayingTable({
                     <ActionButton variant="primary" onClick={onPrimary ? () => onPrimary(r) : undefined}>
                       {primaryAction}
                     </ActionButton>
-                    <ActionButton variant="danger">拒绝</ActionButton>
+                    {showReject && <ActionButton variant="danger">拒绝</ActionButton>}
                   </Stack>
                 </TableCell>
               </TableRow>
