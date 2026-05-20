@@ -76,7 +76,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
         return { title: '付款单信息' };
       case 'transfer-pending':
         return {
-          title: '供应商转账单信息',
+          title: '付款单信息',
           statusSection: {
             title: '已通过审核',
             timeLabel: '过审时间',
