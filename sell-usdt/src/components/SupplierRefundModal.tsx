@@ -150,8 +150,8 @@ export function SupplierRefundModal({
           overflowY: 'auto',
         }}
       >
-        {/* 取消原因 */}
-        <Section title="取消原因">
+        {/* 拒绝原因 */}
+        <Section title="拒绝原因">
           <Stack sx={{ gap: 1 }}>
             {CANCEL_REASONS.map((r) => (
               <RadioRow
