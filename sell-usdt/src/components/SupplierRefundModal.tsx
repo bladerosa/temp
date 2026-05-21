@@ -171,7 +171,7 @@ export const SupplierRefundModal = observer(function SupplierRefundModal({
             ? '该 TxID 不是入账流水'
             : result.reason === 'already-bound-other'
               ? '该 TxID 已绑定到其他订单'
-              : '该 TxID 已被标记为其他类型，请先到 热钱包资产管理 解除',
+              : '该 TxID 已被标记了，无法绑定',
       );
       return;
     }
