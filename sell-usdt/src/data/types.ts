@@ -68,6 +68,22 @@ export type FeeConfig = {
   fiatWithdraw: string;
 };
 
+/** Hot-wallet 账目分类 (交易类型). Empty means 「点击标记」 (operator hasn't categorized yet). */
+export type HotWalletCategory = '借入' | '供应商退款' | '其他' | '';
+
+export type HotWalletRecord = {
+  id: number;            // 主键ID
+  accountType: '入账' | '出账';
+  category: HotWalletCategory;
+  amount: number;
+  currency: 'USDT' | 'TRX' | 'ETH';
+  network: 'TRON' | 'Polygon' | 'BSC' | 'ERC20' | 'Arbitrum' | 'Optimism' | 'Solana';
+  txid: string;
+  time: string;
+  /** 备注 — when bound via supplier refund flow, holds the sell-USDT order id. */
+  remark: string;
+};
+
 export type FeeDerived = {
   platFee: number;
   supAmt: number;

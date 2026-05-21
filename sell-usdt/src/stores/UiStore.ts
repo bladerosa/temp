@@ -2,7 +2,7 @@ import { makeAutoObservable } from 'mobx';
 
 export class UiStore {
   drawerOpen = false;
-  expandedSidebar: Record<string, boolean> = { merchant: true };
+  expandedSidebar: Record<string, boolean> = { merchant: true, n_token: true };
 
   constructor() {
     makeAutoObservable(this);

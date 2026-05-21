@@ -11,6 +11,8 @@ import {
 } from '@mui/material';
 import { AlertTriangle, Check, Copy, X } from 'lucide-react';
 import QRCode from 'react-qr-code';
+import { observer } from 'mobx-react-lite';
+import { useStores } from '@/stores';
 import type { SellOrderRaw } from '@/data/types';
 
 type BoundTx = { txid: string; amount: number };
@@ -18,16 +20,6 @@ type BoundTx = { txid: string; amount: number };
 /** Parse "97,000 USDT" → 97000. */
 function parseRequiredAmount(s: string): number {
   return Number(s.replace(/[^\d.]/g, '')) || 0;
-}
-
-/** Deterministic per-txid amount synthesis — simulates on-chain lookup result. */
-function synthBindAmount(txid: string, required: number): number {
-  let h = 0;
-  for (let i = 0; i < txid.length; i++) h = (h * 31 + txid.charCodeAt(i)) >>> 0;
-  if (required <= 0) return 0;
-  // 20% – 49% of required, rounded to 2 decimals.
-  const pct = 0.2 + ((h % 30) / 100);
-  return Math.round(required * pct * 100) / 100;
 }
 
 function fmtUsdtAmt(n: number): string {
@@ -96,7 +88,7 @@ function synthAddress(seed: string, network: NetworkOption): string {
   return network.prefix + body.join('');
 }
 
-export function SupplierRefundModal({
+export const SupplierRefundModal = observer(function SupplierRefundModal({
   open,
   row,
   onClose,
@@ -105,6 +97,7 @@ export function SupplierRefundModal({
   row: SellOrderRaw | null;
   onClose: () => void;
 }) {
+  const { hotWallet } = useStores();
   const [reasonKey, setReasonKey] = useState<string>(CANCEL_REASONS[0]!.key);
   const [otherReason, setOtherReason] = useState('');
   const [activeNetwork, setActiveNetwork] = useState<string>(NETWORKS[0]!.key);
@@ -113,18 +106,22 @@ export function SupplierRefundModal({
   const [txInput, setTxInput] = useState('');
   const [bindError, setBindError] = useState('');
 
-  // Reset transient state when the modal is opened for a different row.
+  // Reset transient state + re-hydrate bound list from the store whenever
+  // the modal opens for a (possibly different) row.
   useEffect(() => {
-    if (open) {
+    if (open && row) {
       setReasonKey(CANCEL_REASONS[0]!.key);
       setOtherReason('');
       setActiveNetwork(NETWORKS[0]!.key);
       setCopiedKey(null);
-      setBound([]);
       setTxInput('');
       setBindError('');
+      const existing = hotWallet
+        .listBoundForOrder(row.recordId)
+        .map((r) => ({ txid: r.txid, amount: r.amount }));
+      setBound(existing);
     }
-  }, [open, row?.recordId]);
+  }, [open, row, hotWallet]);
 
   const network = useMemo(
     () => NETWORKS.find((n) => n.key === activeNetwork) ?? NETWORKS[0]!,
@@ -162,13 +159,26 @@ export function SupplierRefundModal({
       setBindError('该 TxID 已绑定');
       return;
     }
-    const amount = synthBindAmount(t, requiredNum);
-    setBound([...bound, { txid: t, amount }]);
+    const result = hotWallet.bindAsSupplierRefund(t, row!.recordId);
+    if (!result.ok) {
+      setBindError(
+        result.reason === 'not-found'
+          ? '未在热钱包入账流水中找到该 TxID'
+          : result.reason === 'wrong-account'
+            ? '该 TxID 不是入账流水'
+            : result.reason === 'already-bound-other'
+              ? '该 TxID 已绑定到其他订单'
+              : '该 TxID 已被标记为其他类型，请先到 热钱包资产管理 解除',
+      );
+      return;
+    }
+    setBound([...bound, { txid: t, amount: result.record.amount }]);
     setTxInput('');
     setBindError('');
   };
 
   const unbind = (txid: string) => {
+    hotWallet.unbindSupplierRefund(txid);
     setBound(bound.filter((b) => b.txid !== txid));
   };
 
@@ -534,7 +544,7 @@ export function SupplierRefundModal({
       <Box sx={{ height: 16 }} />
     </Dialog>
   );
-}
+});
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (

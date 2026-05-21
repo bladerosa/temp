@@ -1,4 +1,4 @@
-import type { CompletedRow, RejectedRow, SellOrderRaw } from './types';
+import type { CompletedRow, HotWalletRecord, RejectedRow, SellOrderRaw } from './types';
 
 export const PENDING_ROWS: SellOrderRaw[] = [
   { time: '13 Sep 2024 14:49:34', recordId: '202409...688064', mid: 'CP14732', sellAmt: 222,    market: 1,        ccy: 'USD', bank: 'TrueMoney (Thai…' },
@@ -264,7 +264,16 @@ export const NAV_ITEMS: Array<{
   { key: 'n_dashboard', label: '数据看板',       hasChev: true },
   { key: 'n_finance',   label: '财务数据看板',   hasChev: true },
   { key: 'n_activity',  label: '活动中心',       hasChev: true },
-  { key: 'n_token',     label: '代币/网络管理',  hasChev: true },
+  {
+    key: 'n_token',
+    label: '代币/网络管理',
+    children: [
+      { key: 'hot-wallet-assets', label: '热钱包资产管理' },
+      { key: 'tokens-list',       label: '代币列表' },
+      { key: 'networks-list',     label: '网络管理' },
+      { key: 'tokens-changes',    label: '变更记录' },
+    ],
+  },
   {
     key: 'merchant',
     label: '商户管理',
@@ -288,4 +297,28 @@ export const NAV_ITEMS: Array<{
   { key: 'n_opslog',   label: '运营系统日志',   hasChev: false },
   { key: 'n_ip',       label: '封禁IP',         hasChev: false },
   { key: 'n_email',    label: '邮件验证码列表', hasChev: false },
+];
+
+/* =========================================================
+   Hot-wallet 入账/出账 mock data — feeds 热钱包资产管理 page
+   and is the source of truth for refund-binding lookups.
+   ========================================================= */
+export const HOT_WALLET_RECORDS: HotWalletRecord[] = [
+  // ---- 借入 (TRX for gas) — pre-categorized ----
+  { id: 48479, accountType: '入账', category: '借入', amount: 40.6, currency: 'TRX',  network: 'TRON',     txid: 'cd6bcfd69f5b4e7a2c91f8a1e74c3d59b8e1d2f7a9b6c4e8d3f1a2c5b7e35aa7964',  time: '19 May. 2026 17:19', remark: '' },
+  { id: 48463, accountType: '入账', category: '借入', amount: 41.4, currency: 'TRX',  network: 'TRON',     txid: '6e9fa6ac9710b8f4d3c2e1a7b6c5d4e3f2a1b8c7d6e5f4a3b2c1d0e9f841859356c4', time: '12 May. 2026 18:09', remark: '' },
+  { id: 48461, accountType: '入账', category: '借入', amount: 41.4, currency: 'TRX',  network: 'TRON',     txid: '6fea5aecfdb3a2c1e9d8f7b6a5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9ba261824f4', time: '12 May. 2026 18:00', remark: '' },
+  // ---- 未分类 USDT 入账 — operator can categorize via 点击标记 ----
+  { id: 48468, accountType: '入账', category: '',     amount: 12.6,   currency: 'USDT', network: 'TRON',     txid: 'f8818ec1d0a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2d137bd3a97', time: '13 May. 2026 10:48', remark: '' },
+  { id: 48465, accountType: '入账', category: '',     amount: 13.882, currency: 'USDT', network: 'Polygon',  txid: '0x623e3c84a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2246ad3d53b',     time: '12 May. 2026 18:33', remark: '' },
+  { id: 48459, accountType: '入账', category: '',     amount: 13.894, currency: 'USDT', network: 'Polygon',  txid: '0x1414845da2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f52e96b6a970', time: '12 May. 2026 16:36', remark: '' },
+  { id: 48452, accountType: '入账', category: '',     amount: 32500,  currency: 'USDT', network: 'TRON',     txid: 'TXa1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3', time: '11 May. 2026 14:22', remark: '' },
+  { id: 48447, accountType: '入账', category: '',     amount: 45000,  currency: 'USDT', network: 'Polygon',  txid: '0xpoly45a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',  time: '10 May. 2026 09:18', remark: '' },
+  { id: 48441, accountType: '入账', category: '',     amount: 25000,  currency: 'USDT', network: 'BSC',      txid: '0xbsc25a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',   time: '09 May. 2026 22:05', remark: '' },
+  { id: 48438, accountType: '入账', category: '',     amount: 18000,  currency: 'USDT', network: 'ERC20',    txid: '0xeth18a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',   time: '09 May. 2026 16:41', remark: '' },
+  { id: 48432, accountType: '入账', category: '',     amount: 50000,  currency: 'USDT', network: 'TRON',     txid: 'TX50000a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',  time: '08 May. 2026 20:55', remark: '' },
+  { id: 48427, accountType: '入账', category: '',     amount: 15500,  currency: 'USDT', network: 'Arbitrum', txid: '0xarb155a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',  time: '08 May. 2026 11:30', remark: '' },
+  { id: 48420, accountType: '入账', category: '',     amount: 28000,  currency: 'USDT', network: 'TRON',     txid: 'TX28000a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',  time: '07 May. 2026 19:13', remark: '' },
+  { id: 48414, accountType: '入账', category: '',     amount: 38000,  currency: 'USDT', network: 'Optimism', txid: '0xop380a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',    time: '07 May. 2026 10:42', remark: '' },
+  { id: 48409, accountType: '入账', category: '',     amount: 22000,  currency: 'USDT', network: 'Solana',   txid: '5oL22000a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f',   time: '06 May. 2026 18:20', remark: '' },
 ];

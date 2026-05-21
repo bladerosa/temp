@@ -11,12 +11,14 @@ const SIDEBAR_WIDTH = 220;
 function pathForKey(key: string): string {
   if (key === 'sell-usdt') return PATHS.sellUsdt;
   if (key === 'merchant-list') return PATHS.merchantDetail;
+  if (key === 'hot-wallet-assets') return PATHS.hotWallet;
   return stubPath(key);
 }
 
 function keyForPath(pathname: string): string {
   if (pathname.startsWith(PATHS.sellUsdt)) return 'sell-usdt';
   if (pathname.startsWith(PATHS.merchantDetail)) return 'merchant-list';
+  if (pathname.startsWith(PATHS.hotWallet)) return 'hot-wallet-assets';
   const m = pathname.match(/^\/dashboard\/stub\/(.+)$/);
   return m ? m[1] : '';
 }
