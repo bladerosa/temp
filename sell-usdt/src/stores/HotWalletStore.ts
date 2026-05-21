@@ -64,10 +64,19 @@ export class HotWalletStore {
     orderId: string,
   ):
     | { ok: true; record: HotWalletRecord }
-    | { ok: false; reason: 'not-found' | 'wrong-account' | 'already-categorized' | 'already-bound-other' } => {
+    | {
+        ok: false;
+        reason:
+          | 'not-found'
+          | 'wrong-account'
+          | 'wrong-currency'
+          | 'already-categorized'
+          | 'already-bound-other';
+      } => {
     const rec = this.findByTxidFuzzy(txid);
     if (!rec) return { ok: false, reason: 'not-found' };
     if (rec.accountType !== '入账') return { ok: false, reason: 'wrong-account' };
+    if (rec.currency !== 'USDT') return { ok: false, reason: 'wrong-currency' };
     // Already bound to THIS order is OK — caller handles dedupe.
     if (rec.category === '供应商退款' && rec.remark !== '' && rec.remark !== orderId) {
       return { ok: false, reason: 'already-bound-other' };
