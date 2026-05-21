@@ -31,6 +31,12 @@ export type FiatProofSection = {
   uploadedBy: string;
 };
 
+export type RejectedSection = {
+  reason: string;
+  rejectedAt: string;
+  rejectedBy: string;
+};
+
 export function OrderDetailModal({
   open,
   row,
@@ -41,6 +47,7 @@ export function OrderDetailModal({
   cwalletSection,
   supplierCwalletSection,
   fiatProofSection,
+  rejectedSection,
 }: {
   open: boolean;
   row: SellOrderRaw | null;
@@ -51,6 +58,7 @@ export function OrderDetailModal({
   cwalletSection?: CwalletTransferSection;
   supplierCwalletSection?: SupplierCwalletInfoSection;
   fiatProofSection?: FiatProofSection;
+  rejectedSection?: RejectedSection;
 }) {
   if (!row) return null;
 
@@ -78,6 +86,7 @@ export function OrderDetailModal({
         {cwalletSection && <CwalletSection section={cwalletSection} />}
         {supplierCwalletSection && <SupplierCwalletInfoSectionView section={supplierCwalletSection} />}
         {fiatProofSection && <FiatProofSectionView section={fiatProofSection} />}
+        {rejectedSection && <RejectedSectionView section={rejectedSection} />}
       </Box>
 
       <Stack direction="row" justifyContent="center" sx={{ p: '16px 24px 20px' }}>
@@ -150,6 +159,17 @@ function FiatProofSectionView({ section }: { section: FiatProofSection }) {
       <DetailRow k="付款凭证ID" v={section.proofId} />
       <DetailRow k="凭证上传时间" v={section.uploadedAt} />
       <DetailRow k="上传人" v={section.uploadedBy} />
+    </CardShell>
+  );
+}
+
+function RejectedSectionView({ section }: { section: RejectedSection }) {
+  return (
+    <CardShell>
+      <CardHeader title="已拒绝" />
+      <DetailRow k="拒绝原因" v={section.reason} />
+      <DetailRow k="拒绝时间" v={section.rejectedAt} />
+      <DetailRow k="操作人" v={section.rejectedBy} />
     </CardShell>
   );
 }

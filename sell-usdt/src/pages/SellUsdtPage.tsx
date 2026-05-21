@@ -20,7 +20,7 @@ import {
   REJECTED_ROWS,
   TRANSFER_PENDING_ROWS,
 } from '@/data/mockData';
-import type { SellOrderRaw, FeeConfig, CompletedRow } from '@/data/types';
+import type { SellOrderRaw, FeeConfig, CompletedRow, RejectedRow } from '@/data/types';
 import { deriveRow, fmtFiat, fmtMarketRate, fmtUSDT } from '@/utils/pricing';
 import { FeeSettingsModal } from '@/components/FeeSettingsModal';
 import {
@@ -29,6 +29,7 @@ import {
   type CwalletTransferSection,
   type SupplierCwalletInfoSection,
   type FiatProofSection,
+  type RejectedSection,
 } from '@/components/OrderDetailModal';
 import { ApproveOrderModal } from '@/components/ApproveOrderModal';
 import { ConfirmActionModal } from '@/components/ConfirmActionModal';
@@ -37,7 +38,7 @@ import { Pagination } from '@/components/Pagination';
 import { ProofIcon } from '@/components/ProofIcon';
 
 type TabKey = 'pending' | 'transfer-pending' | 'paying' | 'rejected' | 'completed';
-type DetailKind = 'pending' | 'transfer-pending' | 'paying' | 'completed';
+type DetailKind = 'pending' | 'transfer-pending' | 'paying' | 'completed' | 'rejected';
 
 const TABS: Array<{ key: TabKey; label: string }> = [
   { key: 'pending', label: '待审核' },
@@ -116,6 +117,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
     cwalletSection?: CwalletTransferSection;
     supplierCwalletSection?: SupplierCwalletInfoSection;
     fiatProofSection?: FiatProofSection;
+    rejectedSection?: RejectedSection;
   } = (() => {
     if (!detail) return { title: '付款单信息' };
     const row = detail.row;
@@ -186,6 +188,40 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             proofId: c.proofId,
             uploadedAt: c.completedAt,
             uploadedBy: c.operator ?? '',
+          },
+        };
+      }
+      case 'rejected': {
+        const r = row as RejectedRow;
+        const base = {
+          title: '付款单信息',
+          rejectedSection: {
+            reason: r.reason,
+            rejectedAt: r.rejectedAt,
+            rejectedBy: r.rejectedBy,
+          },
+        };
+        // Pending-rejected: only Order Info + Recipient Info + 已拒绝.
+        if (r.rejectedFrom === 'pending') return base;
+        // Paying-rejected: inherit the full 待供应商付款 chain.
+        return {
+          ...base,
+          statusSection: {
+            title: '已通过审核',
+            timeLabel: '过审时间',
+            time: r.approvedAt ?? '',
+            operator: r.approvedBy ?? '',
+          },
+          cwalletSection: {
+            amount: r.cwalletAmt ?? '',
+            id: r.cwalletId ?? '',
+            time: r.transferAt ?? '',
+            status: '已完成' as const,
+          },
+          supplierCwalletSection: {
+            transferId: r.supplierTransferId ?? '',
+            uploadedAt: r.proofUploadedAt ?? '',
+            uploadedBy: r.proofUploadedBy ?? '',
           },
         };
       }
@@ -349,7 +385,9 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             onPrimary={(r) => setConfirm({ row: r, kind: 'payment' })}
           />
         )}
-        {tab === 'rejected' && <RejectedTable />}
+        {tab === 'rejected' && (
+          <RejectedTable onDetail={(r) => setDetail({ row: r, kind: 'rejected' })} />
+        )}
         {tab === 'completed' && (
           <CompletedTable onDetail={(r) => setDetail({ row: r, kind: 'completed' })} />
         )}
@@ -376,6 +414,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
         cwalletSection={detailModalProps.cwalletSection}
         supplierCwalletSection={detailModalProps.supplierCwalletSection}
         fiatProofSection={detailModalProps.fiatProofSection}
+        rejectedSection={detailModalProps.rejectedSection}
         onClose={() => setDetail(null)}
       />
 
@@ -594,7 +633,7 @@ function ActionButton({
   );
 }
 
-function RejectedTable() {
+function RejectedTable({ onDetail }: { onDetail: (row: RejectedRow) => void }) {
   return (
     <TableContainer sx={{ overflowX: 'auto' }}>
       <Table sx={{ width: '100%', fontSize: 13.5 }}>
@@ -610,14 +649,30 @@ function RejectedTable() {
         <TableBody>
           {REJECTED_ROWS.map((r, i) => (
             <TableRow key={i} sx={{ transition: 'background 120ms ease-out', '&:hover': { bgcolor: '#FAFBFD' } }}>
-              <TableCell sx={bodyCellSx}>{r.time}</TableCell>
+              <TableCell sx={bodyCellSx}>{r.rejectedAt}</TableCell>
               <TableCell sx={bodyCellSx}>{r.recordId}</TableCell>
               <TableCell sx={bodyCellSx}>{r.mid}</TableCell>
               <TableCell sx={bodyCellSx}>{r.refund}</TableCell>
-              <TableCell sx={bodyCellSx}>{r.reason}</TableCell>
-              <TableCell sx={bodyCellSx}>{r.operator}</TableCell>
               <TableCell sx={bodyCellSx}>
-                <ActionButton variant="outlined">详情</ActionButton>
+                <Box
+                  component="span"
+                  sx={{
+                    display: 'inline-block',
+                    maxWidth: 240,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    verticalAlign: 'bottom',
+                  }}
+                  title={r.reason}
+                >
+                  {r.reason}
+                </Box>
+              </TableCell>
+              <TableCell sx={bodyCellSx}>{r.rejectedBy}</TableCell>
+              <TableCell sx={bodyCellSx}>
+                <ActionButton variant="outlined" onClick={() => onDetail(r)}>
+                  详情
+                </ActionButton>
               </TableCell>
             </TableRow>
           ))}

@@ -34,13 +34,18 @@ export type SellOrderRaw = {
   supplierTransferId?: string;
 };
 
-export type RejectedRow = {
-  time: string;
-  recordId: string;
-  mid: string;
+export type RejectedRow = SellOrderRaw & {
+  /** SellOrderRaw.time = order createAt (used for Order Info Create At in detail modal). */
+  /** Which prototype-state the order was rejected from — controls which sections render. */
+  rejectedFrom: 'pending' | 'paying';
+  /** 已返还代币 list cell, e.g. "120,000 USDT". */
   refund: string;
+  /** 拒绝原因 (long-form, modal displays full text). */
   reason: string;
-  operator: string;
+  /** 拒绝时间 (list column + 已拒绝 card). */
+  rejectedAt: string;
+  /** 拒绝人 (list column + 已拒绝 card). */
+  rejectedBy: string;
 };
 
 export type CompletedRow = SellOrderRaw & {

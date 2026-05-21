@@ -36,15 +36,79 @@ export const TRANSFER_PENDING_ROWS: SellOrderRaw[] = [
   { time: '31 Aug 2024 12:48:11', recordId: '202408...248320', mid: 'CP15641', sellAmt: 100,    market: 1,        ccy: 'USD', bank: 'Ecopayz',           operator: 'gliu29514', cwalletAmt: '97.00 USDT',      cwalletId: '202408311248872140987632248320', transferStatus: '转账中' },
 ];
 
+const REASON_FULL = "Incorrect Recipient Information: The recipient's name, IBAN, BIC or SWIFT is entered incorrectly.";
+
 export const REJECTED_ROWS: RejectedRow[] = [
-  { time: '19 Aug 2025 18:04:02', recordId: '202508...097280', mid: 'CP16792', refund: '120,000 USDT', reason: 'Incorrect Recipient Inform…', operator: 'shirley13' },
-  { time: '23 Jul 2025 20:21:01', recordId: '202507...396288', mid: 'CP15641', refund: '110 USDT',     reason: 'Incorrect Recipient Inform…', operator: 'shirley13' },
-  { time: '29 Nov 2024 15:08:06', recordId: '202411...030656', mid: 'CP16451', refund: '111 USDT',     reason: 'Incorrect Recipient Inform…', operator: 'gliu29514' },
-  { time: '29 Nov 2024 15:08:14', recordId: '202411...201216', mid: 'CP16451', refund: '111 USDT',     reason: 'Incorrect Recipient Inform…', operator: 'gliu29514' },
-  { time: '29 Nov 2024 15:08:10', recordId: '202411...453824', mid: 'CP16451', refund: '111 USDT',     reason: 'Incorrect Recipient Inform…', operator: 'gliu29514' },
-  { time: '29 Nov 2024 15:08:18', recordId: '202411...238784', mid: 'CP15641', refund: '100 USDT',     reason: 'Incorrect Recipient Inform…', operator: 'gliu29514' },
-  { time: '22 Nov 2024 11:31:51', recordId: '202411...594560', mid: 'CP16451', refund: '111 USDT',     reason: 'Incorrect Recipient Inform…', operator: 'gliu29514' },
-  { time: '21 Nov 2024 20:23:03', recordId: '202411...554112', mid: 'CP15641', refund: '120 USDT',     reason: 'Incorrect Recipient Inform…', operator: 'momek50304' },
+  // ===== rejected from 'paying' (supplier refund) — full chain =====
+  {
+    time: '19 Aug 2025 17:30:00', recordId: '202508...097280', mid: 'CP16792',
+    sellAmt: 120000, market: 1, ccy: 'USD', bank: 'Bank transfer',
+    operator: 'shirley13',
+    approvedAt: '19 Aug 2025 17:40:11', approvedBy: 'shirley13',
+    transferAt: '19 Aug 2025 17:48:09', transferStatus: '已完成',
+    cwalletAmt: '116,400 USDT', cwalletId: '202508191748274086362176097280',
+    supplierTransferId: '202508191748272015882176097280',
+    proofUploadedAt: '19 Aug 2025 17:52:36', proofUploadedBy: 'shirley13',
+    rejectedFrom: 'paying',
+    refund: '120,000 USDT', reason: REASON_FULL,
+    rejectedAt: '19 Aug 2025 18:04:02', rejectedBy: 'shirley13',
+  },
+  {
+    time: '23 Jul 2025 19:48:21', recordId: '202507...396288', mid: 'CP15641',
+    sellAmt: 110, market: 1, ccy: 'USD', bank: 'TrueMoney (Thai…',
+    operator: 'shirley13',
+    approvedAt: '23 Jul 2025 19:58:00', approvedBy: 'shirley13',
+    transferAt: '23 Jul 2025 20:05:42', transferStatus: '已完成',
+    cwalletAmt: '106.70 USDT', cwalletId: '202507232005274086362176396288',
+    supplierTransferId: '202507232005271619272176396288',
+    proofUploadedAt: '23 Jul 2025 20:09:18', proofUploadedBy: 'shirley13',
+    rejectedFrom: 'paying',
+    refund: '110 USDT', reason: REASON_FULL,
+    rejectedAt: '23 Jul 2025 20:21:01', rejectedBy: 'shirley13',
+  },
+  // ===== rejected from 'pending' — only Order/Recipient + 已拒绝 =====
+  {
+    time: '29 Nov 2024 14:55:30', recordId: '202411...030656', mid: 'CP16451',
+    sellAmt: 111, market: 0.902797, ccy: 'EUR', bank: 'FCM Bank',
+    rejectedFrom: 'pending',
+    refund: '111 USDT', reason: REASON_FULL,
+    rejectedAt: '29 Nov 2024 15:08:06', rejectedBy: 'gliu29514',
+  },
+  {
+    time: '29 Nov 2024 14:55:42', recordId: '202411...201216', mid: 'CP16451',
+    sellAmt: 111, market: 0.903005, ccy: 'EUR', bank: 'FCM Bank',
+    rejectedFrom: 'pending',
+    refund: '111 USDT', reason: REASON_FULL,
+    rejectedAt: '29 Nov 2024 15:08:14', rejectedBy: 'gliu29514',
+  },
+  {
+    time: '29 Nov 2024 14:55:38', recordId: '202411...453824', mid: 'CP16451',
+    sellAmt: 111, market: 0.90128, ccy: 'EUR', bank: 'FCM Bank',
+    rejectedFrom: 'pending',
+    refund: '111 USDT', reason: REASON_FULL,
+    rejectedAt: '29 Nov 2024 15:08:10', rejectedBy: 'gliu29514',
+  },
+  {
+    time: '29 Nov 2024 14:55:46', recordId: '202411...238784', mid: 'CP15641',
+    sellAmt: 100, market: 1, ccy: 'USD', bank: 'Ecopayz',
+    rejectedFrom: 'pending',
+    refund: '100 USDT', reason: REASON_FULL,
+    rejectedAt: '29 Nov 2024 15:08:18', rejectedBy: 'gliu29514',
+  },
+  {
+    time: '22 Nov 2024 11:18:09', recordId: '202411...594560', mid: 'CP16451',
+    sellAmt: 111, market: 0.903295, ccy: 'EUR', bank: 'NLB',
+    rejectedFrom: 'pending',
+    refund: '111 USDT', reason: REASON_FULL,
+    rejectedAt: '22 Nov 2024 11:31:51', rejectedBy: 'gliu29514',
+  },
+  {
+    time: '21 Nov 2024 20:09:48', recordId: '202411...554112', mid: 'CP15641',
+    sellAmt: 120, market: 1, ccy: 'USD', bank: 'Neteller',
+    rejectedFrom: 'pending',
+    refund: '120 USDT', reason: REASON_FULL,
+    rejectedAt: '21 Nov 2024 20:23:03', rejectedBy: 'momek50304',
+  },
 ];
 
 export const COMPLETED_ROWS: CompletedRow[] = [
