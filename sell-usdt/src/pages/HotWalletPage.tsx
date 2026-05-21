@@ -198,7 +198,11 @@ export const HotWalletPage = observer(function HotWalletPage() {
 
         {/* Filters */}
         <Box sx={{ px: 6, py: 5, display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <Stack direction="row" spacing={3} sx={{ flexWrap: 'wrap', rowGap: 2 }}>
+          <Stack
+            direction="row"
+            spacing={3}
+            sx={{ flexWrap: 'wrap', rowGap: 2, alignItems: 'flex-end' }}
+          >
             <FilterField label="交易类型">
               <Select
                 size="small"
@@ -433,48 +437,46 @@ function PlainInput({
   icon?: boolean;
 }) {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 4.5 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1.5,
+        width: 220,
+        height: 40,
+        border: '1px solid',
+        borderColor: 'divider',
+        borderRadius: 2,
+        px: 3,
+        bgcolor: 'background.paper',
+        transition: 'border-color 120ms, box-shadow 120ms',
+        '&:focus-within': {
+          borderColor: 'primary.main',
+          boxShadow: '0 0 0 3px rgba(60,111,245,0.12)',
+        },
+      }}
+    >
+      {icon && (
+        <Box sx={{ color: 'grey.500', display: 'inline-flex' }}>
+          <Search size={16} />
+        </Box>
+      )}
       <Box
+        component="input"
+        placeholder={placeholder}
+        value={value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1.5,
-          width: 220,
-          height: 40,
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 2,
-          px: 3,
-          bgcolor: 'background.paper',
-          transition: 'border-color 120ms, box-shadow 120ms',
-          '&:focus-within': {
-            borderColor: 'primary.main',
-            boxShadow: '0 0 0 3px rgba(60,111,245,0.12)',
-          },
+          flex: 1,
+          border: 0,
+          outline: 'none',
+          fontFamily: 'inherit',
+          fontSize: 14,
+          color: 'text.primary',
+          bgcolor: 'transparent',
+          '&::placeholder': { color: 'grey.400' },
         }}
-      >
-        {icon && (
-          <Box sx={{ color: 'grey.500', display: 'inline-flex' }}>
-            <Search size={16} />
-          </Box>
-        )}
-        <Box
-          component="input"
-          placeholder={placeholder}
-          value={value}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
-          sx={{
-            flex: 1,
-            border: 0,
-            outline: 'none',
-            fontFamily: 'inherit',
-            fontSize: 14,
-            color: 'text.primary',
-            bgcolor: 'transparent',
-            '&::placeholder': { color: 'grey.400' },
-          }}
-        />
-      </Box>
+      />
     </Box>
   );
 }
