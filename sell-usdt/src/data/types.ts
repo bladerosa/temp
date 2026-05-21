@@ -36,8 +36,6 @@ export type SellOrderRaw = {
 
 export type RejectedRow = SellOrderRaw & {
   /** SellOrderRaw.time = order createAt (used for Order Info Create At in detail modal). */
-  /** Which prototype-state the order was rejected from — controls which sections render. */
-  rejectedFrom: 'pending' | 'paying';
   /** 已返还代币 list cell, e.g. "120,000 USDT". */
   refund: string;
   /** 拒绝原因 (long-form, modal displays full text). */

@@ -192,36 +192,15 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
         };
       }
       case 'rejected': {
+        // 拒绝 only happens at 待审核, so the modal stays at the 待审核 shape
+        // (Order Info + Recipient Info) with the 已拒绝 card appended.
         const r = row as RejectedRow;
-        const base = {
+        return {
           title: '付款单信息',
           rejectedSection: {
             reason: r.reason,
             rejectedAt: r.rejectedAt,
             rejectedBy: r.rejectedBy,
-          },
-        };
-        // Pending-rejected: only Order Info + Recipient Info + 已拒绝.
-        if (r.rejectedFrom === 'pending') return base;
-        // Paying-rejected: inherit the full 待供应商付款 chain.
-        return {
-          ...base,
-          statusSection: {
-            title: '已通过审核',
-            timeLabel: '过审时间',
-            time: r.approvedAt ?? '',
-            operator: r.approvedBy ?? '',
-          },
-          cwalletSection: {
-            amount: r.cwalletAmt ?? '',
-            id: r.cwalletId ?? '',
-            time: r.transferAt ?? '',
-            status: '已完成' as const,
-          },
-          supplierCwalletSection: {
-            transferId: r.supplierTransferId ?? '',
-            uploadedAt: r.proofUploadedAt ?? '',
-            uploadedBy: r.proofUploadedBy ?? '',
           },
         };
       }
