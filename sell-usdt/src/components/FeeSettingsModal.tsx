@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Button, Dialog, IconButton, Stack } from '@mui/material';
 import { X } from 'lucide-react';
 import { FeeField } from './FeeField';
@@ -20,12 +20,22 @@ export function FeeSettingsModal({
   const [supplier, setSupplier] = useState(initial.supplier);
   const [submitted, setSubmitted] = useState(false);
 
-  const platformErr = submitted ? validateFee(platform) : '';
+  // Re-seed state when the modal opens for a new edit so cancel → re-open
+  // doesn't carry stale draft values.
+  useEffect(() => {
+    if (open) {
+      setPlatform(initial.platform);
+      setSupplier(initial.supplier);
+      setSubmitted(false);
+    }
+  }, [open, initial.platform, initial.supplier]);
+
   const supplierErr = submitted ? validateFee(supplier) : '';
 
   const submit = () => {
     setSubmitted(true);
-    if (validateFee(platform) || validateFee(supplier)) return;
+    // 模拟平台服务费率 is optional now — only supplier markup is validated.
+    if (validateFee(supplier)) return;
     onSave({ platform, supplier });
   };
 
@@ -38,9 +48,8 @@ export function FeeSettingsModal({
         </IconButton>
       </Box>
       <Box sx={{ p: '4px 24px 8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <FeeField label="模拟平台服务费率" value={platform} onChange={setPlatform} error={platformErr} />
         <FeeField label="供应商汇率加点" value={supplier} onChange={setSupplier} error={supplierErr} />
-        <FeeSimulation platform={platform} supplier={supplier} />
+        <FeeSimulation platform={platform} supplier={supplier} onPlatformChange={setPlatform} />
       </Box>
       <Stack direction="row" justifyContent="flex-end" spacing={2} sx={{ p: '16px 24px 20px' }}>
         <Button variant="outlined" onClick={onClose} sx={{ height: 36, px: 4 }}>

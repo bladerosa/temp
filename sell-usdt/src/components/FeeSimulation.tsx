@@ -1,5 +1,5 @@
-import { Box, Stack } from '@mui/material';
-import { deriveRow } from '@/utils/pricing';
+import { Box, InputBase, Stack } from '@mui/material';
+import { deriveRow, sanitizeFeeInput } from '@/utils/pricing';
 
 const SELL_AMT = 50000;
 const BASE_RATE = 1;
@@ -12,9 +12,12 @@ const fmtRate = (n: number) =>
 export function FeeSimulation({
   platform,
   supplier,
+  onPlatformChange,
 }: {
   platform: string;
   supplier: string;
+  /** When provided, render an inline editable platform-rate field in the simulator header. */
+  onPlatformChange?: (v: string) => void;
 }) {
   const d = deriveRow({ sellAmt: SELL_AMT, market: BASE_RATE }, { platform, supplier });
   const extRate =
@@ -33,9 +36,55 @@ export function FeeSimulation({
         gap: 2.5,
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 12, color: 'grey.600', fontWeight: 500 }}>
-        <Box sx={{ width: 4, height: 12, bgcolor: 'primary.main', borderRadius: '2px' }} />
-        <span>计算模拟</span>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 3,
+          flexWrap: 'wrap',
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 12, color: 'grey.600', fontWeight: 500 }}>
+          <Box sx={{ width: 4, height: 12, bgcolor: 'primary.main', borderRadius: '2px' }} />
+          <span>计算模拟</span>
+        </Box>
+        {onPlatformChange && (
+          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1.5 }}>
+            <Box component="span" sx={{ fontSize: 12, color: 'grey.700' }}>
+              模拟平台服务费率
+            </Box>
+            <Box
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1.5,
+                bgcolor: 'background.paper',
+                px: 2,
+                height: 28,
+                width: 96,
+                transition: 'border-color 120ms, box-shadow 120ms',
+                '&:focus-within': {
+                  borderColor: 'primary.main',
+                  boxShadow: '0 0 0 3px rgba(60,111,245,0.12)',
+                },
+              }}
+            >
+              <InputBase
+                value={platform}
+                placeholder="选填"
+                onChange={(e) => onPlatformChange(sanitizeFeeInput(e.target.value))}
+                inputProps={{ inputMode: 'decimal' }}
+                sx={{ flex: 1, fontSize: 13, color: 'text.primary', height: '100%' }}
+              />
+              <Box component="span" sx={{ color: 'grey.500', fontSize: 13, ml: 1 }}>
+                %
+              </Box>
+            </Box>
+          </Box>
+        )}
       </Box>
       <Box
         sx={{
