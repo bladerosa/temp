@@ -360,7 +360,27 @@ export const SupplierRefundModal = observer(function SupplierRefundModal({
         </Section>
 
         {/* 热钱包入账流水绑定 */}
-        <Section title="热钱包入账流水绑定">
+        <Section
+          title="热钱包入账流水绑定"
+          trailing={
+            <Box
+              component="a"
+              href="/dashboard/hot-wallet/assets"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                fontSize: 13,
+                color: 'primary.main',
+                fontWeight: 500,
+                cursor: 'pointer',
+                textDecoration: 'none',
+                '&:hover': { textDecoration: 'underline' },
+              }}
+            >
+              打开热钱包入账列表
+            </Box>
+          }
+        >
           {isComplete && (
             <Box
               sx={{
@@ -555,7 +575,15 @@ export const SupplierRefundModal = observer(function SupplierRefundModal({
   );
 });
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  trailing,
+  children,
+}: {
+  title: string;
+  trailing?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <Box
       sx={{
@@ -568,7 +596,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
         gap: 2,
       }}
     >
-      <Typography sx={{ fontSize: 15, fontWeight: 700, color: 'text.primary' }}>{title}</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+        <Typography sx={{ fontSize: 15, fontWeight: 700, color: 'text.primary' }}>{title}</Typography>
+        {trailing}
+      </Box>
       {children}
     </Box>
   );
