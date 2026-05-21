@@ -172,7 +172,13 @@ export const SupplierRefundModal = observer(function SupplierRefundModal({
       );
       return;
     }
-    setBound([...bound, { txid: t, amount: result.record.amount }]);
+    // Use the resolved (full) txid from the matched record, not the user's
+    // typed string — so 解绑 looks up by the same canonical value.
+    if (bound.some((b) => b.txid === result.record.txid)) {
+      setBindError('该 TxID 已绑定');
+      return;
+    }
+    setBound([...bound, { txid: result.record.txid, amount: result.record.amount }]);
     setTxInput('');
     setBindError('');
   };
