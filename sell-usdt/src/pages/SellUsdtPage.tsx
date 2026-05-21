@@ -33,6 +33,7 @@ import {
 } from '@/components/OrderDetailModal';
 import { ApproveOrderModal } from '@/components/ApproveOrderModal';
 import { ConfirmActionModal } from '@/components/ConfirmActionModal';
+import { SupplierRefundModal } from '@/components/SupplierRefundModal';
 import { SearchBox } from '@/components/SearchBox';
 import { Pagination } from '@/components/Pagination';
 import { ProofIcon } from '@/components/ProofIcon';
@@ -55,6 +56,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
   const [detail, setDetail] = useState<{ row: SellOrderRaw; kind: DetailKind } | null>(null);
   const [approveRow, setApproveRow] = useState<SellOrderRaw | null>(null);
   const [confirm, setConfirm] = useState<{ row: SellOrderRaw; kind: 'transfer' | 'payment' } | null>(null);
+  const [refundRow, setRefundRow] = useState<SellOrderRaw | null>(null);
 
   const confirmModalConfig = (() => {
     if (!confirm) return null;
@@ -362,6 +364,7 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             rejectLabel="供应商退款"
             onDetail={(r) => setDetail({ row: r, kind: 'paying' })}
             onPrimary={(r) => setConfirm({ row: r, kind: 'payment' })}
+            onReject={setRefundRow}
           />
         )}
         {tab === 'rejected' && (
@@ -424,6 +427,12 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
           onConfirm={() => setConfirm(null)}
         />
       )}
+
+      <SupplierRefundModal
+        open={!!refundRow}
+        row={refundRow}
+        onClose={() => setRefundRow(null)}
+      />
     </Box>
   );
 });
@@ -461,6 +470,7 @@ function PendingPayingTable({
   rejectLabel,
   onDetail,
   onPrimary,
+  onReject,
   canPrimary,
 }: {
   rows: SellOrderRaw[];
@@ -471,6 +481,7 @@ function PendingPayingTable({
   rejectLabel?: string;
   onDetail: (row: SellOrderRaw) => void;
   onPrimary?: (row: SellOrderRaw) => void;
+  onReject?: (row: SellOrderRaw) => void;
   /** Per-row predicate: when it returns false, the primary action button is hidden for that row. */
   canPrimary?: (row: SellOrderRaw) => boolean;
 }) {
@@ -552,7 +563,11 @@ function PendingPayingTable({
                         {primaryAction}
                       </ActionButton>
                     )}
-                    {rejectLabel && <ActionButton variant="danger">{rejectLabel}</ActionButton>}
+                    {rejectLabel && (
+                      <ActionButton variant="danger" onClick={onReject ? () => onReject(r) : undefined}>
+                        {rejectLabel}
+                      </ActionButton>
+                    )}
                   </Stack>
                 </TableCell>
               </TableRow>
