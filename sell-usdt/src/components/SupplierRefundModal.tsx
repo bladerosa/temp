@@ -13,6 +13,7 @@ import { AlertTriangle, Check, Copy, X } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '@/stores';
+import { copyToClipboard } from '@/utils/clipboard';
 import type { SellOrderRaw } from '@/data/types';
 
 type BoundTx = { txid: string; amount: number };
@@ -142,10 +143,12 @@ export const SupplierRefundModal = observer(function SupplierRefundModal({
   const requiredDisplay = row.cwalletAmt ?? '—';
   const receivedDisplay = fmtUsdtAmt(receivedNum);
 
-  const copy = (text: string, key: string) => {
-    navigator.clipboard?.writeText(text).catch(() => {});
-    setCopiedKey(key);
-    window.setTimeout(() => setCopiedKey((k) => (k === key ? null : k)), 1500);
+  const copy = async (text: string, key: string) => {
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      setCopiedKey(key);
+      window.setTimeout(() => setCopiedKey((k) => (k === key ? null : k)), 1500);
+    }
   };
 
   const submitBind = () => {

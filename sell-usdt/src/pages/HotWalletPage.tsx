@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '@/stores';
+import { copyToClipboard } from '@/utils/clipboard';
 import type { HotWalletCategory, HotWalletRecord } from '@/data/types';
 
 type SubTab = 'all' | 'out' | 'in';
@@ -78,10 +79,12 @@ export const HotWalletPage = observer(function HotWalletPage() {
     setIdQuery(idDraft.trim());
   };
 
-  const copyTxid = (txid: string) => {
-    navigator.clipboard?.writeText(txid).catch(() => {});
-    setCopiedTxid(txid);
-    window.setTimeout(() => setCopiedTxid((c) => (c === txid ? null : c)), 1500);
+  const copyTxid = async (txid: string) => {
+    const ok = await copyToClipboard(txid);
+    if (ok) {
+      setCopiedTxid(txid);
+      window.setTimeout(() => setCopiedTxid((c) => (c === txid ? null : c)), 1500);
+    }
   };
 
   return (
@@ -373,6 +376,7 @@ function Row({
         <Stack direction="row" alignItems="center" spacing={1}>
           <Box
             component="span"
+            onClick={() => onCopy(r.txid)}
             sx={{
               color: 'primary.main',
               fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace',
@@ -381,7 +385,7 @@ function Row({
               textUnderlineOffset: '2px',
               cursor: 'pointer',
             }}
-            title={r.txid}
+            title={`点击复制：${r.txid}`}
           >
             {truncateTxid(r.txid)}
           </Box>
