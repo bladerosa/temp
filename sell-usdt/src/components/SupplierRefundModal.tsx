@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Box,
+  Button,
   Dialog,
   IconButton,
   InputBase,
@@ -8,9 +9,30 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { Check, Copy, X } from 'lucide-react';
+import { AlertTriangle, Check, Copy, X } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import type { SellOrderRaw } from '@/data/types';
+
+type BoundTx = { txid: string; amount: number };
+
+/** Parse "97,000 USDT" → 97000. */
+function parseRequiredAmount(s: string): number {
+  return Number(s.replace(/[^\d.]/g, '')) || 0;
+}
+
+/** Deterministic per-txid amount synthesis — simulates on-chain lookup result. */
+function synthBindAmount(txid: string, required: number): number {
+  let h = 0;
+  for (let i = 0; i < txid.length; i++) h = (h * 31 + txid.charCodeAt(i)) >>> 0;
+  if (required <= 0) return 0;
+  // 20% – 49% of required, rounded to 2 decimals.
+  const pct = 0.2 + ((h % 30) / 100);
+  return Math.round(required * pct * 100) / 100;
+}
+
+function fmtUsdtAmt(n: number): string {
+  return n.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' USDT';
+}
 
 /**
  * 供应商退款地址 modal
@@ -87,6 +109,9 @@ export function SupplierRefundModal({
   const [otherReason, setOtherReason] = useState('');
   const [activeNetwork, setActiveNetwork] = useState<string>(NETWORKS[0]!.key);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [bound, setBound] = useState<BoundTx[]>([]);
+  const [txInput, setTxInput] = useState('');
+  const [bindError, setBindError] = useState('');
 
   // Reset transient state when the modal is opened for a different row.
   useEffect(() => {
@@ -95,6 +120,9 @@ export function SupplierRefundModal({
       setOtherReason('');
       setActiveNetwork(NETWORKS[0]!.key);
       setCopiedKey(null);
+      setBound([]);
+      setTxInput('');
+      setBindError('');
     }
   }, [open, row?.recordId]);
 
@@ -108,16 +136,40 @@ export function SupplierRefundModal({
     [row, network],
   );
 
+  const requiredNum = row ? parseRequiredAmount(row.cwalletAmt ?? '0') : 0;
+  const receivedNum = useMemo(() => bound.reduce((sum, b) => sum + b.amount, 0), [bound]);
+  const isComplete = requiredNum > 0 && receivedNum >= requiredNum;
+
   if (!row) return null;
 
-  const required = row.cwalletAmt ?? '—';
-  // Prototype: monitoring is real on the backend; here we display 0.
-  const received = '0 USDT';
+  const requiredDisplay = row.cwalletAmt ?? '—';
+  const receivedDisplay = fmtUsdtAmt(receivedNum);
 
   const copy = (text: string, key: string) => {
     navigator.clipboard?.writeText(text).catch(() => {});
     setCopiedKey(key);
     window.setTimeout(() => setCopiedKey((k) => (k === key ? null : k)), 1500);
+  };
+
+  const submitBind = () => {
+    if (isComplete) return;
+    const t = txInput.trim();
+    if (!t) {
+      setBindError('请输入 TxID');
+      return;
+    }
+    if (bound.some((b) => b.txid === t)) {
+      setBindError('该 TxID 已绑定');
+      return;
+    }
+    const amount = synthBindAmount(t, requiredNum);
+    setBound([...bound, { txid: t, amount }]);
+    setTxInput('');
+    setBindError('');
+  };
+
+  const unbind = (txid: string) => {
+    setBound(bound.filter((b) => b.txid !== txid));
   };
 
   return (
@@ -288,10 +340,194 @@ export function SupplierRefundModal({
           </Stack>
         </Section>
 
+        {/* 热钱包入账流水绑定 */}
+        <Section title="热钱包入账流水绑定">
+          {isComplete && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 1.5,
+                p: '10px 12px',
+                borderRadius: 1.5,
+                bgcolor: 'rgba(231,178,43,0.10)',
+                border: '1px solid',
+                borderColor: 'rgba(231,178,43,0.32)',
+              }}
+            >
+              <Box sx={{ display: 'inline-flex', color: 'warning.dark', mt: '2px', flexShrink: 0 }}>
+                <AlertTriangle size={14} strokeWidth={2} />
+              </Box>
+              <Box sx={{ fontSize: 12, lineHeight: '18px', color: 'warning.darker', fontWeight: 500 }}>
+                已绑定金额已满足需收款数量，订单将流转至 已拒绝 状态。
+              </Box>
+            </Box>
+          )}
+
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+            <Box
+              sx={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1,
+                minWidth: 0,
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  height: 36,
+                  border: '1px solid',
+                  borderColor: bindError ? 'error.main' : 'divider',
+                  borderRadius: 1.5,
+                  px: 3,
+                  bgcolor: isComplete ? 'grey.100' : 'background.paper',
+                  transition: 'border-color 120ms, box-shadow 120ms',
+                  '&:focus-within': {
+                    borderColor: bindError ? 'error.main' : 'primary.main',
+                    boxShadow: bindError
+                      ? '0 0 0 3px rgba(236,104,76,0.16)'
+                      : '0 0 0 3px rgba(60,111,245,0.12)',
+                  },
+                }}
+              >
+                <InputBase
+                  fullWidth
+                  placeholder="输入热钱包入账 TxID"
+                  value={txInput}
+                  disabled={isComplete}
+                  onChange={(e) => {
+                    setTxInput(e.target.value);
+                    if (bindError) setBindError('');
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      submitBind();
+                    }
+                  }}
+                  sx={{ fontSize: 13, color: 'text.primary' }}
+                />
+              </Box>
+              {bindError && (
+                <Box sx={{ fontSize: 12, color: 'error.main' }}>{bindError}</Box>
+              )}
+            </Box>
+            <Button
+              variant="contained"
+              disabled={isComplete}
+              onClick={submitBind}
+              sx={{
+                height: 36,
+                minHeight: 36,
+                px: 3,
+                fontSize: 13,
+                '&.Mui-disabled': { bgcolor: 'grey.200', color: 'grey.400' },
+              }}
+            >
+              提交
+            </Button>
+          </Box>
+
+          {bound.length === 0 ? (
+            <Box
+              sx={{
+                py: 3,
+                textAlign: 'center',
+                color: 'grey.500',
+                fontSize: 12,
+                bgcolor: 'grey.100',
+                borderRadius: 1.5,
+              }}
+            >
+              暂无绑定流水
+            </Box>
+          ) : (
+            <Stack sx={{ gap: 1 }}>
+              <Box sx={{ fontSize: 12, color: 'grey.600' }}>
+                已绑定 {bound.length} 笔流水
+              </Box>
+              <Stack sx={{ gap: 1 }}>
+                {bound.map((b) => (
+                  <Box
+                    key={b.txid}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 2,
+                      px: 3,
+                      py: 2,
+                      bgcolor: 'grey.100',
+                      borderRadius: 1.5,
+                    }}
+                  >
+                    <Box
+                      component="span"
+                      sx={{
+                        flex: 1,
+                        minWidth: 0,
+                        fontFamily:
+                          'ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace',
+                        fontSize: 12,
+                        color: 'text.primary',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                      title={b.txid}
+                    >
+                      {b.txid}
+                    </Box>
+                    <Box
+                      component="span"
+                      sx={{
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: 'text.primary',
+                        fontVariantNumeric: 'tabular-nums',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {fmtUsdtAmt(b.amount)}
+                    </Box>
+                    <Box
+                      component="button"
+                      onClick={() => unbind(b.txid)}
+                      sx={{
+                        flexShrink: 0,
+                        fontFamily: 'inherit',
+                        fontSize: 12,
+                        fontWeight: 500,
+                        height: 26,
+                        px: 2,
+                        border: 0,
+                        borderRadius: 1,
+                        bgcolor: 'transparent',
+                        color: 'error.dark',
+                        cursor: 'pointer',
+                        transition: 'background 120ms',
+                        '&:hover': { bgcolor: 'rgba(236,104,76,0.08)' },
+                      }}
+                    >
+                      解绑
+                    </Box>
+                  </Box>
+                ))}
+              </Stack>
+            </Stack>
+          )}
+        </Section>
+
         {/* 收款进度 */}
         <Section title="收款进度">
-          <ProgressRow k="需收款数量" v={required} bold />
-          <ProgressRow k="供应商已支付数量" v={received} />
+          <ProgressRow k="需收款数量" v={requiredDisplay} bold />
+          <ProgressRow
+            k="供应商已支付数量"
+            v={receivedDisplay}
+            valueColor={isComplete ? 'success.dark' : undefined}
+          />
         </Section>
       </Box>
 
@@ -353,7 +589,17 @@ function RadioRow({
   );
 }
 
-function ProgressRow({ k, v, bold }: { k: string; v: string; bold?: boolean }) {
+function ProgressRow({
+  k,
+  v,
+  bold,
+  valueColor,
+}: {
+  k: string;
+  v: string;
+  bold?: boolean;
+  valueColor?: string;
+}) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
       <Box component="span" sx={{ color: 'grey.600', fontSize: 13 }}>
@@ -362,7 +608,7 @@ function ProgressRow({ k, v, bold }: { k: string; v: string; bold?: boolean }) {
       <Box
         component="span"
         sx={{
-          color: 'text.primary',
+          color: valueColor ?? 'text.primary',
           fontSize: bold ? 15 : 13,
           fontWeight: bold ? 700 : 600,
           fontVariantNumeric: 'tabular-nums',
