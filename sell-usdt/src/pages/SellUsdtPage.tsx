@@ -50,7 +50,10 @@ const TABS: Array<{ key: TabKey; label: string }> = [
 ];
 
 export const SellUsdtPage = observer(function SellUsdtPage() {
-  const { fee } = useStores();
+  const { fee, ui } = useStores();
+  // Read at render time so observer tracks the dependency — otherwise the
+  // mutation only fires inside callbacks and SellUsdtPage never re-renders.
+  const paidPendingMap = ui.paidPendingConfirm;
   const [tab, setTab] = useState<TabKey>('pending');
   const [feeOpen, setFeeOpen] = useState(false);
   const [detail, setDetail] = useState<{ row: SellOrderRaw; kind: DetailKind } | null>(null);
@@ -365,6 +368,12 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             onDetail={(r) => setDetail({ row: r, kind: 'paying' })}
             onPrimary={(r) => setConfirm({ row: r, kind: 'payment' })}
             onReject={setRefundRow}
+            canPrimary={(r) => !paidPendingMap[r.recordId]}
+            rowStatusText={(r) =>
+              paidPendingMap[r.recordId]
+                ? '等待用户确认，或 3 天后自动确认'
+                : undefined
+            }
           />
         )}
         {tab === 'rejected' && (
@@ -424,7 +433,15 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
           amountSuffix={confirmModalConfig.amountSuffix}
           warning={confirmModalConfig.warning}
           onClose={() => setConfirm(null)}
-          onConfirm={() => setConfirm(null)}
+          onConfirm={() => {
+            // 付款流程 提交后，该行进入「等待用户确认」过渡态：
+            // 待供应商付款 行隐藏 确认付款 按钮，显示状态文字。
+            // 转账流程 不需要此过渡态。
+            if (confirm.kind === 'payment') {
+              ui.markPaidPending(confirm.row.recordId);
+            }
+            setConfirm(null);
+          }}
         />
       )}
 
@@ -472,6 +489,7 @@ function PendingPayingTable({
   onPrimary,
   onReject,
   canPrimary,
+  rowStatusText,
 }: {
   rows: SellOrderRaw[];
   fee: FeeConfig;
@@ -484,6 +502,8 @@ function PendingPayingTable({
   onReject?: (row: SellOrderRaw) => void;
   /** Per-row predicate: when it returns false, the primary action button is hidden for that row. */
   canPrimary?: (row: SellOrderRaw) => boolean;
+  /** Per-row optional status text, shown to the left of all action buttons. */
+  rowStatusText?: (row: SellOrderRaw) => string | undefined;
 }) {
   return (
     <TableContainer sx={{ overflowX: 'auto' }}>
@@ -554,7 +574,25 @@ function PendingPayingTable({
                   </Box>
                 </TableCell>
                 <TableCell sx={bodyCellSx}>
-                  <Stack direction="row" spacing={2} justifyContent="flex-end">
+                  <Stack
+                    direction="row"
+                    spacing={2}
+                    alignItems="center"
+                    justifyContent="flex-end"
+                  >
+                    {rowStatusText && rowStatusText(r) && (
+                      <Box
+                        component="span"
+                        sx={{
+                          fontSize: 12.5,
+                          color: 'grey.600',
+                          whiteSpace: 'nowrap',
+                          mr: 1,
+                        }}
+                      >
+                        {rowStatusText(r)}
+                      </Box>
+                    )}
                     <ActionButton variant="outlined" onClick={() => onDetail(r)}>
                       详情
                     </ActionButton>

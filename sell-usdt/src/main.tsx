@@ -12,6 +12,12 @@ import App from './App';
 import { ccpaymentTheme } from './theme';
 import { rootStore, StoresProvider } from './stores';
 
+// Expose the store in dev so PRD-figure capture scripts can mark per-row
+// states (e.g. paid-pending) without going through the whole modal flow.
+if (import.meta.env.DEV) {
+  (window as unknown as { __rootStore: typeof rootStore }).__rootStore = rootStore;
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
