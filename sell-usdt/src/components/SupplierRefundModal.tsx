@@ -39,6 +39,11 @@ function fmtUsdtAmt(n: number): string {
  * cancel reason is recorded at completion time. Backend/race-condition logic
  * lives outside this prototype — this modal just renders the addresses and
  * lets the operator edit the cancel reason at any time.
+ *
+ * 提交模型：弹窗内对「拒绝原因 / TxID 绑定列表」的所有编辑都是预绑定预览，
+ * 不会立刻写入热钱包入账列表；只有点击底部「确定提交」按钮后，本次会话
+ * 中新增 / 移除的 TxID 才会真正回写到热钱包入账流水（交易类型 + 备注）。
+ * 顶部 X 关闭、点击遮罩关闭 = 放弃本次预览，不做任何回写。
  */
 
 const CANCEL_REASONS: ReadonlyArray<{ key: string; label: string }> = [
@@ -103,9 +108,16 @@ export const SupplierRefundModal = observer(function SupplierRefundModal({
   const [otherReason, setOtherReason] = useState('');
   const [activeNetwork, setActiveNetwork] = useState<string>(NETWORKS[0]!.key);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  // bound = 当前预览态（添加 / 解绑 仅改这个本地列表，不立即写库）。
   const [bound, setBound] = useState<BoundTx[]>([]);
+  // originalBoundIds = 弹窗打开时已经在热钱包入账列表里属于本订单的 TxID 集合，
+  // 用于在「确定提交」时计算 diff（toAdd / toRemove）。
+  const [originalBoundIds, setOriginalBoundIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
   const [txInput, setTxInput] = useState('');
   const [bindError, setBindError] = useState('');
+  const [commitError, setCommitError] = useState('');
 
   // Reset transient state + re-hydrate bound list from the store whenever
   // the modal opens for a (possibly different) row.
@@ -117,10 +129,12 @@ export const SupplierRefundModal = observer(function SupplierRefundModal({
       setCopiedKey(null);
       setTxInput('');
       setBindError('');
+      setCommitError('');
       const existing = hotWallet
         .listBoundForOrder(row.recordId)
         .map((r) => ({ txid: r.txid, amount: r.amount }));
       setBound(existing);
+      setOriginalBoundIds(new Set(existing.map((r) => r.txid)));
     }
   }, [open, row, hotWallet]);
 
@@ -151,6 +165,10 @@ export const SupplierRefundModal = observer(function SupplierRefundModal({
     }
   };
 
+  /**
+   * 添加（预绑定预览）：仅做校验 + 把候选 TxID 推入本地 bound 列表，不写库。
+   * 真正回写到热钱包入账流水由「确定提交」按钮触发。
+   */
   const submitBind = () => {
     if (isComplete) return;
     const t = txInput.trim();
@@ -162,7 +180,7 @@ export const SupplierRefundModal = observer(function SupplierRefundModal({
       setBindError('该 TxID 已绑定');
       return;
     }
-    const result = hotWallet.bindAsSupplierRefund(t, row!.recordId);
+    const result = hotWallet.validateBindForSupplierRefund(t, row!.recordId);
     if (!result.ok) {
       setBindError(
         result.reason === 'not-found'
@@ -186,11 +204,53 @@ export const SupplierRefundModal = observer(function SupplierRefundModal({
     setBound([...bound, { txid: result.record.txid, amount: result.record.amount }]);
     setTxInput('');
     setBindError('');
+    if (commitError) setCommitError('');
   };
 
+  /**
+   * 解绑（预绑定预览）：仅把候选 TxID 从本地 bound 列表移除，不写库。
+   * 若该 TxID 在打开弹窗时已绑定到本订单，「确定提交」时会调用解绑接口。
+   */
   const unbind = (txid: string) => {
-    hotWallet.unbindSupplierRefund(txid);
     setBound(bound.filter((b) => b.txid !== txid));
+    if (commitError) setCommitError('');
+  };
+
+  /**
+   * 计算 diff，把本次会话内新增 / 移除的 TxID 实际写回热钱包入账列表。
+   * 任一条新增 TxID 在 commit 这一刻失去资格（例如被其他会话抢绑），就停止
+   * 并把错误回显给操作员；解绑无校验，按顺序逐条移除。
+   */
+  const commitChanges = () => {
+    if (!row) return;
+    const orderId = row.recordId;
+    const stagedTxids = new Set(bound.map((b) => b.txid));
+    const toAdd = bound.filter((b) => !originalBoundIds.has(b.txid));
+    const toRemove = [...originalBoundIds].filter((txid) => !stagedTxids.has(txid));
+
+    for (const item of toAdd) {
+      const result = hotWallet.bindAsSupplierRefund(item.txid, orderId);
+      if (!result.ok) {
+        setCommitError(
+          result.reason === 'not-found'
+            ? `提交失败：${item.txid} 已不在热钱包入账流水中`
+            : result.reason === 'wrong-account'
+              ? `提交失败：${item.txid} 不是入账流水`
+              : result.reason === 'wrong-currency'
+                ? `提交失败：${item.txid} 不是 USDT 交易`
+                : result.reason === 'already-bound-other'
+                  ? `提交失败：${item.txid} 已被绑定到其他订单`
+                  : `提交失败：${item.txid} 已被标记，无法绑定`,
+        );
+        return;
+      }
+    }
+    for (const txid of toRemove) {
+      hotWallet.unbindSupplierRefund(txid);
+    }
+    setOriginalBoundIds(new Set(stagedTxids));
+    setCommitError('');
+    onClose();
   };
 
   return (
@@ -468,7 +528,7 @@ export const SupplierRefundModal = observer(function SupplierRefundModal({
                 '&.Mui-disabled': { bgcolor: 'grey.200', color: 'grey.400' },
               }}
             >
-              提交
+              添加
             </Button>
           </Box>
 
@@ -572,7 +632,36 @@ export const SupplierRefundModal = observer(function SupplierRefundModal({
         </Section>
       </Box>
 
-      <Box sx={{ height: 16 }} />
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1.5,
+          p: '12px 24px 20px',
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+        }}
+      >
+        {commitError && (
+          <Box sx={{ fontSize: 12, color: 'error.main' }}>{commitError}</Box>
+        )}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+          <Button
+            variant="contained"
+            onClick={commitChanges}
+            sx={{
+              height: 36,
+              minHeight: 36,
+              px: 4,
+              fontSize: 13,
+              fontWeight: 600,
+            }}
+          >
+            确定提交
+          </Button>
+        </Box>
+      </Box>
     </Dialog>
   );
 });

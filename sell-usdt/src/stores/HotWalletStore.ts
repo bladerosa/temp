@@ -55,11 +55,11 @@ export class HotWalletStore {
   };
 
   /**
-   * Bind a txid to a sell-USDT order's supplier refund flow. Returns the
-   * matched record, or an error code so the caller can surface a useful
-   * message to the operator.
+   * Pure validation for the supplier-refund bind flow — checks eligibility
+   * WITHOUT mutating the store. Used by the modal's 添加 button to preview
+   * a binding (staged) before the operator commits via 确定提交.
    */
-  bindAsSupplierRefund = (
+  validateBindForSupplierRefund = (
     txid: string,
     orderId: string,
   ):
@@ -84,9 +84,34 @@ export class HotWalletStore {
     if (rec.category !== '' && rec.category !== '供应商退款') {
       return { ok: false, reason: 'already-categorized' };
     }
-    rec.category = '供应商退款';
-    rec.remark = orderId;
     return { ok: true, record: rec };
+  };
+
+  /**
+   * Bind a txid to a sell-USDT order's supplier refund flow. Returns the
+   * matched record, or an error code so the caller can surface a useful
+   * message to the operator. This mutates the store and is invoked when the
+   * operator clicks 确定提交 in the supplier-refund modal.
+   */
+  bindAsSupplierRefund = (
+    txid: string,
+    orderId: string,
+  ):
+    | { ok: true; record: HotWalletRecord }
+    | {
+        ok: false;
+        reason:
+          | 'not-found'
+          | 'wrong-account'
+          | 'wrong-currency'
+          | 'already-categorized'
+          | 'already-bound-other';
+      } => {
+    const result = this.validateBindForSupplierRefund(txid, orderId);
+    if (!result.ok) return result;
+    result.record.category = '供应商退款';
+    result.record.remark = orderId;
+    return result;
   };
 
   /** Reverse the binding — used by the modal's 解绑 button. */
