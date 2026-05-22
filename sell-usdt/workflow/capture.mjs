@@ -200,17 +200,26 @@ const RECIPES = [
     url: '/dashboard/sell-usdt',
     pre: [
       { click: '[role="tab"]:has-text("待供应商付款")' },
-      { eval: `(() => { window.__rootStore.ui.markPaidPending('202507...370816'); })()` },
+      // Mark three rows with three different markedAt values to showcase
+      // the day / hour / minute unit downgrade together in one figure.
+      { eval: `(() => {
+        const NOW = Date.now();
+        const DAY = 86400000;
+        const MIN = 60000;
+        window.__rootStore.ui.markPaidPending('202507...370816', NOW);
+        window.__rootStore.ui.markPaidPending('202505...228032', NOW - 2.5 * DAY);
+        window.__rootStore.ui.markPaidPending('202502...619264', NOW - (3 * DAY - 5 * MIN));
+      })()` },
       { waitTimeout: 200 },
       // Scroll the table horizontally so the action column is on-screen.
       { eval: `(() => { const s = document.querySelector('.MuiTableContainer-root'); if (s) s.scrollLeft = s.scrollWidth; })()` },
       { waitTimeout: 150 },
     ],
     annos: [
-      { sel: 'tbody tr:nth-child(1) span:has-text("等待用户确认")', n: 1, pos: 'tl' },
-      { sel: 'tbody tr:nth-child(1) button:has-text("详情")',       n: 2, pos: 'cr' },
-      { sel: 'tbody tr:nth-child(1) button:has-text("供应商退款")', n: 3, pos: 'cr' },
-      { sel: 'tbody tr:nth-child(2) button:has-text("确认付款")',   n: 4, pos: 'cr' },
+      { sel: 'tbody tr:nth-child(1) span:has-text("天后自动确认")',   n: 1, pos: 'tl' },
+      { sel: 'tbody tr:nth-child(2) span:has-text("小时后自动确认")', n: 2, pos: 'tl' },
+      { sel: 'tbody tr:nth-child(3) span:has-text("分钟后自动确认")', n: 3, pos: 'tl' },
+      { sel: 'tbody tr:nth-child(4) button:has-text("确认付款")',     n: 4, pos: 'cr' },
     ],
   },
   {

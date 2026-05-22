@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '@/stores';
+import { formatAutoConfirmCountdown } from '@/stores/UiStore';
 import {
   COMPLETED_ROWS,
   PAYING_ROWS,
@@ -369,11 +370,10 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             onPrimary={(r) => setConfirm({ row: r, kind: 'payment' })}
             onReject={setRefundRow}
             canPrimary={(r) => !paidPendingMap[r.recordId]}
-            rowStatusText={(r) =>
-              paidPendingMap[r.recordId]
-                ? '等待用户确认，或 3 天后自动确认'
-                : undefined
-            }
+            rowStatusText={(r) => {
+              const entry = paidPendingMap[r.recordId];
+              return entry ? formatAutoConfirmCountdown(entry.markedAt) : undefined;
+            }}
           />
         )}
         {tab === 'rejected' && (
