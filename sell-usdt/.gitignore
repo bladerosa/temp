@@ -6,3 +6,7 @@ dist
 .env*
 !.env.example
 tsconfig.tsbuildinfo
+
+# PRD / workflow artifacts — local-only, do not publish
+workflow/
+
