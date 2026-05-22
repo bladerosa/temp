@@ -1,0 +1,186 @@
+/* CCPayment Design System — Colors / Typography tokens
+ * Mirrors src/theme/palette.ts + typography.ts so non-MUI surfaces
+ * (custom SVG charts, hand-rolled chips) can reach the same values via
+ * CSS variables. Imported once in src/main.tsx.
+ */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('/fonts/Poppins-Light.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Poppins-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/Poppins-Medium.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/Poppins-SemiBold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Poppins-Bold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/fonts/Poppins-Black.ttf') format('truetype');
+}
+
+:root {
+  --primary-lighter: #d8e7fe;
+  --primary-light: #89affc;
+  --primary: #3c6ff5;
+  --primary-dark: #1e3eb0;
+  --primary-darker: #0b1c75;
+
+  --secondary-lighter: #f8fde4;
+  --secondary-light: #e3f5ad;
+  --secondary: #bee072;
+  --secondary-dark: #7aa139;
+
+  --success-lighter: #dbfbdb;
+  --success: #43be76;
+  --success-dark: #218861;
+  --success-darker: #0c5b4c;
+
+  --warning-lighter: #fef7d8;
+  --warning: #e7b22b;
+  --warning-dark: #ac7c1f;
+  --warning-darker: #72490b;
+
+  --error-lighter: #feecdb;
+  --error: #ec684c;
+  --error-dark: #a92926;
+  --error-darker: #710e1b;
+
+  --info-lighter: #e3f7fd;
+  --info: #65aee8;
+  --info-dark: #3767a3;
+  --info-darker: #15326c;
+
+  --grey-100: #f8f9fb;
+  --grey-200: #e8ecf2;
+  --grey-300: #cacfd8;
+  --grey-400: #a3a8b1;
+  --grey-500: #71757e;
+  --grey-600: #656872;
+  --grey-700: #494c54;
+  --grey-800: #383a3f;
+  --grey-900: #26282d;
+
+  --bg-default: #ffffff;
+  --bg-neutral: #f4f6f8;
+  --bg-paper: #ffffff;
+  --bg-subtle: #f8f9fb;
+
+  --text-primary: #1f2025;
+  --text-secondary: #71757e;
+  --text-disabled: #b3b9c5;
+
+  --border-subtle: rgba(145, 158, 171, 0.24);
+  --border-default: #e8ecf2;
+  --border-strong: #cacfd8;
+
+  --shadow-card: 0 0 2px 0 rgba(145, 158, 171, 0.2), 0 12px 24px -4px rgba(145, 158, 171, 0.12);
+  --shadow-dialog: -40px 40px 80px -8px rgba(145, 158, 171, 0.24);
+  --shadow-dropdown: -20px 20px 40px -4px rgba(182, 184, 176, 0.24), 0 0 2px 0 rgba(182, 184, 176, 0.24);
+  --shadow-primary: 0 8px 16px 0 rgba(60, 111, 245, 0.24);
+
+  --font-sans: 'Poppins', 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Courier New', monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  background: var(--bg-neutral);
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Print: hide chrome and interactive controls, show only the report content.
+ * Used by 商户数据 -> 生成 PDF action.
+ *
+ * Strategy:
+ *  - The sidebar / appbar and the page-head action area carry [data-no-print="1"]
+ *  - Each card's action toolbar (Segmented tabs, buttons, footer links) carries
+ *    [data-no-print="1"]
+ *  - Card surfaces get a printed-looking border (no drop shadows on paper)
+ *  - break-inside: avoid keeps each card on one page when possible
+ */
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  /* Hide chrome + interactive bits. */
+  .print-hide,
+  [data-no-print='1'],
+  [data-segmented='1'],
+  .MuiButton-root,
+  .MuiSelect-root,
+  .MuiIconButton-root {
+    display: none !important;
+  }
+  /* Force tagged grids to stack vertically — A4 portrait is too narrow for
+   * side-by-side, and stacking guarantees every card has full page width. */
+  [data-print-stack='1'] {
+    display: block !important;
+  }
+  [data-print-stack='1'] > * {
+    margin-bottom: 12px !important;
+  }
+  /* Card surface: paper-friendly borders, no shadow. */
+  .MuiCard-root,
+  .MuiPaper-root {
+    box-shadow: none !important;
+    border: 1px solid #e5e7eb !important;
+    margin-bottom: 12px !important;
+  }
+  /* Let cards break across pages naturally — for tall reports this is critical;
+   * `break-inside: avoid` would cause cards taller than a page to get pushed
+   * off entirely on some browsers. */
+  .MuiCard-root {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+  /* But keep individual table rows + chart SVGs intact. */
+  tr,
+  svg {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  thead {
+    display: table-header-group;
+  }
+}

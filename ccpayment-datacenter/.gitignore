@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# TS incremental compile cache
+*.tsbuildinfo
+
+# Editor / OS
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage (when wired)
+coverage/
+
+# PRD deliverable + 标注原型图 + prd-studio 工作目录（不入库）
+/docs/PRD_商户数据.md
+/docs/assets/prd_*.jpg
+/workflow/
