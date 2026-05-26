@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   Box,
-  Button,
   Stack,
   Table,
   TableBody,
@@ -23,7 +22,6 @@ import {
 } from '@/data/mockData';
 import type { SellOrderRaw, FeeConfig, CompletedRow, RejectedRow } from '@/data/types';
 import { deriveRow, fmtFiat, fmtMarketRate, fmtUSDT } from '@/utils/pricing';
-import { FeeSettingsModal } from '@/components/FeeSettingsModal';
 import {
   OrderDetailModal,
   type DetailStatusSection,
@@ -56,7 +54,6 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
   // mutation only fires inside callbacks and SellUsdtPage never re-renders.
   const paidPendingMap = ui.paidPendingConfirm;
   const [tab, setTab] = useState<TabKey>('pending');
-  const [feeOpen, setFeeOpen] = useState(false);
   const [detail, setDetail] = useState<{ row: SellOrderRaw; kind: DetailKind } | null>(null);
   const [approveRow, setApproveRow] = useState<SellOrderRaw | null>(null);
   const [confirm, setConfirm] = useState<{ row: SellOrderRaw; kind: 'transfer' | 'payment' } | null>(null);
@@ -260,18 +257,17 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
             </Box>
           </Box>
           <Box sx={{ display: 'inline-flex', alignItems: 'baseline', gap: 1, fontSize: 13, color: 'grey.700' }}>
-            供应商汇率加点：
+            供应商服务费：
             <Box component="span" sx={{ color: 'text.primary', fontWeight: 600 }}>
               {fee.supplier}%
             </Box>
           </Box>
-          <Button
-            variant="contained"
-            onClick={() => setFeeOpen(true)}
-            sx={{ height: 36, px: 4, fontSize: 13.5 }}
-          >
-            服务费设置
-          </Button>
+          <Box sx={{ display: 'inline-flex', alignItems: 'baseline', gap: 1, fontSize: 13, color: 'grey.700' }}>
+            供应商银行转账补贴：
+            <Box component="span" sx={{ color: 'text.primary', fontWeight: 600 }}>
+              {fee.platformFlat} USDT
+            </Box>
+          </Box>
         </Stack>
       </Box>
 
@@ -385,16 +381,6 @@ export const SellUsdtPage = observer(function SellUsdtPage() {
 
         <Pagination total={total} />
       </Box>
-
-      <FeeSettingsModal
-        open={feeOpen}
-        initial={{ platform: fee.platform, supplier: fee.supplier }}
-        onClose={() => setFeeOpen(false)}
-        onSave={(next) => {
-          fee.saveSellFee(next);
-          setFeeOpen(false);
-        }}
-      />
 
       <OrderDetailModal
         open={!!detail}

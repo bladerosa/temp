@@ -7,12 +7,14 @@ import { sanitizeFeeInput, validateFee } from '@/utils/pricing';
 export function FiatWithdrawFeeModal({
   open,
   initialRate,
+  platformFlat,
   supplier,
   onClose,
   onSave,
 }: {
   open: boolean;
   initialRate: string;
+  platformFlat: string;
   supplier: string;
   onClose: () => void;
   onSave: (next: string) => void;
@@ -103,14 +105,19 @@ export function FiatWithdrawFeeModal({
             <Info size={14} strokeWidth={1.8} />
           </Box>
           <span>
-            当前供应商汇率加点：
+            当前供应商服务费（固定）：
             <Box component="b" sx={{ color: 'primary.main', fontWeight: 600 }}>
               {supplier}%
+            </Box>
+            <Box component="span" sx={{ mx: 1.5, color: 'grey.400' }}>·</Box>
+            供应商银行转账补贴（固定）：
+            <Box component="b" sx={{ color: 'primary.main', fontWeight: 600 }}>
+              {platformFlat} USDT
             </Box>
           </span>
         </Box>
 
-        <FeeSimulation platform={rate} supplier={supplier} />
+        <FeeSimulation platform={rate} platformFlat={platformFlat} supplier={supplier} />
       </Box>
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: '16px 24px 20px' }}>

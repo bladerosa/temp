@@ -6,20 +6,23 @@ const BASE_RATE = 1;
 
 const fmt = (n: number) =>
   n.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 0 });
-const fmtRate = (n: number) =>
-  n.toLocaleString('en-US', { maximumFractionDigits: 6, minimumFractionDigits: 0 });
 
 export function FeeSimulation({
   platform,
+  platformFlat,
   supplier,
   onPlatformChange,
 }: {
   platform: string;
+  platformFlat: string;
   supplier: string;
   /** When provided, render an inline editable platform-rate field in the simulator header. */
   onPlatformChange?: (v: string) => void;
 }) {
-  const d = deriveRow({ sellAmt: SELL_AMT, market: BASE_RATE }, { platform, supplier });
+  const d = deriveRow(
+    { sellAmt: SELL_AMT, market: BASE_RATE },
+    { platform, platformFlat, supplier },
+  );
   const extRate =
     SELL_AMT > 0
       ? ((d.extFee / SELL_AMT) * 100).toLocaleString('en-US', { maximumFractionDigits: 4 })
@@ -100,11 +103,14 @@ export function FeeSimulation({
         <Box component="span" sx={{ color: 'primary.main', fontWeight: 600 }}>USD</Box>
       </Box>
       <Stack sx={{ gap: 1.5 }}>
-        <SimRow k="外显服务费" v={`${fmt(d.extFee)} USDT`} />
         <SimRow k="平台服务费" v={`${fmt(d.platFee)} USDT`} />
+        <SimRow k="Cwallet 运营账户转账数量" v={`${fmt(d.cwalletAmt)} USDT`} />
+        <SimRow k={`供应商服务费 (${supplier}%)`} v={`${fmt(d.supplierSelfFee)} USDT`} />
+        <SimRow k="供应商银行转账补贴 (固定)" v={`${fmt(d.supplierSubsidy)} USDT`} />
         <SimRow k="供应商承兑数量" v={`${fmt(d.supAmt)} USDT`} />
-        <SimRow k="供应商承兑汇率" v={`1 USDT ≈ ${fmtRate(d.supRate)} USD`} />
-        <SimRow k="外显服务费率" v={`${extRate}%`} highlight withSep />
+        <SimRow k="供应商承兑汇率" v={`1 USDT = 1 USD（固定）`} />
+        <SimRow k="用户外显服务费" v={`${fmt(d.extFee)} USD`} />
+        <SimRow k="用户外显服务费率" v={`${extRate}%`} highlight withSep />
         <SimRow k="用户实际到手" v={`${fmt(d.userGot)} USD`} highlight />
       </Stack>
     </Box>

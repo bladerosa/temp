@@ -11,8 +11,13 @@ export type SellOrderRaw = {
   recordId: string;
   mid: string;
   sellAmt: number;
+  /**
+   * 市场汇率 USDT → 法币。仅支持 USD，固定为 1:1。
+   * 字段保留以兼容历史数据结构；新数据写入时统一为 1。
+   */
   market: number;
-  ccy: 'USD' | 'EUR' | string;
+  /** 收款法币币种。仅支持 USD。 */
+  ccy: 'USD';
   bank: string;
   /** Operator who took the last relevant action — set for transfer-pending / paying rows. */
   operator?: string;
@@ -63,8 +68,17 @@ export type CompletedRow = SellOrderRaw & {
 };
 
 export type FeeConfig = {
+  /** 平台服务费率（%，可编辑）。商户级配置，在「法币提现 编辑」弹窗维护。 */
   platform: string;
+  /**
+   * 供应商银行转账补贴（USDT，固定值）。每笔订单平台从 sellAmt 中预留这么多
+   * USDT 一并交给供应商，供应商再用它去覆盖国际汇款银行手续费。本字段后台
+   * 配置死，本期写死 10 USDT，前端不可改。
+   */
+  platformFlat: string;
+  /** 供应商服务费率（%，固定 0.5%，无前端编辑入口）。 */
   supplier: string;
+  /** 商户级法币提现费率（%，可编辑）。 */
   fiatWithdraw: string;
 };
 
@@ -85,9 +99,20 @@ export type HotWalletRecord = {
 };
 
 export type FeeDerived = {
+  /** 平台服务费（USDT），= sellAmt × 平台服务费率。 */
   platFee: number;
+  /** 供应商银行转账补贴（USDT，固定）。 */
+  supplierSubsidy: number;
+  /** 供应商按 0.5% 留下的服务费（USDT）。 */
+  supplierSelfFee: number;
+  /** Cwallet 运营账户转给供应商的 USDT，= sellAmt − 平台服务费。 */
+  cwalletAmt: number;
+  /** 供应商实际承兑给用户的 USDT 数量。 */
   supAmt: number;
+  /** 供应商承兑汇率（USDT → 法币）。本期固定 1。 */
   supRate: number;
+  /** 用户实际到手（法币 USD）。本期 = supAmt × 1。 */
   userGot: number;
+  /** 用户外显服务费（USD），= sellAmt − userGot。 */
   extFee: number;
 };

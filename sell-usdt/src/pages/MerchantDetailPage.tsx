@@ -138,7 +138,7 @@ const FeeConfigTable = observer(function FeeConfigTable() {
     {
       key: 'wd-fiat',
       item: '法币提现',
-      rate: `${fee.fiatWithdraw}%  +0 USDT`,
+      rate: `${fee.fiatWithdraw}%  +${fee.platformFlat} USDT`,
       action: '编辑',
       cumulative: '--',
     },
@@ -223,6 +223,7 @@ const FeeConfigTable = observer(function FeeConfigTable() {
       <FiatWithdrawFeeModal
         open={editFiat}
         initialRate={fee.fiatWithdraw}
+        platformFlat={fee.platformFlat}
         supplier={fee.supplier}
         onClose={() => setEditFiat(false)}
         onSave={(next) => {

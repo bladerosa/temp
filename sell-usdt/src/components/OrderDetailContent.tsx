@@ -27,11 +27,12 @@ export function OrderDetailContent({
         <DetailRow k="Record ID:" v={String(row.recordId).replace(/\.\.\./, '')} />
         <DetailRow k="Merchant ID:" v={row.mid} />
         <DetailRow k="Sell Amount:" v={fmtUSDT(row.sellAmt)} />
-        <DetailRow k="外显服务费:" v={fmtUSDT(d.extFee)} />
+        <DetailRow k="用户外显服务费:" v={fmtFiat(d.extFee, row.ccy)} />
         <DetailRow k="平台服务费:" v={fmtUSDT(d.platFee)} />
+        <DetailRow k="供应商服务费 (0.5%):" v={fmtUSDT(d.supplierSelfFee)} />
+        <DetailRow k="供应商银行转账补贴 (固定):" v={fmtUSDT(d.supplierSubsidy)} />
         <DetailRow k="供应商承兑Amount:" v={fmtUSDT(d.supAmt)} />
         <DetailRow k="Rate:" v={fmtMarketRate(row.market, row.ccy)} />
-        <DetailRow k="供应商汇率:" v={fmtMarketRate(d.supRate, row.ccy)} />
         <DetailRow k="Get Asset:" v={fmtFiat(d.userGot, row.ccy)} />
       </DetailSection>
 
