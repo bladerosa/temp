@@ -5,7 +5,8 @@ import type { CompletedRow, HotWalletRecord, RejectedRow, SellOrderRaw } from '.
  * 法币仅支持 USD，市场汇率固定 1:1。
  * Cwallet 运营账户转给供应商的 USDT = sellAmt × (1 − 平台服务费率)；
  * 默认平台服务费率 = 3%、供应商服务费率 = 0.5%、供应商银行转账补贴 = 10 USDT。
- * 所以 cwalletAmt ≈ sellAmt × 0.97；fiatPaid ≈ sellAmt × 0.96515 − 10。
+ * 所以 cwalletAmt ≈ sellAmt × 0.97；
+ * fiatPaid = (cwalletAmt − 10) × 0.995（v1.7.1：先扣 10U 再按 0.5% 抽供应商服务费）。
  */
 
 export const PENDING_ROWS: SellOrderRaw[] = [
@@ -120,7 +121,7 @@ export const COMPLETED_ROWS: CompletedRow[] = [
     proofUploadedBy: 'shirley13',
     proofId: 'test0000009999',
     completedAt: '18 May 2026 17:07:42',
-    fiatPaid: '96,505.10 USD',
+    fiatPaid: '96,505.15 USD',
     payBank: 'FasterPay',
   },
   {
@@ -143,7 +144,7 @@ export const COMPLETED_ROWS: CompletedRow[] = [
     proofUploadedBy: 'shirley13',
     proofId: '123123',
     completedAt: '15 May 2026 15:07:50',
-    fiatPaid: '96,505.00 USD',
+    fiatPaid: '96,505.05 USD',
     payBank: 'FasterPay',
   },
   {
@@ -166,7 +167,7 @@ export const COMPLETED_ROWS: CompletedRow[] = [
     proofUploadedBy: 'shirley13',
     proofId: '12323',
     completedAt: '04 Sep 2025 17:30:55',
-    fiatPaid: '96,505.00 USD',
+    fiatPaid: '96,505.05 USD',
     payBank: 'Bank transfer',
   },
   {
@@ -189,7 +190,7 @@ export const COMPLETED_ROWS: CompletedRow[] = [
     proofUploadedBy: 'shirley13',
     proofId: '123',
     completedAt: '22 Aug 2025 19:01:40',
-    fiatPaid: '96,505.00 USD',
+    fiatPaid: '96,505.05 USD',
     payBank: 'Neteller',
   },
   {
@@ -212,7 +213,7 @@ export const COMPLETED_ROWS: CompletedRow[] = [
     proofUploadedBy: 'gliu29514',
     proofId: '1',
     completedAt: '01 Jul 2025 16:58:26',
-    fiatPaid: '96,505.00 USD',
+    fiatPaid: '96,505.05 USD',
     payBank: 'Bank transfer',
   },
   {
@@ -235,7 +236,7 @@ export const COMPLETED_ROWS: CompletedRow[] = [
     proofUploadedBy: 'shirley13',
     proofId: '20240902034018216153707364352',
     completedAt: '03 Sep 2024 16:11:15',
-    fiatPaid: '77,202.00 USD',
+    fiatPaid: '77,202.05 USD',
     payBank: 'Global66',
   },
   {
@@ -258,7 +259,7 @@ export const COMPLETED_ROWS: CompletedRow[] = [
     proofUploadedBy: 'shirley13',
     proofId: '235.18',
     completedAt: '06 Sep 2024 15:55:05',
-    fiatPaid: '250,929.00 USD',
+    fiatPaid: '250,929.05 USD',
     payBank: 'Global66',
   },
 ];
