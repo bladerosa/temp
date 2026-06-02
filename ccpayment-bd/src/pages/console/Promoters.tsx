@@ -34,6 +34,8 @@ export default observer(function Promoters() {
   const [unbindFor, setUnbindFor] = useState<Promoter | null>(null);
   const [remarkFor, setRemarkFor] = useState<Promoter | null>(null);
   const [dividendFor, setDividendFor] = useState<Promoter | null>(null);
+  const [commBindFor, setCommBindFor] = useState<Promoter | null>(null);
+  const [commUnbindFor, setCommUnbindFor] = useState<Promoter | null>(null);
   const [pageSize, setPageSize] = useState(100);
 
   const list = promoter.filtered;
@@ -91,7 +93,7 @@ export default observer(function Promoters() {
         }}
       >
         <Box sx={{ overflowX: 'auto' }}>
-          <Table sx={{ minWidth: 1480, '& th, & td': { whiteSpace: 'nowrap' } }}>
+          <Table sx={{ minWidth: 1680, '& th, & td': { whiteSpace: 'nowrap' } }}>
             <TableHead>
               <TableRow>
                 <TableCell sx={{ minWidth: 200 }}>推广账号</TableCell>
@@ -106,7 +108,7 @@ export default observer(function Promoters() {
                 <TableCell>已提现佣金(USD)</TableCell>
                 <TableCell>待提现佣金(USD)</TableCell>
                 <TableCell>备注</TableCell>
-                <TableCell sx={{ minWidth: 280 }}>操作</TableCell>
+                <TableCell sx={{ minWidth: 480 }}>操作</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -190,11 +192,17 @@ export default observer(function Promoters() {
                   <TableCell>
                     {p.merchant ? (
                       <ActionLink danger onClick={() => setUnbindFor(p)}>
-                        解绑商户账号
+                        取消关联商户账号
                       </ActionLink>
                     ) : (
-                      <ActionLink onClick={() => setBindFor(p)}>绑定商户账号</ActionLink>
+                      <ActionLink onClick={() => setBindFor(p)}>关联商户账号</ActionLink>
                     )}
+                    <ActionSep />
+                    <ActionLink onClick={() => setCommBindFor(p)}>绑定商户账号</ActionLink>
+                    <ActionSep />
+                    <ActionLink danger onClick={() => setCommUnbindFor(p)}>
+                      解绑商户账号
+                    </ActionLink>
                     <ActionSep />
                     <ActionLink>佣金结算记录</ActionLink>
                     <ActionSep />
@@ -233,6 +241,16 @@ export default observer(function Promoters() {
         open={!!dividendFor}
         promoterName={dividendFor ? dividendFor.email : null}
         onClose={() => setDividendFor(null)}
+      />
+      <CommissionMerchantDialog
+        mode="bind"
+        promoter={commBindFor}
+        onClose={() => setCommBindFor(null)}
+      />
+      <CommissionMerchantDialog
+        mode="unbind"
+        promoter={commUnbindFor}
+        onClose={() => setCommUnbindFor(null)}
       />
     </>
   );
@@ -306,14 +324,14 @@ function BindMerchantDialog({ promoter, onClose }: { promoter: Promoter | null; 
       onClose={onClose}
       PaperProps={{ sx: { width: 440, maxWidth: 'calc(100vw - 32px)' } }}
     >
-      <DialogHeader title="绑定商户账号" onClose={onClose} />
+      <DialogHeader title="关联商户账号" onClose={onClose} />
       <DialogContent sx={{ p: '20px' }}>
         <Box sx={{ p: '10px 12px', bgcolor: 'grey.100', borderRadius: '8px', mb: 2, fontSize: 13, color: 'text.secondary' }}>
           为{' '}
           <Box component="b" sx={{ color: 'text.primary', fontWeight: 600 }}>
             {promoter?.email ?? '--'}
           </Box>{' '}
-          绑定商户账号
+          关联商户账号
         </Box>
         <Box sx={{ fontSize: 13, color: 'text.secondary', mb: 1, fontWeight: 500 }}>商户账号</Box>
         <TextField
@@ -339,7 +357,7 @@ function BindMerchantDialog({ promoter, onClose }: { promoter: Promoter | null; 
           onClick={submit}
           sx={{ height: 38 }}
         >
-          {saving ? '绑定中…' : '绑定'}
+          {saving ? '关联中…' : '关联'}
         </Button>
       </DialogActions>
     </Dialog>
@@ -367,7 +385,7 @@ function UnbindMerchantDialog({ promoter, onClose }: { promoter: Promoter | null
       onClose={onClose}
       PaperProps={{ sx: { width: 440, maxWidth: 'calc(100vw - 32px)' } }}
     >
-      <DialogHeader title="解绑商户账号" onClose={onClose} />
+      <DialogHeader title="取消关联商户账号" onClose={onClose} />
       <DialogContent sx={{ p: '20px' }}>
         <Box sx={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
           <Box
@@ -385,7 +403,7 @@ function UnbindMerchantDialog({ promoter, onClose }: { promoter: Promoter | null
             <AlertTriangle size={22} />
           </Box>
           <Box sx={{ fontSize: 14, lineHeight: '22px' }}>
-            确认要解绑该推广者当前绑定的商户账号{' '}
+            确认要取消关联该推广者当前关联的商户账号{' '}
             <Box component="b" sx={{ fontWeight: 600 }}>
               {merchant ? `${merchant.name} (${merchant.id})` : '--'}
             </Box>{' '}
@@ -404,7 +422,7 @@ function UnbindMerchantDialog({ promoter, onClose }: { promoter: Promoter | null
           onClick={submit}
           sx={{ height: 38 }}
         >
-          {saving ? '解绑中…' : '确认解绑'}
+          {saving ? '取消关联中…' : '确认取消关联'}
         </Button>
       </DialogActions>
     </Dialog>
@@ -454,6 +472,99 @@ function RemarkDialog({ promoter, onClose }: { promoter: Promoter | null; onClos
           sx={{ height: 38 }}
         >
           保存
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+function CommissionMerchantDialog({
+  mode,
+  promoter,
+  onClose,
+}: {
+  mode: 'bind' | 'unbind';
+  promoter: Promoter | null;
+  onClose: () => void;
+}) {
+  const { promoter: store } = useStores();
+  const [value, setValue] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const id = value.trim().toUpperCase();
+  const formatOk = /^CP\d{4,6}$/.test(id);
+  const isBind = mode === 'bind';
+  const title = isBind ? '绑定商户账号' : '解绑商户账号';
+
+  const reset = () => {
+    setValue('');
+    setError(null);
+    setSaving(false);
+  };
+
+  const submit = () => {
+    if (!promoter || !formatOk) return;
+    const has = store.hasCommissionMerchant(promoter.email, id);
+    if (isBind && has) {
+      setError('该商户已与该推广者建立分佣关系');
+      return;
+    }
+    if (!isBind && !has) {
+      setError('该商户与该推广者未建立分佣关系');
+      return;
+    }
+    setSaving(true);
+    setTimeout(() => {
+      if (isBind) store.addCommissionMerchant(promoter.email, id);
+      else store.removeCommissionMerchant(promoter.email, id);
+      reset();
+      onClose();
+    }, 500);
+  };
+
+  return (
+    <Dialog
+      open={!!promoter}
+      onClose={onClose}
+      PaperProps={{ sx: { width: 440, maxWidth: 'calc(100vw - 32px)' } }}
+      TransitionProps={{ onExited: reset }}
+    >
+      <DialogHeader title={title} onClose={onClose} />
+      <DialogContent sx={{ p: '20px' }}>
+        <Box sx={{ p: '10px 12px', bgcolor: 'grey.100', borderRadius: '8px', mb: 2, fontSize: 13, color: 'text.secondary' }}>
+          为{' '}
+          <Box component="b" sx={{ color: 'text.primary', fontWeight: 600 }}>
+            {promoter?.email ?? '--'}
+          </Box>{' '}
+          {isBind ? '绑定享受分佣的商户账号' : '解绑享受分佣的商户账号'}
+        </Box>
+        <Box sx={{ fontSize: 13, color: 'text.secondary', mb: 1, fontWeight: 500 }}>商户号</Box>
+        <TextField
+          fullWidth
+          size="small"
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value);
+            setError(null);
+          }}
+          placeholder="例如 CP10238"
+          error={!!error}
+          helperText={error ?? '商户号格式：CP + 4–6 位数字'}
+        />
+      </DialogContent>
+      <DialogActions sx={{ p: '14px 20px', borderTop: '1px solid', borderColor: 'divider', gap: 1.25 }}>
+        <Button variant="outlined" onClick={onClose} sx={{ height: 38 }}>
+          取消
+        </Button>
+        <Button
+          variant="contained"
+          color={isBind ? 'primary' : 'error'}
+          disabled={!formatOk || saving}
+          onClick={submit}
+          sx={{ height: 38 }}
+        >
+          {saving ? (isBind ? '绑定中…' : '解绑中…') : isBind ? '绑定' : '解绑'}
         </Button>
       </DialogActions>
     </Dialog>

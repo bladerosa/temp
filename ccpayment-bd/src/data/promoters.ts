@@ -18,6 +18,8 @@ export interface Promoter {
   remark: string;
   has2fa?: boolean;
   merchant: Merchant | null;
+  /** 享受分佣的商户号集合（多对多关系，独立于单一的账户关联 merchant） */
+  commissionMerchantIds?: string[];
 }
 
 export const KNOWN_MERCHANTS: Record<string, string> = {

@@ -9,7 +9,10 @@ export type PromoterSortKey =
   | 'commission-asc';
 
 export class PromoterStore {
-  promoters: Promoter[] = INITIAL_PROMOTERS.map((p) => ({ ...p }));
+  promoters: Promoter[] = INITIAL_PROMOTERS.map((p) => ({
+    ...p,
+    commissionMerchantIds: p.commissionMerchantIds ? [...p.commissionMerchantIds] : [],
+  }));
   filterKey: PromoterFilterKey = 'email';
   filterQuery = '';
   sortKey: PromoterSortKey = 'time-desc';
@@ -40,6 +43,27 @@ export class PromoterStore {
   unbindMerchant = (email: string) => {
     const target = this.promoters.find((p) => p.email === email);
     if (target) target.merchant = null;
+  };
+
+  /** 分佣关系：该推广者是否已绑定指定商户号 */
+  hasCommissionMerchant = (email: string, id: string): boolean => {
+    const target = this.promoters.find((p) => p.email === email);
+    return !!target?.commissionMerchantIds?.includes(id);
+  };
+
+  /** 分佣关系：将商户加入推广者的绑定关系（享受分佣） */
+  addCommissionMerchant = (email: string, id: string) => {
+    const target = this.promoters.find((p) => p.email === email);
+    if (!target) return;
+    if (!target.commissionMerchantIds) target.commissionMerchantIds = [];
+    if (!target.commissionMerchantIds.includes(id)) target.commissionMerchantIds.push(id);
+  };
+
+  /** 分佣关系：将商户移出推广者的绑定关系（不再享受分佣） */
+  removeCommissionMerchant = (email: string, id: string) => {
+    const target = this.promoters.find((p) => p.email === email);
+    if (!target?.commissionMerchantIds) return;
+    target.commissionMerchantIds = target.commissionMerchantIds.filter((x) => x !== id);
   };
 
   updateRemark = (email: string, remark: string) => {
