@@ -8,11 +8,13 @@ import {
   MenuItem,
   Select,
   Stack,
+  Tab,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  Tabs,
   TextField,
   Typography,
 } from '@mui/material';
@@ -34,8 +36,7 @@ export default observer(function Promoters() {
   const [unbindFor, setUnbindFor] = useState<Promoter | null>(null);
   const [remarkFor, setRemarkFor] = useState<Promoter | null>(null);
   const [dividendFor, setDividendFor] = useState<Promoter | null>(null);
-  const [commBindFor, setCommBindFor] = useState<Promoter | null>(null);
-  const [commUnbindFor, setCommUnbindFor] = useState<Promoter | null>(null);
+  const [commManageFor, setCommManageFor] = useState<Promoter | null>(null);
   const [pageSize, setPageSize] = useState(100);
 
   const list = promoter.filtered;
@@ -93,7 +94,7 @@ export default observer(function Promoters() {
         }}
       >
         <Box sx={{ overflowX: 'auto' }}>
-          <Table sx={{ minWidth: 1680, '& th, & td': { whiteSpace: 'nowrap' } }}>
+          <Table sx={{ minWidth: 1560, '& th, & td': { whiteSpace: 'nowrap' } }}>
             <TableHead>
               <TableRow>
                 <TableCell sx={{ minWidth: 200 }}>推广账号</TableCell>
@@ -108,7 +109,7 @@ export default observer(function Promoters() {
                 <TableCell>已提现佣金(USD)</TableCell>
                 <TableCell>待提现佣金(USD)</TableCell>
                 <TableCell>备注</TableCell>
-                <TableCell sx={{ minWidth: 480 }}>操作</TableCell>
+                <TableCell sx={{ minWidth: 420 }}>操作</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -198,11 +199,7 @@ export default observer(function Promoters() {
                       <ActionLink onClick={() => setBindFor(p)}>关联商户账号</ActionLink>
                     )}
                     <ActionSep />
-                    <ActionLink onClick={() => setCommBindFor(p)}>绑定商户账号</ActionLink>
-                    <ActionSep />
-                    <ActionLink danger onClick={() => setCommUnbindFor(p)}>
-                      解绑商户账号
-                    </ActionLink>
+                    <ActionLink onClick={() => setCommManageFor(p)}>绑定商户管理</ActionLink>
                     <ActionSep />
                     <ActionLink>佣金结算记录</ActionLink>
                     <ActionSep />
@@ -242,15 +239,9 @@ export default observer(function Promoters() {
         promoterName={dividendFor ? dividendFor.email : null}
         onClose={() => setDividendFor(null)}
       />
-      <CommissionMerchantDialog
-        mode="bind"
-        promoter={commBindFor}
-        onClose={() => setCommBindFor(null)}
-      />
-      <CommissionMerchantDialog
-        mode="unbind"
-        promoter={commUnbindFor}
-        onClose={() => setCommUnbindFor(null)}
+      <CommissionManageDialog
+        promoter={commManageFor}
+        onClose={() => setCommManageFor(null)}
       />
     </>
   );
@@ -478,29 +469,32 @@ function RemarkDialog({ promoter, onClose }: { promoter: Promoter | null; onClos
   );
 }
 
-function CommissionMerchantDialog({
-  mode,
+function CommissionManageDialog({
   promoter,
   onClose,
 }: {
-  mode: 'bind' | 'unbind';
   promoter: Promoter | null;
   onClose: () => void;
 }) {
   const { promoter: store } = useStores();
+  const [tab, setTab] = useState<'bind' | 'unbind'>('bind');
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const id = value.trim().toUpperCase();
   const formatOk = /^CP\d{4,6}$/.test(id);
-  const isBind = mode === 'bind';
-  const title = isBind ? '绑定商户账号' : '解绑商户账号';
+  const isBind = tab === 'bind';
 
-  const reset = () => {
+  const resetFields = () => {
     setValue('');
     setError(null);
     setSaving(false);
+  };
+
+  const switchTab = (next: 'bind' | 'unbind') => {
+    setTab(next);
+    resetFields();
   };
 
   const submit = () => {
@@ -518,7 +512,7 @@ function CommissionMerchantDialog({
     setTimeout(() => {
       if (isBind) store.addCommissionMerchant(promoter.email, id);
       else store.removeCommissionMerchant(promoter.email, id);
-      reset();
+      resetFields();
       onClose();
     }, 500);
   };
@@ -528,9 +522,27 @@ function CommissionMerchantDialog({
       open={!!promoter}
       onClose={onClose}
       PaperProps={{ sx: { width: 440, maxWidth: 'calc(100vw - 32px)' } }}
-      TransitionProps={{ onExited: reset }}
+      TransitionProps={{
+        onExited: () => {
+          setTab('bind');
+          resetFields();
+        },
+      }}
     >
-      <DialogHeader title={title} onClose={onClose} />
+      <DialogHeader title="绑定商户管理" onClose={onClose} />
+      <Tabs
+        value={tab}
+        onChange={(_, v) => switchTab(v as 'bind' | 'unbind')}
+        sx={{
+          px: '20px',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          '& .MuiTab-root': { textTransform: 'none', fontSize: 14, fontWeight: 600, minHeight: 44 },
+        }}
+      >
+        <Tab value="bind" label="绑定商户账号" />
+        <Tab value="unbind" label="解绑商户账号" />
+      </Tabs>
       <DialogContent sx={{ p: '20px' }}>
         <Box sx={{ p: '10px 12px', bgcolor: 'grey.100', borderRadius: '8px', mb: 2, fontSize: 13, color: 'text.secondary' }}>
           为{' '}
