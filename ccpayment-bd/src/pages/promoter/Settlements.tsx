@@ -15,8 +15,9 @@ import {
   Typography,
 } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import { Check, ChevronRight, Copy, Info, ShieldCheck, X } from 'lucide-react';
+import { Check, ChevronRight, Copy, Download, Info, ShieldCheck, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useStores } from '@/stores';
 import { fmtUsdt } from '@/utils/validators';
 
@@ -26,6 +27,8 @@ const MERCHANT_ID = 'CP12345';
 
 export default observer(function Settlements() {
   const { toast } = useStores();
+  const [params] = useSearchParams();
+  const embedded = params.get('embedded') === '1';
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const inviteLink = `https://22f704ccbeta-admin.ccpayment.com/register?ref=Yuu-${MERCHANT_ID}`;
 
@@ -73,7 +76,10 @@ export default observer(function Settlements() {
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', lg: '1.4fr 1fr' },
+          gridTemplateColumns: {
+            xs: '1fr',
+            lg: embedded ? '1.4fr 1fr 1fr' : '1.4fr 1fr',
+          },
           gap: '20px',
           mb: '24px',
         }}
@@ -160,6 +166,38 @@ export default observer(function Settlements() {
             />
           </Box>
         </Box>
+
+        {embedded && (
+          <Box
+            sx={{
+              bgcolor: 'secondary.main',
+              borderRadius: '16px',
+              p: '24px 28px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Box sx={{ fontSize: 18, fontWeight: 700, lineHeight: '26px', mb: '24px', color: 'text.primary' }}>
+              Share the Affiliate Program and Earn More Commission.
+            </Box>
+            <Button
+              startIcon={<Download size={16} />}
+              sx={{
+                alignSelf: 'flex-start',
+                bgcolor: 'grey.900',
+                color: '#fff',
+                p: '10px 16px',
+                borderRadius: '10px',
+                fontSize: 14,
+                fontWeight: 600,
+                '&:hover': { bgcolor: 'grey.800' },
+              }}
+            >
+              Download PDF
+            </Button>
+          </Box>
+        )}
       </Box>
 
       <Box

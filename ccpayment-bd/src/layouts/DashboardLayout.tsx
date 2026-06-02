@@ -319,52 +319,6 @@ const EmbeddedDashboard = observer(function EmbeddedDashboard({
         </Stack>
       </Box>
 
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '14px',
-          p: '12px 24px',
-          bgcolor: 'secondary.lighter',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          flex: 'none',
-        }}
-      >
-        <Box
-          sx={{
-            width: 36,
-            height: 36,
-            borderRadius: '10px',
-            bgcolor: 'secondary.main',
-            display: 'grid',
-            placeItems: 'center',
-            color: 'text.primary',
-            flex: 'none',
-          }}
-        >
-          <Download size={18} />
-        </Box>
-        <Box sx={{ flex: 1, fontSize: 13, fontWeight: 600, color: 'text.primary', lineHeight: '18px' }}>
-          Share the Affiliate Program and Earn More Commission.
-        </Box>
-        <Button
-          size="small"
-          startIcon={<Download size={14} />}
-          sx={{
-            bgcolor: 'grey.900',
-            color: '#fff',
-            p: '6px 14px',
-            borderRadius: '8px',
-            fontSize: 13,
-            fontWeight: 600,
-            '&:hover': { bgcolor: 'grey.800' },
-          }}
-        >
-          Download PDF
-        </Button>
-      </Box>
-
       <Box sx={{ flex: 1, overflowY: 'auto', minHeight: 0, p: '16px 24px 40px' }}>
         <Outlet />
       </Box>
