@@ -7,6 +7,7 @@ export const paths = {
     reset: '/auth/reset',
     success: '/auth/success',
     verifySignup: '/auth/verify-signup',
+    setPassword: '/auth/set-password',
   },
   promoter: {
     settlements: '/referral/settlements',

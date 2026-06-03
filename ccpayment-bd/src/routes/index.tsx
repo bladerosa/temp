@@ -14,6 +14,7 @@ const Forgot = lazy(() => import('@/pages/auth/Forgot'));
 const Reset = lazy(() => import('@/pages/auth/Reset'));
 const Success = lazy(() => import('@/pages/auth/Success'));
 const VerifySignup = lazy(() => import('@/pages/auth/VerifySignup'));
+const SetPassword = lazy(() => import('@/pages/auth/SetPassword'));
 
 const Settlements = lazy(() => import('@/pages/promoter/Settlements'));
 const Promoters = lazy(() => import('@/pages/console/Promoters'));
@@ -33,6 +34,7 @@ export function AppRoutes() {
           <Route path={paths.auth.reset} element={<Reset />} />
           <Route path={paths.auth.success} element={<Success />} />
           <Route path={paths.auth.verifySignup} element={<VerifySignup />} />
+          <Route path={paths.auth.setPassword} element={<SetPassword />} />
         </Route>
 
         <Route element={<DashboardLayout />}>

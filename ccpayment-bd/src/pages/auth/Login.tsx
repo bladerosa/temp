@@ -17,8 +17,8 @@ import { paths } from '@/routes/paths';
 import { useStores } from '@/stores';
 
 const ACCOUNTS = [
-  { name: 'Alex Chen', email: 'alex.chen@gmail.com', color: '#1a73e8' },
-  { name: 'Maya Patel', email: 'maya.work@gmail.com', color: '#9334e6' },
+  { name: 'Alex Chen', email: 'alex.chen@gmail.com', color: '#1a73e8', isNew: false },
+  { name: 'Maya Patel', email: 'maya.work@gmail.com', color: '#9334e6', isNew: true },
 ];
 
 export default observer(function Login() {
@@ -59,7 +59,9 @@ export default observer(function Login() {
       auth.setEmail(acc.email);
       setGoogleOpen(false);
       setGoogleLoading(null);
-      navigate(paths.promoter.settlements + embeddedSuffix);
+      // 新账户：需先设置密码再进入推广者后台
+      if (acc.isNew) navigate(paths.auth.setPassword + embeddedSuffix);
+      else navigate(paths.promoter.settlements + embeddedSuffix);
     }, 1100);
   };
 
