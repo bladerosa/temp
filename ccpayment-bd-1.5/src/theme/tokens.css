@@ -1,0 +1,126 @@
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('/fonts/Poppins-Light.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Poppins-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/Poppins-Medium.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/Poppins-SemiBold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Poppins-Bold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/fonts/Poppins-Black.ttf') format('truetype');
+}
+
+:root {
+  --primary-lighter: #d8e7fe;
+  --primary-light: #89affc;
+  --primary: #3c6ff5;
+  --primary-dark: #1e3eb0;
+  --primary-darker: #0b1c75;
+
+  --secondary-lighter: #f8fde4;
+  --secondary-light: #e3f5ad;
+  --secondary: #bee072;
+  --secondary-dark: #7aa139;
+  --secondary-darker: #466b15;
+
+  --grey-100: #f8f9fb;
+  --grey-200: #e8ecf2;
+  --grey-300: #cacfd8;
+  --grey-400: #a3a8b1;
+  --grey-500: #71757e;
+  --grey-600: #656872;
+  --grey-700: #494c54;
+  --grey-800: #383a3f;
+  --grey-900: #26282d;
+
+  --success-lighter: #dbfbdb;
+  --success-light: #90eba3;
+  --success: #43be76;
+  --success-dark: #218861;
+  --success-darker: #0c5b4c;
+
+  --info-lighter: #e3f7fd;
+  --info-light: #aaddf6;
+  --info: #65aee8;
+  --info-dark: #3767a3;
+  --info-darker: #15326c;
+
+  --warning-lighter: #fef7d8;
+  --warning-light: #fae18b;
+  --warning: #e7b22b;
+  --warning-dark: #ac7c1f;
+  --warning-darker: #72490b;
+
+  --error-lighter: #feecdb;
+  --error-light: #f9b593;
+  --error: #ec684c;
+  --error-dark: #a92926;
+  --error-darker: #710e1b;
+
+  --bg-default: #ffffff;
+  --bg-neutral: #f4f6f8;
+  --bg-subtle: #f8f9fb;
+
+  --text-primary: #1f2025;
+  --text-secondary: #71757e;
+  --text-disabled: #b3b9c5;
+
+  --border-default: #e8ecf2;
+  --border-strong: #cacfd8;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg-neutral);
+  color: var(--text-primary);
+  font-family: 'Poppins', 'PingFang SC', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
