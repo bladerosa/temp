@@ -1,0 +1,101 @@
+<svg width="400" height="320" viewBox="0 0 400 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="scr" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3C6FF5"></stop><stop offset="1" stop-color="#2A56D8"></stop>
+    </linearGradient>
+    <linearGradient id="lockTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8E7BF2"></stop><stop offset="1" stop-color="#6F5AE6"></stop>
+    </linearGradient>
+  </defs>
+
+  
+  <g opacity="0.95">
+    
+    <g transform="translate(70,238)">
+      <path d="M0 0 36 21 0 42 -36 21Z" fill="#DCE8FF"></path>
+      <path d="M-36 21 0 42 0 64 -36 43Z" fill="#B9D0FF"></path>
+      <path d="M36 21 0 42 0 64 36 43Z" fill="#9CB8FA"></path>
+    </g>
+    
+    <g transform="translate(320,236)">
+      <path d="M0 0 34 20 0 40 -34 20Z" fill="#DCE8FF"></path>
+      <path d="M-34 20 0 40 0 60 -34 40Z" fill="#B9D0FF"></path>
+      <path d="M34 20 0 40 0 60 34 40Z" fill="#9CBF FA"></path>
+      <path d="M34 20 0 40 0 60 34 40Z" fill="#9CBFFA"></path>
+    </g>
+    
+    <g transform="translate(360,272)">
+      <path d="M0 0 24 14 0 28 -24 14Z" fill="#E6EEFF"></path>
+      <path d="M-24 14 0 28 0 42 -24 28Z" fill="#C6D7FB"></path>
+      <path d="M24 14 0 28 0 42 24 28Z" fill="#AAC4F6"></path>
+    </g>
+  </g>
+
+  
+  <g transform="translate(196,196)">
+    <path d="M0 -54 116 14 0 82 -116 14Z" fill="#EAF1FF"></path>
+    <path d="M-116 14 0 82 0 108 -116 40Z" fill="#C2D5FB"></path>
+    <path d="M116 14 0 82 0 108 116 40Z" fill="#A2BEF6"></path>
+    
+    <path d="M0 -34 78 12 0 58 -78 12Z" fill="#FBFCFF" opacity="0.7"></path>
+  </g>
+
+  
+  <g transform="translate(196,150)">
+    
+    <path d="M0 36 70 76 0 116 -70 76Z" fill="#D7E3FB"></path>
+    <path d="M-70 76 0 116 0 122 -70 82Z" fill="#B7CBF4"></path>
+    <path d="M70 76 0 116 0 122 70 82Z" fill="#9DB7EF"></path>
+    
+    <path d="M0 50 50 78 0 106 -50 78Z" fill="#EDF2FD"></path>
+    
+    <path d="M-2 36 -64 0 -64 -52 -2 -16Z" fill="#C7D6F6"></path>
+    <path d="M2 36 64 0 64 -52 2 -16Z" fill="#AFC4F1"></path>
+    
+    <path d="M0 -14 58 -50 0 -86 -58 -50Z" fill="url(#scr)" transform="translate(0,32)"></path>
+    
+    <g opacity="0.55" stroke="#BFD2FF" stroke-width="2.4" stroke-linecap="round">
+      <path d="M-30 4 -8 -10"></path><path d="M-22 12 10 -8"></path><path d="M-12 20 18 2"></path>
+    </g>
+  </g>
+
+  
+  <g transform="translate(232,86)">
+    <ellipse cx="0" cy="78" rx="34" ry="11" fill="#1F2025" opacity="0.06"></ellipse>
+    
+    <path d="M-14 6c0-12 6-20 16-20s16 8 16 20" fill="none" stroke="#5BC8E8" stroke-width="7" stroke-linecap="round"></path>
+    
+    <path d="M0 2 30 19 0 36 -30 19Z" fill="url(#lockTop)"></path>
+    
+    <path d="M-30 19 0 36 0 64 -30 47Z" fill="#5B49C9"></path>
+    <path d="M30 19 0 36 0 64 30 47Z" fill="#4A39B3"></path>
+    
+    <circle cx="0" cy="34" r="5" fill="#EAE3FF"></circle>
+    <rect x="-2" y="34" width="4" height="9" rx="2" fill="#EAE3FF"></rect>
+  </g>
+
+  
+  <g transform="translate(298,52) rotate(-12)">
+    <path d="M0 0 44 14 16 22 8 40 2 22Z" fill="#5BC8E8"></path>
+    <path d="M16 22 44 14 8 40Z" fill="#3FB3D6"></path>
+  </g>
+
+  
+  <g transform="translate(338,150)" fill="#9CB8FA">
+    <circle cx="0" cy="0" r="9"></circle>
+    <g>
+      <rect x="-2.4" y="-15" width="4.8" height="6" rx="1"></rect>
+      <rect x="-2.4" y="9" width="4.8" height="6" rx="1"></rect>
+      <rect x="-15" y="-2.4" width="6" height="4.8" rx="1"></rect>
+      <rect x="9" y="-2.4" width="6" height="4.8" rx="1"></rect>
+    </g>
+    <circle cx="0" cy="0" r="4" fill="#EAF1FF"></circle>
+  </g>
+
+  
+  <g transform="translate(150,206)">
+    <ellipse cx="0" cy="0" rx="13" ry="7.5" fill="#F7C948"></ellipse>
+    <ellipse cx="0" cy="-3" rx="13" ry="7.5" fill="#FBD976"></ellipse>
+    <text x="0" y="-1" text-anchor="middle" font-family="Poppins" font-size="9" font-weight="700" fill="#A9791A">¥</text>
+  </g>
+</svg>
