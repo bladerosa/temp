@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { paths } from '@/routes/paths';
 import { validEmail } from '@/utils/validators';
 import { useStores } from '@/stores';
+import { LinkedSettlements } from './LinkedSettlements';
 
 const LOGOS = ['WordPress', 'ASIAN SKY GROUP', 'COINS GAME', 'Payeer', 'arkreen', 'WatchesWorld', 'THEVALUE.COM'];
 
@@ -32,9 +33,13 @@ const STEPS = [
 
 export default function BDLanding() {
   const [associateOpen, setAssociateOpen] = useState(false);
+  const [linkedEmail, setLinkedEmail] = useState<string | null>(null);
   // 立即注册推广计划账号：在浏览器中新开 tab 打开推广者登录页
   const apply = () => window.open(paths.auth.login, '_blank', 'noopener,noreferrer');
   const openAssociate = () => setAssociateOpen(true);
+
+  // 关联成功后，BD 推广页切换为已关联推广计划账号的结算视图
+  if (linkedEmail) return <LinkedSettlements email={linkedEmail} />;
 
   return (
     <Box sx={{ maxWidth: 1280, mx: 'auto', px: '32px', pb: '48px' }}>
@@ -417,12 +422,24 @@ export default function BDLanding() {
         </Box>
       </Box>
 
-      <AssociateAccountDialog open={associateOpen} onClose={() => setAssociateOpen(false)} />
+      <AssociateAccountDialog
+        open={associateOpen}
+        onClose={() => setAssociateOpen(false)}
+        onLinked={setLinkedEmail}
+      />
     </Box>
   );
 }
 
-function AssociateAccountDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+function AssociateAccountDialog({
+  open,
+  onClose,
+  onLinked,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onLinked: (email: string) => void;
+}) {
   const { toast } = useStores();
   const [email, setEmail] = useState('');
   const [touched, setTouched] = useState(false);
@@ -442,13 +459,15 @@ function AssociateAccountDialog({ open, onClose }: { open: boolean; onClose: () 
     setLoading(true);
     // 真实需求：后端校验该邮箱是否已被他人关联；同一 IP 每 10 分钟最多 5 次关联尝试
     setTimeout(() => {
+      const linked = email.trim();
       toast.show({
         tone: 'success',
         title: 'Referral program account linked',
-        desc: email,
+        desc: linked,
       });
       reset();
       onClose();
+      onLinked(linked);
     }, 700);
   };
 
