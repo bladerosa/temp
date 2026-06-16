@@ -1,6 +1,6 @@
 import { Box, Button, Stack } from '@mui/material';
 import { ArrowDown, ArrowRight, ArrowUp, Mail, Send } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { paths } from '@/routes/paths';
 
 const LOGOS = ['WordPress', 'ASIAN SKY GROUP', 'COINS GAME', 'Payeer', 'arkreen', 'WatchesWorld', 'THEVALUE.COM'];
 
@@ -19,11 +19,8 @@ const STEPS = [
 ];
 
 export default function BDLanding() {
-  const [params, setParams] = useSearchParams();
-  const embedded = params.get('embed') === '1';
-  const apply = () => setParams({ embed: '1' });
-
-  if (embedded) return <EmbeddedReferral />;
+  // 立即注册推广计划账号：在浏览器中新开 tab 打开推广者注册页
+  const apply = () => window.open(paths.auth.signup, '_blank', 'noopener,noreferrer');
 
   return (
     <Box sx={{ maxWidth: 1280, mx: 'auto', px: '32px', pb: '48px' }}>
@@ -92,7 +89,7 @@ export default function BDLanding() {
                   '&:hover': { bgcolor: '#2A2F3D', transform: 'translateY(-1px)' },
                 }}
               >
-                未关联推广者账号，立即关联
+                立即注册推广计划账号
               </Button>
             </Stack>
           </Box>
@@ -319,7 +316,7 @@ export default function BDLanding() {
                 '&:hover': { bgcolor: '#2A2F3D' },
               }}
             >
-              未关联推广者账号，立即关联
+              立即注册推广计划账号
             </Button>
             <Button
               sx={{
@@ -483,16 +480,5 @@ function HeroArt() {
         </Box>
       ))}
     </Box>
-  );
-}
-
-function EmbeddedReferral() {
-  return (
-    <Box
-      component="iframe"
-      title="CCPayment Referral Platform"
-      src="/auth/login?embedded=1"
-      sx={{ display: 'block', border: 0, width: '100%', height: '100%', bgcolor: 'grey.100' }}
-    />
   );
 }

@@ -1,5 +1,5 @@
 import { Box, IconButton, Stack } from '@mui/material';
-import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   Bell,
@@ -46,12 +46,7 @@ const NAV: NavItem[] = [
 
 export default function MerchantLayout() {
   const navigate = useNavigate();
-  const [params, setParams] = useSearchParams();
-  const isEmbedded = params.get('embed') === '1';
-  const onBack = () => {
-    if (isEmbedded) setParams({});
-    else navigate(paths.promoter.settlements);
-  };
+  const onBack = () => navigate(paths.promoter.settlements);
   return (
     <Box
       sx={{
