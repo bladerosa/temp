@@ -19,8 +19,8 @@ const STEPS = [
 ];
 
 export default function BDLanding() {
-  // 立即注册推广计划账号：在浏览器中新开 tab 打开推广者注册页
-  const apply = () => window.open(paths.auth.signup, '_blank', 'noopener,noreferrer');
+  // 立即注册推广计划账号：在浏览器中新开 tab 打开推广者登录页
+  const apply = () => window.open(paths.auth.login, '_blank', 'noopener,noreferrer');
 
   return (
     <Box sx={{ maxWidth: 1280, mx: 'auto', px: '32px', pb: '48px' }}>
