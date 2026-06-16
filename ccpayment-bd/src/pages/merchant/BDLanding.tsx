@@ -8,11 +8,12 @@ import {
   Stack,
   TextField,
 } from '@mui/material';
-import { ArrowDown, ArrowRight, ArrowUp, Info, Link2, Mail, Send, X } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Info, Link2, Mail, Send, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { paths } from '@/routes/paths';
 import { validEmail } from '@/utils/validators';
 import { useStores } from '@/stores';
+import { OtpInput } from '@/components/OtpInput';
 import { LinkedSettlements } from './LinkedSettlements';
 
 const LOGOS = ['WordPress', 'ASIAN SKY GROUP', 'COINS GAME', 'Payeer', 'arkreen', 'WatchesWorld', 'THEVALUE.COM'];
@@ -441,23 +442,48 @@ function AssociateAccountDialog({
   onLinked: (email: string) => void;
 }) {
   const { toast } = useStores();
+  const [phase, setPhase] = useState<'email' | 'verify'>('email');
   const [email, setEmail] = useState('');
   const [touched, setTouched] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [seconds, setSeconds] = useState(60);
   const [loading, setLoading] = useState(false);
 
   const ok = validEmail(email);
   const err = touched && email.length > 0 && !ok;
 
+  useEffect(() => {
+    if (phase !== 'verify' || seconds <= 0) return;
+    const t = setTimeout(() => setSeconds((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [phase, seconds]);
+
   const reset = () => {
+    setPhase('email');
     setEmail('');
     setTouched(false);
+    setOtp('');
+    setSeconds(60);
     setLoading(false);
   };
 
-  const confirm = () => {
+  // 步骤一：发送邮箱验证码
+  const sendCode = () => {
     if (!ok || loading) return;
     setLoading(true);
     // 真实需求：后端校验该邮箱是否已被他人关联；同一 IP 每 10 分钟最多 5 次关联尝试
+    setTimeout(() => {
+      setLoading(false);
+      setOtp('');
+      setSeconds(60);
+      setPhase('verify');
+    }, 600);
+  };
+
+  // 步骤二：校验验证码并完成关联
+  const confirm = () => {
+    if (otp.length !== 6 || loading) return;
+    setLoading(true);
     setTimeout(() => {
       const linked = email.trim();
       toast.show({
@@ -470,6 +496,8 @@ function AssociateAccountDialog({
       onLinked(linked);
     }, 700);
   };
+
+  const isEmailStep = phase === 'email';
 
   return (
     <Dialog
@@ -484,50 +512,150 @@ function AssociateAccountDialog({
           <X size={18} />
         </IconButton>
       </Box>
-      <DialogContent sx={{ px: '24px', pb: '8px', pt: 0 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            gap: '10px',
-            p: '12px 14px',
-            bgcolor: 'primary.lighter',
-            borderRadius: '10px',
-            mb: '20px',
-          }}
-        >
-          <Box sx={{ color: 'primary.main', flex: 'none', mt: '1px' }}>
-            <Info size={18} />
-          </Box>
-          <Box sx={{ fontSize: 13, lineHeight: '20px', color: 'text.primary' }}>
-            Once linked, you can view your referral program account's commission balance, referral
-            links, and other details right here in your merchant backend. Commissions can also be
-            withdrawn directly to your merchant wallet balance — with faster withdrawals.
-          </Box>
-        </Box>
-        <Box sx={{ fontSize: 13, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
-          Referral program account email
-        </Box>
-        <TextField
-          fullWidth
-          size="small"
-          type="email"
-          autoComplete="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onBlur={() => setTouched(true)}
-          error={err}
-          helperText={err ? 'Please enter a valid email address.' : ' '}
-        />
-      </DialogContent>
-      <DialogActions sx={{ p: '8px 24px 24px', gap: 1.25 }}>
-        <Button variant="outlined" onClick={onClose} sx={{ height: 40 }}>
-          Cancel
-        </Button>
-        <Button variant="contained" disabled={!ok || loading} onClick={confirm} sx={{ height: 40 }}>
-          {loading ? 'Linking…' : 'Confirm association'}
-        </Button>
-      </DialogActions>
+
+      {isEmailStep ? (
+        <>
+          <DialogContent sx={{ px: '24px', pb: '8px', pt: 0 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: '10px',
+                p: '12px 14px',
+                bgcolor: 'primary.lighter',
+                borderRadius: '10px',
+                mb: '20px',
+              }}
+            >
+              <Box sx={{ color: 'primary.main', flex: 'none', mt: '1px' }}>
+                <Info size={18} />
+              </Box>
+              <Box sx={{ fontSize: 13, lineHeight: '20px', color: 'text.primary' }}>
+                Once linked, you can view your referral program account's commission balance,
+                referral links, and other details right here in your merchant backend. Commissions
+                can also be withdrawn directly to your merchant wallet balance — with faster
+                withdrawals.
+              </Box>
+            </Box>
+            <Box sx={{ fontSize: 13, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
+              Referral program account email
+            </Box>
+            <TextField
+              fullWidth
+              size="small"
+              type="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onBlur={() => setTouched(true)}
+              error={err}
+              helperText={err ? 'Please enter a valid email address.' : ' '}
+            />
+          </DialogContent>
+          <DialogActions sx={{ p: '8px 24px 24px', gap: 1.25 }}>
+            <Button variant="outlined" onClick={onClose} sx={{ height: 40 }}>
+              Cancel
+            </Button>
+            <Button variant="contained" disabled={!ok || loading} onClick={sendCode} sx={{ height: 40 }}>
+              {loading ? 'Sending…' : 'Send verification code'}
+            </Button>
+          </DialogActions>
+        </>
+      ) : (
+        <>
+          <DialogContent sx={{ px: '24px', pb: '8px', pt: 0 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '12px',
+                p: '14px 16px',
+                bgcolor: 'primary.lighter',
+                borderRadius: '10px',
+                mb: '20px',
+              }}
+            >
+              <Box
+                sx={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '10px',
+                  bgcolor: 'primary.main',
+                  color: '#fff',
+                  display: 'grid',
+                  placeItems: 'center',
+                  flex: 'none',
+                }}
+              >
+                <Mail size={18} />
+              </Box>
+              <Box sx={{ fontSize: 13, lineHeight: '19px', color: 'text.primary' }}>
+                We sent a 6-digit verification code to{' '}
+                <Box component="b" sx={{ fontWeight: 600 }}>
+                  {email}
+                </Box>
+                . Enter it below to link this referral program account.
+              </Box>
+            </Box>
+            <Box sx={{ fontSize: 13, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
+              Verification code
+            </Box>
+            <OtpInput value={otp} onChange={setOtp} autoFocus />
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontSize: 13,
+                color: 'text.secondary',
+                mt: '14px',
+              }}
+            >
+              <Box>
+                {seconds > 0
+                  ? `Resend code in 0:${String(seconds).padStart(2, '0')}`
+                  : `Didn't get the code?`}
+              </Box>
+              <Box
+                component="button"
+                type="button"
+                onClick={() => seconds <= 0 && setSeconds(60)}
+                disabled={seconds > 0}
+                sx={{
+                  color: seconds > 0 ? 'text.disabled' : 'primary.main',
+                  fontWeight: 600,
+                  fontSize: 13,
+                  background: 'none',
+                  border: 0,
+                  p: 0,
+                  cursor: seconds > 0 ? 'not-allowed' : 'pointer',
+                  fontFamily: 'inherit',
+                }}
+              >
+                Resend code
+              </Box>
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ p: '8px 24px 24px', gap: 1.25 }}>
+            <Button
+              variant="outlined"
+              onClick={() => setPhase('email')}
+              sx={{ height: 40 }}
+              startIcon={<ArrowLeft size={16} />}
+            >
+              Back
+            </Button>
+            <Button
+              variant="contained"
+              disabled={otp.length !== 6 || loading}
+              onClick={confirm}
+              sx={{ height: 40 }}
+            >
+              {loading ? 'Linking…' : 'Confirm association'}
+            </Button>
+          </DialogActions>
+        </>
+      )}
     </Dialog>
   );
 }
