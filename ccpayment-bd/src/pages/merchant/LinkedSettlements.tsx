@@ -20,7 +20,7 @@ import { useStores } from '@/stores';
 const BALANCE = '100.123456';
 const INVITE_LINK = 'https://22f704ccbeta-admin.ccpayment.com/register?ref=Yuu-CP12345';
 
-// 佣金结算记录：每行为一天的汇总结果，向前模拟多天
+// 佣金结算记录：每行为一天的汇总结果，仅展示近 7 天
 const SETTLEMENTS = [
   { date: '2026-02-04', merchants: 1, commBase: '0.9', rate: '20.00%', commission: '0.18' },
   { date: '2026-02-03', merchants: 3, commBase: '12.50', rate: '20.00%', commission: '2.50' },
@@ -29,11 +29,6 @@ const SETTLEMENTS = [
   { date: '2026-01-31', merchants: 2, commBase: '6.75', rate: '15.00%', commission: '1.01' },
   { date: '2026-01-30', merchants: 5, commBase: '40.00', rate: '20.00%', commission: '8.00' },
   { date: '2026-01-29', merchants: 1, commBase: '3.20', rate: '25.00%', commission: '0.80' },
-  { date: '2026-01-28', merchants: 3, commBase: '15.60', rate: '20.00%', commission: '3.12' },
-  { date: '2026-01-27', merchants: 2, commBase: '9.90', rate: '18.00%', commission: '1.78' },
-  { date: '2026-01-26', merchants: 4, commBase: '28.40', rate: '20.00%', commission: '5.68' },
-  { date: '2026-01-25', merchants: 1, commBase: '2.10', rate: '20.00%', commission: '0.42' },
-  { date: '2026-01-24', merchants: 3, commBase: '17.80', rate: '15.00%', commission: '2.67' },
 ];
 
 export const LinkedSettlements = observer(function LinkedSettlements({ email }: { email: string }) {
