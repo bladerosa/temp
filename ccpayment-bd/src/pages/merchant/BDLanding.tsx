@@ -1,6 +1,18 @@
-import { Box, Button, Stack } from '@mui/material';
-import { ArrowDown, ArrowRight, ArrowUp, Mail, Send } from 'lucide-react';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  IconButton,
+  Stack,
+  TextField,
+} from '@mui/material';
+import { ArrowDown, ArrowRight, ArrowUp, Info, Link2, Mail, Send, X } from 'lucide-react';
+import { useState } from 'react';
 import { paths } from '@/routes/paths';
+import { validEmail } from '@/utils/validators';
+import { useStores } from '@/stores';
 
 const LOGOS = ['WordPress', 'ASIAN SKY GROUP', 'COINS GAME', 'Payeer', 'arkreen', 'WatchesWorld', 'THEVALUE.COM'];
 
@@ -19,8 +31,10 @@ const STEPS = [
 ];
 
 export default function BDLanding() {
+  const [associateOpen, setAssociateOpen] = useState(false);
   // 立即注册推广计划账号：在浏览器中新开 tab 打开推广者登录页
   const apply = () => window.open(paths.auth.login, '_blank', 'noopener,noreferrer');
+  const openAssociate = () => setAssociateOpen(true);
 
   return (
     <Box sx={{ maxWidth: 1280, mx: 'auto', px: '32px', pb: '48px' }}>
@@ -90,6 +104,22 @@ export default function BDLanding() {
                 }}
               >
                 立即注册推广计划账号
+              </Button>
+              <Button
+                onClick={openAssociate}
+                startIcon={<Link2 size={16} />}
+                sx={{
+                  bgcolor: 'secondary.main',
+                  color: '#14171F',
+                  height: 48,
+                  px: '22px',
+                  borderRadius: 9999,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  '&:hover': { bgcolor: 'secondary.dark', transform: 'translateY(-1px)' },
+                }}
+              >
+                关联推广计划账号
               </Button>
             </Stack>
           </Box>
@@ -319,6 +349,22 @@ export default function BDLanding() {
               立即注册推广计划账号
             </Button>
             <Button
+              onClick={openAssociate}
+              startIcon={<Link2 size={16} />}
+              sx={{
+                bgcolor: 'secondary.main',
+                color: '#14171F',
+                height: 44,
+                px: '22px',
+                borderRadius: 9999,
+                fontSize: 14,
+                fontWeight: 600,
+                '&:hover': { bgcolor: 'secondary.dark' },
+              }}
+            >
+              关联推广计划账号
+            </Button>
+            <Button
               sx={{
                 bgcolor: 'rgba(255,255,255,0.08)',
                 color: '#fff',
@@ -370,7 +416,100 @@ export default function BDLanding() {
           ))}
         </Box>
       </Box>
+
+      <AssociateAccountDialog open={associateOpen} onClose={() => setAssociateOpen(false)} />
     </Box>
+  );
+}
+
+function AssociateAccountDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { toast } = useStores();
+  const [email, setEmail] = useState('');
+  const [touched, setTouched] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const ok = validEmail(email);
+  const err = touched && email.length > 0 && !ok;
+
+  const reset = () => {
+    setEmail('');
+    setTouched(false);
+    setLoading(false);
+  };
+
+  const confirm = () => {
+    if (!ok || loading) return;
+    setLoading(true);
+    // 真实需求：后端校验该邮箱是否已被他人关联；同一 IP 每 10 分钟最多 5 次关联尝试
+    setTimeout(() => {
+      toast.show({
+        tone: 'success',
+        title: 'Referral program account linked',
+        desc: email,
+      });
+      reset();
+      onClose();
+    }, 700);
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      TransitionProps={{ onExited: reset }}
+      PaperProps={{ sx: { width: 480, maxWidth: 'calc(100vw - 32px)', borderRadius: '16px' } }}
+    >
+      <Box sx={{ p: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box sx={{ fontSize: 18, fontWeight: 700 }}>Link your referral program account</Box>
+        <IconButton size="small" onClick={onClose} aria-label="Close">
+          <X size={18} />
+        </IconButton>
+      </Box>
+      <DialogContent sx={{ px: '24px', pb: '8px', pt: 0 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: '10px',
+            p: '12px 14px',
+            bgcolor: 'primary.lighter',
+            borderRadius: '10px',
+            mb: '20px',
+          }}
+        >
+          <Box sx={{ color: 'primary.main', flex: 'none', mt: '1px' }}>
+            <Info size={18} />
+          </Box>
+          <Box sx={{ fontSize: 13, lineHeight: '20px', color: 'text.primary' }}>
+            Once linked, you can view your referral program account's commission balance, referral
+            links, and other details right here in your merchant backend. Commissions can also be
+            withdrawn directly to your merchant wallet balance — with faster withdrawals.
+          </Box>
+        </Box>
+        <Box sx={{ fontSize: 13, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
+          Referral program account email
+        </Box>
+        <TextField
+          fullWidth
+          size="small"
+          type="email"
+          autoComplete="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          onBlur={() => setTouched(true)}
+          error={err}
+          helperText={err ? 'Please enter a valid email address.' : ' '}
+        />
+      </DialogContent>
+      <DialogActions sx={{ p: '8px 24px 24px', gap: 1.25 }}>
+        <Button variant="outlined" onClick={onClose} sx={{ height: 40 }}>
+          Cancel
+        </Button>
+        <Button variant="contained" disabled={!ok || loading} onClick={confirm} sx={{ height: 40 }}>
+          {loading ? 'Linking…' : 'Confirm association'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 
