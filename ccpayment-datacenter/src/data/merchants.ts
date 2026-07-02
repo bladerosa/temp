@@ -36,6 +36,7 @@ function genRanks(seedBase: number): RankItem[] {
   return MERCHANTS.map((m, i) => ({
     ...m,
     deposit: Math.round((1 - i / 25) * 850_000 * (0.6 + r() * 0.8)),
+    withdraw: Math.round((1 - i / 25) * 610_000 * (0.6 + r() * 0.8)),
     exchange: Math.round((1 - i / 25) * 420_000 * (0.6 + r() * 0.8)),
   })).sort((a, b) => b.deposit - a.deposit);
 }

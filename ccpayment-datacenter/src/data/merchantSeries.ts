@@ -1,6 +1,6 @@
 import type { Merchant, PeriodUnit } from './types';
 import { windowDays } from './kpi';
-import { fmtRange } from '@/utils/dateRange';
+import { fmtDot, fmtRange } from '@/utils/dateRange';
 
 /** Hash a short string into a stable numeric seed (for series keys etc.). */
 function hashSeed(key: string): number {
@@ -35,19 +35,41 @@ export function merchantSparklineValues(merchant: Merchant, from: string, to: st
   return Array.from({ length: days }, (_, k) => merchantDailyTxnCount(merchant, k));
 }
 
+/** Fixed trailing daily series for the DetailPage 交易笔数变化趋势 column: always
+ *  the most recent `days` days ending at `to`, INDEPENDENT of the global filter
+ *  window/unit. Returns oldest-first daily values plus matching `YYYY.MM.DD`
+ *  labels (left → right = old → new). Used to cap the sparkline at 90 days. */
+export function merchantTrailingDaily(
+  merchant: Merchant,
+  to: string,
+  days = 90,
+): { values: number[]; labels: string[] } {
+  const [ty, tm, td] = to.split('/').map(Number);
+  const end = new Date(ty, tm - 1, td);
+  const values: number[] = [];
+  const labels: string[] = [];
+  // j = 0 → oldest day (days-1 before `to`); j = days-1 → latest (= `to`).
+  for (let j = 0; j < days; j++) {
+    values.push(merchantDailyTxnCount(merchant, j));
+    const d = new Date(end);
+    d.setDate(end.getDate() - (days - 1 - j));
+    labels.push(fmtDot(d));
+  }
+  return { values, labels };
+}
+
 /* ────────────────────────────────────────────────────────────────────────
  *  Platform-scoped series (aggregate across all merchants)
  * ────────────────────────────────────────────────────────────────────── */
 
-const TREND_PARAMS: Record<'reg' | 'ver' | 'txn' | 'idle', { base: number; amp: number; noise: number }> = {
+const TREND_PARAMS: Record<'reg' | 'txn' | 'idle', { base: number; amp: number; noise: number }> = {
   reg:  { base: 1.2, amp: 1.0, noise: 3 },
-  ver:  { base: 0.6, amp: 0.8, noise: 2 },
   txn:  { base: 38,  amp: 16,  noise: 14 },
   idle: { base: 9,   amp: 2,   noise: 3 },
 };
 
 /** Per-day platform-level series value for trend chart. */
-export function platformDailyTrend(seriesKey: 'reg' | 'ver' | 'txn' | 'idle', dayIndex: number): number {
+export function platformDailyTrend(seriesKey: 'reg' | 'txn' | 'idle', dayIndex: number): number {
   const seed = hashSeed(seriesKey);
   const p = TREND_PARAMS[seriesKey];
   return perturbedDaily(seed, dayIndex, p.base, p.amp, p.noise);

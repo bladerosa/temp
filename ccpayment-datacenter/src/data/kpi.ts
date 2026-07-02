@@ -1,8 +1,8 @@
 import type { KpiRowData, PeriodUnit } from './types';
 import { fmtRange } from '@/utils/dateRange';
 
-/** Lifetime累计 (suffix on 新增注册 / 新增验证 columns). */
-const LIFETIME_USERS = { regUsers: 26418, verUsers: 5193 };
+/** Lifetime累计 (suffix on 新增注册 column). */
+const LIFETIME_USERS = { regUsers: 26418 };
 
 /** Number of explicit period rows above the 「其余时间」 + 「累计」 rows. */
 export const MAX_PERIOD_ROWS = 10;
@@ -40,7 +40,6 @@ export function buildPeriodLabels(unit: PeriodUnit, anchor: string, count: numbe
 /** Synthetic per-period row. `idx` 0 = latest. Deterministic. */
 export function periodData(unit: PeriodUnit, idx: number): KpiRowData {
   const regV = BASE_REG[unit][idx] ?? 0;
-  const verV = Math.round(regV * 0.42);
 
   // txn/idle = distinct-merchant count active/idle during this period (NOT cumulative).
   const txnBase = { day: 71, week: 198, month: 624, quarter: 1820 }[unit];
@@ -49,24 +48,19 @@ export function periodData(unit: PeriodUnit, idx: number): KpiRowData {
   const idleV = Math.round(idleBase * (IDLE_FACTORS[idx] ?? 1.2));
   const totalActive = txnV + idleV;
 
-  // Cumulative users at end of this period.
+  // Cumulative registered users at end of this period.
   const userRatio = { day: 12, week: 11, month: 9, quarter: 8 }[unit];
-  const verUserRatio = { day: 13, week: 12, month: 10, quarter: 9 }[unit];
   let regUsersCum = LIFETIME_USERS.regUsers;
-  let verUsersCum = LIFETIME_USERS.verUsers;
   for (let i = 0; i < idx; i++) {
     const r = BASE_REG[unit][i] ?? 0;
     regUsersCum -= r * userRatio;
-    verUsersCum -= Math.round(r * 0.42) * verUserRatio;
   }
 
   return {
     reg: regV,
-    ver: verV,
     txn: txnV,
     idle: idleV,
     regUsers: regUsersCum,
-    verUsers: verUsersCum,
     txnPct: totalActive ? +((txnV / totalActive) * 100).toFixed(2) : 0,
     idlePct: totalActive ? +((idleV / totalActive) * 100).toFixed(2) : 0,
   };
@@ -77,9 +71,7 @@ export function periodData(unit: PeriodUnit, idx: number): KpiRowData {
 export function restData(unit: PeriodUnit): KpiRowData {
   const recent = BASE_REG[unit].slice(0, MAX_PERIOD_ROWS);
   const regSum = recent.reduce((a, b) => a + b, 0);
-  const verSum = recent.reduce((a, b) => a + Math.round(b * 0.42), 0);
   const userRatio = { day: 12, week: 11, month: 9, quarter: 8 }[unit];
-  const verUserRatio = { day: 13, week: 12, month: 10, quarter: 9 }[unit];
 
   const txn = { day: 64, week: 68, month: 70, quarter: 71 }[unit];
   const idle = { day: 148, week: 152, month: 155, quarter: 158 }[unit];
@@ -87,9 +79,7 @@ export function restData(unit: PeriodUnit): KpiRowData {
 
   return {
     reg: 2243 - regSum,
-    ver: 866 - verSum,
     regUsers: LIFETIME_USERS.regUsers - regSum * userRatio,
-    verUsers: LIFETIME_USERS.verUsers - verSum * verUserRatio,
     txn,
     idle,
     txnPct: total ? +((txn / total) * 100).toFixed(2) : 0,
@@ -127,11 +117,9 @@ export function totalDataFor(
 ): KpiRowData {
   const recent = Array.from({ length: shownCount }, (_, i) => periodData(unit, i));
   let reg = recent.reduce((s, p) => s + p.reg, 0);
-  let ver = recent.reduce((s, p) => s + p.ver, 0);
   if (hasRest) {
     const rest = restData(unit);
     reg += rest.reg;
-    ver += rest.ver;
   }
   const days = windowDays(from, to);
   const ratio = 1 - Math.exp(-days / 30);
@@ -141,9 +129,7 @@ export function totalDataFor(
 
   return {
     reg,
-    ver,
     regUsers: LIFETIME_USERS.regUsers,
-    verUsers: LIFETIME_USERS.verUsers,
     txn,
     idle,
     txnPct: total ? +((txn / total) * 100).toFixed(2) : 0,
@@ -182,33 +168,25 @@ export function expandRestPeriods(
   const weights = Array.from({ length: restN }, (_, i) => 1 - (i * 0.4) / Math.max(1, restN - 1));
   const wSum = weights.reduce((a, b) => a + b, 0);
   let regAcc = 0;
-  let verAcc = 0;
   const rows: (KpiRowData & { label: string })[] = [];
 
   const restTxn = rest.txn ?? 0;
   const restIdle = rest.idle ?? 0;
   const restReg = rest.reg;
-  const restVer = rest.ver;
   const baseRegUsers = rest.regUsers ?? LIFETIME_USERS.regUsers;
-  const baseVerUsers = rest.verUsers ?? LIFETIME_USERS.verUsers;
 
   for (let i = 0; i < restN; i++) {
     const w = weights[i] / wSum;
     const reg = i === restN - 1 ? restReg - regAcc : Math.round(restReg * w);
-    const ver = i === restN - 1 ? restVer - verAcc : Math.round(restVer * w);
     regAcc += reg;
-    verAcc += ver;
     const txn = Math.round(restTxn * w * 0.95 + (restTxn / restN) * 0.05);
     const idle = Math.round(restIdle * w * 0.95 + (restIdle / restN) * 0.05);
     const sum = txn + idle;
     const regUsers = Math.round(baseRegUsers - (regAcc - reg) * 12);
-    const verUsers = Math.round(baseVerUsers - (verAcc - ver) * 13);
     rows.push({
       label: periodsBack(i),
       reg,
-      ver,
       regUsers,
-      verUsers,
       txn,
       idle,
       txnPct: sum ? +((txn / sum) * 100).toFixed(2) : 0,

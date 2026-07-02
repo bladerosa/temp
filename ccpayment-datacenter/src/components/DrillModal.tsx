@@ -36,8 +36,7 @@ const METRIC_META: Record<
   { title: string; cols: ColMeta[] }
 > = {
   reg: { title: '新增注册商户', cols: [{ k: 'id', label: '商户ID' }, { k: 'time', label: '注册时间' }] },
-  ver: { title: '新增验证商户', cols: [{ k: 'id', label: '商户ID' }, { k: 'time', label: '验证时间' }] },
-  txn: { title: '交易商户', cols: [{ k: 'id', label: '商户ID' }, { k: 'amt', label: '交易额', align: 'right' }] },
+  txn: { title: '交易商户', cols: [{ k: 'id', label: '商户ID' }, { k: 'amt', label: '交易金额', align: 'right' }] },
   idle: { title: '无交易商户', cols: [{ k: 'id', label: '商户ID' }, { k: 'last', label: '最后一次交易时间' }] },
 };
 
@@ -62,7 +61,7 @@ function buildDrillRows(ctx: DrillCtx): DrillRow[] {
       Math.floor(rand() * 24),
       2
     )}:${pad(Math.floor(rand() * 60), 2)}`;
-    if (ctx.metric === 'reg' || ctx.metric === 'ver') {
+    if (ctx.metric === 'reg') {
       rows.push({ id, time });
     } else if (ctx.metric === 'txn') {
       const amt = (rand() * 50000 + 50).toFixed(2);

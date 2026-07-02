@@ -36,7 +36,6 @@ export function industryLabel(code: IndustryCode): string {
 /** Per-metric counts per industry. Order matches INDUSTRY_META. */
 const INDUSTRY_DATA_BY_METRIC: Record<RegionMetric, number[]> = {
   reg:  [712,       458,       320,       285,     198,     162,     108],
-  ver:  [310,       196,       138,       122,     84,      64,      92],
   txn:  [240,       168,       122,       96,      68,      48,      78],
   gmv:  [3_650_000, 2_280_000, 1_840_000, 920_000, 580_000, 320_000, 686_000],
   idle: [490,       312,       218,       198,     132,     108,     178],
@@ -66,7 +65,6 @@ const LEADING_INDUSTRY_MERCHANTS = [
 /** Per-metric values for the 8 leading-industry merchants. */
 const LEADING_INDUSTRY_BY_METRIC: Record<RegionMetric, number[]> = {
   reg:  [184, 142, 108,  86,  72,  58,  44,  32],
-  ver:  [ 78,  60,  48,  38,  32,  25,  20,  14],
   txn:  [ 62,  48,  38,  30,  25,  20,  15,  11],
   gmv:  [820_000, 720_000, 560_000, 430_000, 320_000, 250_000, 180_000, 120_000],
   idle: [132,  98,  84,  68,  55,  46,  36,  28],

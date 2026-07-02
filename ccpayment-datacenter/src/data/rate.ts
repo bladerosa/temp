@@ -15,6 +15,7 @@ export interface AggregationFeeDetailRow {
   id: string;
   deposit: number;       // USD total deposit during the window
   depositCount: number;  // count of deposit transactions
+  aggCount: number;      // 归集次数 — aggregation operations run for this merchant
   platformCost: number;  // USD platform paid for this merchant's aggregation
   platformRate: number;  // platformCost / deposit (percentage)
   userFee: number;       // USD collected from this merchant as upfront fee
@@ -39,10 +40,13 @@ const _DETAIL_INPUTS: Array<{ id: string; deposit: number; depositCount: number;
 export const AGGREGATION_FEE_DETAIL: AggregationFeeDetailRow[] = _DETAIL_INPUTS.map((r) => {
   const userFee = +(r.deposit * r.userRate / 100).toFixed(2);
   const platformCost = +(r.deposit * r.platformRate / 100).toFixed(2);
+  // 归集次数：多笔充值合并归集，一般少于充值笔数。以 depositCount 的 ~30%~45% 确定性估算。
+  const aggCount = Math.max(1, Math.round(r.depositCount * (0.3 + ((r.deposit >> 8) % 16) / 100)));
   return {
     id: r.id,
     deposit: r.deposit,
     depositCount: r.depositCount,
+    aggCount,
     userFee,
     userRate: r.userRate,
     platformCost,

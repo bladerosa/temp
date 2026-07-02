@@ -7,6 +7,7 @@ export const paths = {
     aggregationFeeDetail: '/dashboard/merchant/aggregation-fee-detail',
     serviceFeeDetail: '/dashboard/merchant/service-fee-detail',
     swapFeeDetail: '/dashboard/merchant/swap-fee-detail',
+    withdrawFeeDetail: '/dashboard/merchant/withdraw-fee-detail',
     finance: '/dashboard/finance',
     system: '/dashboard/system',
   },

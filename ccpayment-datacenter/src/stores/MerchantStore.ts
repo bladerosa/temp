@@ -15,7 +15,7 @@ export class MerchantStore {
   unit: PeriodUnit = 'day';
 
   // Trend legend toggles.
-  hiddenSeries: Partial<Record<'reg' | 'ver' | 'txn' | 'idle', boolean>> = {};
+  hiddenSeries: Partial<Record<'reg' | 'txn' | 'idle', boolean>> = {};
 
   // Region pie metric.
   regionMetric: RegionMetric = 'reg';
@@ -26,8 +26,9 @@ export class MerchantStore {
   // 收币费率 unit toggle.
   rateUnit: PeriodUnit = 'week';
 
-  // 充值 / 换币 排行 TopN.
+  // 充值 / 提现 / 换币 排行 TopN.
   depositTopN = 10;
+  withdrawTopN = 10;
   exchangeTopN = 10;
 
   constructor() {
@@ -55,7 +56,7 @@ export class MerchantStore {
     this.unit = u;
   };
 
-  toggleSeries = (k: 'reg' | 'ver' | 'txn' | 'idle') => {
+  toggleSeries = (k: 'reg' | 'txn' | 'idle') => {
     this.hiddenSeries = { ...this.hiddenSeries, [k]: !this.hiddenSeries[k] };
   };
 
@@ -73,6 +74,10 @@ export class MerchantStore {
 
   setDepositTopN = (n: number) => {
     this.depositTopN = n;
+  };
+
+  setWithdrawTopN = (n: number) => {
+    this.withdrawTopN = n;
   };
 
   setExchangeTopN = (n: number) => {

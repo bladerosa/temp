@@ -10,6 +10,7 @@ const CRUMBS: Record<string, string[]> = {
   '/dashboard/merchant/aggregation-fee-detail': ['数据看板', '商户数据', '用户支付归集费明细'],
   '/dashboard/merchant/service-fee-detail': ['数据看板', '商户数据', '用户支付充值服务费明细'],
   '/dashboard/merchant/swap-fee-detail': ['数据看板', '商户数据', '用户支付换币服务费明细'],
+  '/dashboard/merchant/withdraw-fee-detail': ['数据看板', '商户数据', '用户支付提现网络费明细'],
   '/dashboard/finance': ['财务数据看板', '财务看板'],
   '/dashboard/system': ['数据看板', '系统数据'],
 };

@@ -5,7 +5,6 @@ import { windowDays } from './kpi';
 export interface TrendPoint {
   date: string;
   reg: number;
-  ver: number;
   txn: number;
   idle: number;
 }
@@ -23,12 +22,10 @@ export function aggTrendByUnit(unit: PeriodUnit, from: string, to: string): Tren
   const buckets = bucketRanges(unit, from, to);
 
   const dailyReg = Array.from({ length: days }, (_, k) => platformDailyTrend('reg', k));
-  const dailyVer = Array.from({ length: days }, (_, k) => platformDailyTrend('ver', k));
   const dailyTxn = Array.from({ length: days }, (_, k) => platformDailyTrend('txn', k));
   const dailyIdle = Array.from({ length: days }, (_, k) => platformDailyTrend('idle', k));
 
   const regBuckets = bucketSum(dailyReg, buckets);
-  const verBuckets = bucketSum(dailyVer, buckets);
   const txnBuckets = bucketSum(dailyTxn, buckets);
   const idleBuckets = bucketSum(dailyIdle, buckets);
 
@@ -39,7 +36,6 @@ export function aggTrendByUnit(unit: PeriodUnit, from: string, to: string): Tren
     points.push({
       date: buckets[i].label,
       reg: regBuckets[i],
-      ver: verBuckets[i],
       txn: txnBuckets[i],
       idle: idleBuckets[i],
     });

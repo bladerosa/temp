@@ -42,6 +42,7 @@ import { RANK_DATA } from '@/data/merchants';
 import { PLATFORM_AGGREGATION_FEE, AGGREGATION_FEE_DETAIL } from '@/data/rate';
 import { SERVICE_FEE_DETAIL } from '@/data/serviceFee';
 import { SWAP_FEE_DETAIL } from '@/data/swapFee';
+import { WITHDRAW_FEE_DETAIL } from '@/data/withdrawFee';
 import type { DrillCtx, KpiRowData, PeriodUnit } from '@/data/types';
 import { fmtMoney, fmtTenThousand } from '@/utils/format';
 import { fmtRangeStr } from '@/utils/dateRange';
@@ -96,13 +97,6 @@ function KpiRow({
         />
       </TableCell>
       <TableCell>
-        <KpiNumberCell
-          value={data.ver}
-          suffix={data.verUsers != null ? `验证商户:${data.verUsers.toLocaleString()}` : null}
-          onClick={() => onCellClick('ver')}
-        />
-      </TableCell>
-      <TableCell>
         <KpiNumberCell value={data.txn} pct={data.txnPct} onClick={() => onCellClick('txn')} />
       </TableCell>
       <TableCell>
@@ -147,8 +141,6 @@ const KpiTableCard = observer(function KpiTableCard({
       '周期',
       '新增注册量',
       '注册商户(累计)',
-      '新增验证商户',
-      '验证商户(累计)',
       '交易商户',
       '交易商户占比',
       '无交易商户',
@@ -158,8 +150,6 @@ const KpiTableCard = observer(function KpiTableCard({
       label,
       d.reg,
       d.regUsers ?? '',
-      d.ver,
-      d.verUsers ?? '',
       d.txn ?? '',
       d.txnPct != null ? `${d.txnPct}%` : '',
       d.idle ?? '',
@@ -201,12 +191,11 @@ const KpiTableCard = observer(function KpiTableCard({
       </Stack>
 
       <Box sx={{ overflowX: 'auto' }}>
-      <Table sx={{ tableLayout: 'fixed', minWidth: 720 }}>
+      <Table sx={{ tableLayout: 'fixed', minWidth: 620 }}>
         <TableHead>
           <TableRow>
             <TableCell sx={{ width: 180 }}></TableCell>
             <TableCell>新增注册量</TableCell>
-            <TableCell>新增验证商户</TableCell>
             <TableCell>交易商户</TableCell>
             <TableCell>无交易商户</TableCell>
           </TableRow>
@@ -262,9 +251,8 @@ const TrendCard = observer(function TrendCard() {
   const { merchant } = useStores();
   const { unit, hiddenSeries, globalFrom, globalTo } = merchant;
   const data = useMemo(() => aggTrendByUnit(unit, globalFrom, globalTo), [unit, globalFrom, globalTo]);
-  const series: { key: 'reg' | 'ver' | 'txn' | 'idle'; color: string; label: string }[] = [
+  const series: { key: 'reg' | 'txn' | 'idle'; color: string; label: string }[] = [
     { key: 'reg', color: '#BEE072', label: '新增注册' },
-    { key: 'ver', color: '#E7B22B', label: '新增验证商户' },
     { key: 'txn', color: '#3C6FF5', label: '交易商户' },
     { key: 'idle', color: '#919EAB', label: '无交易商户' },
   ];
@@ -302,12 +290,11 @@ const TrendCard = observer(function TrendCard() {
 });
 
 // ============== Region pie card ==============
-const REGION_METRIC_OPTIONS: { value: 'reg' | 'ver' | 'txn' | 'gmv' | 'idle'; label: string }[] = [
-  { value: 'reg', label: '注册数' },
-  { value: 'ver', label: '验证数' },
-  { value: 'txn', label: '交易商户数' },
-  { value: 'gmv', label: '交易额' },
+const REGION_METRIC_OPTIONS: { value: 'reg' | 'txn' | 'gmv' | 'idle'; label: string }[] = [
+  { value: 'reg', label: '注册商户数' },
+  { value: 'txn', label: '有交易商户数' },
   { value: 'idle', label: '无交易商户数' },
+  { value: 'gmv', label: '交易额' },
 ];
 
 const RegionCard = observer(function RegionCard() {
@@ -330,7 +317,7 @@ const RegionCard = observer(function RegionCard() {
     <Card sx={{ p: 5, mb: 4 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 4, gap: 4, flexWrap: 'wrap' }}>
         <Typography sx={{ fontSize: 15, fontWeight: 700 }}>商户地区分布</Typography>
-        <Segmented<'reg' | 'ver' | 'txn' | 'gmv' | 'idle'>
+        <Segmented<'reg' | 'txn' | 'gmv' | 'idle'>
           value={regionMetric}
           options={REGION_METRIC_OPTIONS}
           onChange={merchant.setRegionMetric}
@@ -485,7 +472,7 @@ const IndustryCard = observer(function IndustryCard() {
     <Card sx={{ p: 5, mb: 4 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 4, gap: 4, flexWrap: 'wrap' }}>
         <Typography sx={{ fontSize: 15, fontWeight: 700 }}>商户行业分布</Typography>
-        <Segmented<'reg' | 'ver' | 'txn' | 'gmv' | 'idle'>
+        <Segmented<'reg' | 'txn' | 'gmv' | 'idle'>
           value={industryMetric}
           options={REGION_METRIC_OPTIONS}
           onChange={merchant.setIndustryMetric}
@@ -559,19 +546,23 @@ const RankCard = observer(function RankCard({
   setTopN,
 }: {
   title: string;
-  metric: 'deposit' | 'exchange';
+  metric: 'deposit' | 'withdraw' | 'exchange';
   unit: string;
   topN: number;
   setTopN: (n: number) => void;
 }) {
   const items = useMemo(
     () =>
-      RANK_DATA['30d'].slice(0, topN).map((m) => ({
-        id: m.id,
-        name: m.name,
-        value: m[metric],
-        unit,
-      })),
+      RANK_DATA['30d']
+        .slice()
+        .sort((a, b) => b[metric] - a[metric])
+        .slice(0, topN)
+        .map((m) => ({
+          id: m.id,
+          name: m.name,
+          value: m[metric],
+          unit,
+        })),
     [metric, topN, unit]
   );
   return (
@@ -604,9 +595,6 @@ function ServiceFeeRankCard() {
     <Card sx={{ p: 5, display: 'flex', flexDirection: 'column' }}>
       <Stack sx={{ mb: 3 }}>
         <Typography sx={{ fontSize: 15, fontWeight: 700 }}>用户支付充值服务费排名</Typography>
-        <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>
-          顺差 (红色) = 充值服务费 &gt; 平台网络 fee 成本，我们挣钱；逆差 (绿色) = 我们亏钱。
-        </Typography>
       </Stack>
       <Table size="small" sx={{ '& th, & td': { fontSize: 12 } }}>
         <TableHead>
@@ -618,33 +606,21 @@ function ServiceFeeRankCard() {
         <TableBody>
           {SERVICE_FEE_DETAIL.slice()
             .sort((a, b) => b.serviceFee - a.serviceFee)
-            .map((r) => {
-              const zero = r.rateDiff === 0;
-              const profit = r.rateDiff > 0;
-              const rateColor = zero ? 'text.secondary' : profit ? 'error.main' : 'success.dark';
-              const rateSign = profit ? '+' : '';
-              return (
-                <TableRow key={r.id}>
-                  <TableCell sx={{ fontFamily: 'var(--font-mono)', color: 'text.primary' }}>
-                    {r.id}
-                  </TableCell>
-                  <TableCell align="right">
-                    <Box
-                      component="span"
-                      sx={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: 'text.primary' }}
-                    >
-                      {fmtMoney(r.serviceFee, 2)}
-                    </Box>
-                    {!zero && (
-                      <Box component="span" sx={{ ml: 0.5, fontSize: 11, color: rateColor, fontWeight: 600 }}>
-                        ({rateSign}
-                        {r.rateDiff.toFixed(2)}%)
-                      </Box>
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            .map((r) => (
+              <TableRow key={r.id}>
+                <TableCell sx={{ fontFamily: 'var(--font-mono)', color: 'text.primary' }}>
+                  {r.id}
+                </TableCell>
+                <TableCell align="right">
+                  <Box
+                    component="span"
+                    sx={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: 'text.primary' }}
+                  >
+                    {fmtMoney(r.serviceFee, 2)}
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
       <Box data-no-print="1" sx={{ textAlign: 'center', mt: 'auto', pt: 3 }}>
@@ -668,9 +644,6 @@ function SwapFeeRankCard() {
     <Card sx={{ p: 5, display: 'flex', flexDirection: 'column' }}>
       <Stack sx={{ mb: 3 }}>
         <Typography sx={{ fontSize: 15, fontWeight: 700 }}>用户支付换币服务费排名</Typography>
-        <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>
-          顺差 (红色) = 换币服务费 &gt; 平台换币成本 fee，我们挣钱；逆差 (绿色) = 我们亏钱。
-        </Typography>
       </Stack>
       <Table size="small" sx={{ '& th, & td': { fontSize: 12 } }}>
         <TableHead>
@@ -682,33 +655,21 @@ function SwapFeeRankCard() {
         <TableBody>
           {SWAP_FEE_DETAIL.slice()
             .sort((a, b) => b.swapFee - a.swapFee)
-            .map((r) => {
-              const zero = r.rateDiff === 0;
-              const profit = r.rateDiff > 0;
-              const rateColor = zero ? 'text.secondary' : profit ? 'error.main' : 'success.dark';
-              const rateSign = profit ? '+' : '';
-              return (
-                <TableRow key={r.id}>
-                  <TableCell sx={{ fontFamily: 'var(--font-mono)', color: 'text.primary' }}>
-                    {r.id}
-                  </TableCell>
-                  <TableCell align="right">
-                    <Box
-                      component="span"
-                      sx={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: 'text.primary' }}
-                    >
-                      {fmtMoney(r.swapFee, 2)}
-                    </Box>
-                    {!zero && (
-                      <Box component="span" sx={{ ml: 0.5, fontSize: 11, color: rateColor, fontWeight: 600 }}>
-                        ({rateSign}
-                        {r.rateDiff.toFixed(2)}%)
-                      </Box>
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            .map((r) => (
+              <TableRow key={r.id}>
+                <TableCell sx={{ fontFamily: 'var(--font-mono)', color: 'text.primary' }}>
+                  {r.id}
+                </TableCell>
+                <TableCell align="right">
+                  <Box
+                    component="span"
+                    sx={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: 'text.primary' }}
+                  >
+                    {fmtMoney(r.swapFee, 2)}
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
       <Box data-no-print="1" sx={{ textAlign: 'center', mt: 'auto', pt: 3 }}>
@@ -786,6 +747,69 @@ function AggFeeCard() {
   );
 }
 
+// ============== Withdraw network-fee ranking ==============
+// Same anatomy as AggFeeCard — 用户支付提现网络费 vs 平台支付 fee 成本.
+function WithdrawFeeRankCard() {
+  const navigate = useNavigate();
+  return (
+    <Card sx={{ p: 5, display: 'flex', flexDirection: 'column' }}>
+      <Stack sx={{ mb: 3 }}>
+        <Typography sx={{ fontSize: 15, fontWeight: 700 }}>用户支付提现网络费排名</Typography>
+        <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>
+          顺差 (红色) = 用户支付 fee &gt; 平台支付 fee 成本，我们挣钱；逆差 (绿色) = 我们亏钱。
+        </Typography>
+      </Stack>
+      <Table size="small" sx={{ '& th, & td': { fontSize: 12 } }}>
+        <TableHead>
+          <TableRow>
+            <TableCell>Display ID</TableCell>
+            <TableCell align="right">用户支付fee</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {WITHDRAW_FEE_DETAIL.slice()
+            .sort((a, b) => b.userFee - a.userFee)
+            .map((r) => {
+              const zero = r.rateDiff === 0;
+              const profit = r.rateDiff > 0;
+              const rateColor = zero ? 'text.secondary' : profit ? 'error.main' : 'success.dark';
+              const rateSign = profit ? '+' : '';
+              return (
+                <TableRow key={r.id}>
+                  <TableCell sx={{ fontFamily: 'var(--font-mono)', color: 'text.primary' }}>
+                    {r.id}
+                  </TableCell>
+                  <TableCell align="right">
+                    <Box
+                      component="span"
+                      sx={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: 'text.primary' }}
+                    >
+                      {fmtMoney(r.userFee, 2)}
+                    </Box>
+                    {!zero && (
+                      <Box component="span" sx={{ ml: 0.5, fontSize: 11, color: rateColor, fontWeight: 600 }}>
+                        ({rateSign}
+                        {r.rateDiff.toFixed(2)}%)
+                      </Box>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+        </TableBody>
+      </Table>
+      <Box data-no-print="1" sx={{ textAlign: 'center', mt: 'auto', pt: 3 }}>
+        <Typography
+          onClick={() => navigate(paths.dashboard.withdrawFeeDetail)}
+          sx={{ color: 'primary.main', fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'inline-block' }}
+        >
+          查看全部 →
+        </Typography>
+      </Box>
+    </Card>
+  );
+}
+
 // ============== Page ==============
 const MerchantPage = observer(function MerchantPage() {
   const { merchant } = useStores();
@@ -838,13 +862,20 @@ const MerchantPage = observer(function MerchantPage() {
       <RegionCard />
       <IndustryCard />
 
-      <Box data-print-stack="1" sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 4, mb: 4 }}>
+      <Box data-print-stack="1" sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: '1fr 1fr 1fr' }, gap: 4, mb: 4 }}>
         <RankCard
           title="充值排行"
           metric="deposit"
           unit="USDT"
           topN={merchant.depositTopN}
           setTopN={merchant.setDepositTopN}
+        />
+        <RankCard
+          title="提现排行"
+          metric="withdraw"
+          unit="USDT"
+          topN={merchant.withdrawTopN}
+          setTopN={merchant.setWithdrawTopN}
         />
         <RankCard
           title="换币排行"
@@ -855,10 +886,11 @@ const MerchantPage = observer(function MerchantPage() {
         />
       </Box>
 
-      <Box data-print-stack="1" sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: '1fr 1fr 1fr' }, gap: 4 }}>
+      <Box data-print-stack="1" sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: '1fr 1fr 1fr 1fr' }, gap: 4 }}>
         <ServiceFeeRankCard />
         <SwapFeeRankCard />
         <AggFeeCard />
+        <WithdrawFeeRankCard />
       </Box>
 
       <DrillModal ctx={drillCtx} onClose={() => setDrillCtx(null)} />

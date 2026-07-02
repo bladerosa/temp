@@ -34,9 +34,9 @@ type SortField =
   | 'id'
   | 'deposit'
   | 'depositCount'
-  | 'networkCost'
+  | 'riskDepositCount'
   | 'serviceFee'
-  | 'profit';
+  | 'depositFeeRate';
 type SortDir = 'asc' | 'desc';
 
 const ServiceFeeDetailPage = observer(function ServiceFeeDetailPage() {
@@ -46,7 +46,7 @@ const ServiceFeeDetailPage = observer(function ServiceFeeDetailPage() {
 
   const [search, setSearch] = useState('');
   const [tone, setTone] = useState<'all' | 'profit' | 'loss'>('all');
-  const [sortField, setSortField] = useState<SortField>('profit');
+  const [sortField, setSortField] = useState<SortField>('serviceFee');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [page, setPage] = useState(1);
 
@@ -84,23 +84,19 @@ const ServiceFeeDetailPage = observer(function ServiceFeeDetailPage() {
       '商户ID',
       '充值金额 (USD)',
       '充值笔数',
-      '平台网络fee成本 (USD)',
-      '平台网络fee成本率 (%)',
+      '风险充值笔数',
       '用户支付充值服务费用 (USD)',
       '用户支付充值服务费率 (%)',
-      '充值服务费率差 (%)',
-      '充值服务费利润 (USD)',
+      '当前执行充值费率 (%)',
     ];
     const rows = filtered.map((r) => [
       r.id,
       r.deposit,
       r.depositCount,
-      r.networkCost,
-      r.networkRate,
+      r.riskDepositCount,
       r.serviceFee,
       r.serviceRate,
-      r.rateDiff,
-      r.profit,
+      r.depositFeeRate,
     ]);
     downloadCsv(
       `充值服务费明细_${globalFrom.replace(/\//g, '-')}_${globalTo.replace(/\//g, '-')}.csv`,
@@ -118,27 +114,6 @@ const ServiceFeeDetailPage = observer(function ServiceFeeDetailPage() {
       </Box>
     </Box>
   );
-
-  const renderProfitCell = (row: ServiceFeeDetailRow) => {
-    const profit = row.profit > 0;
-    const zero = row.profit === 0;
-    const color = zero ? 'text.secondary' : profit ? 'error.main' : 'success.dark';
-    const sign = profit ? '+' : '';
-    return (
-      <Box component="span" sx={{ color, fontVariantNumeric: 'tabular-nums' }}>
-        <Box component="span" sx={{ fontWeight: 600 }}>
-          {sign}
-          {fmtMoney(row.profit, 2)}
-        </Box>
-        {!zero && (
-          <Box component="span" sx={{ ml: 0.5, fontSize: 12 }}>
-            ({sign}
-            {row.rateDiff.toFixed(2)}%)
-          </Box>
-        )}
-      </Box>
-    );
-  };
 
   return (
     <Container maxWidth={false} disableGutters>
@@ -160,7 +135,6 @@ const ServiceFeeDetailPage = observer(function ServiceFeeDetailPage() {
             <span>用户支付充值服务费明细</span>
           </Stack>
         }
-        subtitle="红色 (顺差) = 用户支付充值服务费 > 平台网络 fee 成本，我们挣钱；绿色 (逆差) = 我们亏钱。"
         action={
           <Button variant="outlined" startIcon={<Download size={14} />} onClick={exportCsv}>
             导出 CSV
@@ -231,14 +205,14 @@ const ServiceFeeDetailPage = observer(function ServiceFeeDetailPage() {
               <TableCell align="right" sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('depositCount')}>
                 充值笔数 <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>{sortIcon('depositCount')}</Box>
               </TableCell>
-              <TableCell align="right" sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('networkCost')}>
-                平台网络fee成本 <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>{sortIcon('networkCost')}</Box>
+              <TableCell align="right" sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('riskDepositCount')}>
+                风险充值笔数 <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>{sortIcon('riskDepositCount')}</Box>
               </TableCell>
               <TableCell align="right" sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('serviceFee')}>
                 用户支付充值服务费用 <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>{sortIcon('serviceFee')}</Box>
               </TableCell>
-              <TableCell align="right" sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('profit')}>
-                充值服务费利润 <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>{sortIcon('profit')}</Box>
+              <TableCell align="right" sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('depositFeeRate')}>
+                当前执行充值费率 <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>{sortIcon('depositFeeRate')}</Box>
               </TableCell>
             </TableRow>
           </TableHead>
@@ -254,9 +228,20 @@ const ServiceFeeDetailPage = observer(function ServiceFeeDetailPage() {
                 <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>
                   {r.depositCount.toLocaleString()}
                 </TableCell>
-                <TableCell align="right">{renderPctCell(r.networkCost, r.networkRate)}</TableCell>
+                <TableCell
+                  align="right"
+                  sx={{
+                    fontVariantNumeric: 'tabular-nums',
+                    fontWeight: 600,
+                    color: r.riskDepositCount > 0 ? 'error.main' : 'text.disabled',
+                  }}
+                >
+                  {r.riskDepositCount.toLocaleString()}
+                </TableCell>
                 <TableCell align="right">{renderPctCell(r.serviceFee, r.serviceRate)}</TableCell>
-                <TableCell align="right">{renderProfitCell(r)}</TableCell>
+                <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {r.depositFeeRate.toFixed(2)}%
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

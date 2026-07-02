@@ -6,8 +6,6 @@ import {
   Chip,
   Container,
   IconButton,
-  MenuItem,
-  Select,
   Stack,
   Table,
   TableBody,
@@ -24,10 +22,21 @@ import { PageHeader } from '@/components/PageHeader';
 import { Spark } from '@/components/Spark';
 import { AdvancedFilterDialog, type AdvancedFilterValue } from '@/components/AdvancedFilterDialog';
 import { TxnDrawer, type TxnDrawerMerchant } from '@/components/TxnDrawer';
+import {
+  LinkedMerchantsModal,
+  type LinkedMember,
+  type LinkedMerchantsCtx,
+} from '@/components/LinkedMerchantsModal';
 import { EmptyState } from '@/components/EmptyState';
 import { useStores } from '@/stores';
 import { RANK_DATA, resolveRangeKey, type RankRangeKey } from '@/data/merchants';
-import { bucketRanges, bucketSum, merchantSparklineValues } from '@/data/merchantSeries';
+import {
+  bucketRanges,
+  bucketSum,
+  merchantSparklineValues,
+  merchantTrailingDaily,
+} from '@/data/merchantSeries';
+import { merchantProfile } from '@/data/merchantProfile';
 import { industryLabel } from '@/data/industries';
 import { downloadCsv } from '@/utils/csv';
 import { paths } from '@/routes/paths';
@@ -62,7 +71,8 @@ const DetailPage = observer(function DetailPage() {
   // Sparkline / 交易笔数 / TxnDrawer all derive from the GLOBAL filter window
   // via merchantSparklineValues (which caps at 365 days internally).
 
-  const [sortBy, setSortBy] = useState<'deposit' | 'exchange'>(ctx?.rank ?? 'deposit');
+  // 本视图统一以「交易金额」(= deposit) 为金额口径，换币不再单列/单独排序。
+  const [sortBy] = useState<'deposit'>('deposit');
   const [search, setSearch] = useState('');
   const [advOpen, setAdvOpen] = useState(false);
   const [adv, setAdv] = useState<AdvancedFilterValue>(DEFAULT_ADVANCED);
@@ -78,6 +88,7 @@ const DetailPage = observer(function DetailPage() {
   const [page, setPage] = useState(1);
   const pageSize = 20;
   const [txnFor, setTxnFor] = useState<TxnDrawerMerchant | null>(null);
+  const [linkedCtx, setLinkedCtx] = useState<LinkedMerchantsCtx | null>(null);
 
   const removeTag = (k: string) => {
     setAppliedTags((tags) => tags.filter((t) => t.key !== k));
@@ -112,26 +123,40 @@ const DetailPage = observer(function DetailPage() {
 
   const enriched = useMemo(() => {
     const base = RANK_DATA[range].slice().sort((a, b) => b[sortBy] - a[sortBy]);
-    // Buckets at the global unit are shared by every merchant in this list —
-    // compute once. (Same buckets are used by TxnDrawer when the row is
-    // clicked, guaranteeing chart ↔ drawer alignment.)
+    // 交易笔数 cell still totals the global window (buckets shared with the
+    // TxnDrawer for chart ↔ drawer alignment); the sparkline no longer uses
+    // these buckets — it is a fixed 90-day daily series (see below).
     const buckets = bucketRanges(merchant.unit, merchant.globalFrom, merchant.globalTo);
-    // bucketRanges is latest-first → reverse to oldest-first for the sparkline.
-    const labelsOldestFirst = buckets.slice().reverse().map((b) => b.label);
     return base.map((m) => {
       const daily = merchantSparklineValues(m, merchant.globalFrom, merchant.globalTo);
       const bucketed = bucketSum(daily, buckets);
-      // Sparkline reads oldest-first (left → right on the line).
-      const values = bucketed.slice().reverse();
       const count = bucketed.reduce((s, v) => s + v, 0);
-      return { ...m, count, values, labels: labelsOldestFirst };
+      // 交易笔数变化趋势 column is CAPPED to the most recent 90 days (daily),
+      // independent of the global window/unit — see merchantTrailingDaily.
+      const spark = merchantTrailingDaily(m, merchant.globalTo, 90);
+      const profile = merchantProfile(m.id);
+      const revenue = m.deposit + m.exchange; // 充值换币收入 (USDT)
+      return {
+        ...m,
+        count,
+        values: spark.values,
+        labels: spark.labels,
+        profile,
+        revenue,
+      };
     });
   }, [range, sortBy, merchant.unit, merchant.globalFrom, merchant.globalTo]);
 
   const filtered = useMemo(() => {
     let list = enriched;
     const q = (search || adv.keyword || '').trim().toLowerCase();
-    if (q) list = list.filter((m) => m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q));
+    if (q)
+      list = list.filter(
+        (m) =>
+          m.name.toLowerCase().includes(q) ||
+          m.id.toLowerCase().includes(q) ||
+          m.profile.email.toLowerCase().includes(q)
+      );
     if (adv.regions.length) list = list.filter((m) => adv.regions.includes(m.country));
     if (adv.industries.length) list = list.filter((m) => adv.industries.includes(m.industry));
     const aMin = parseFloat(adv.amountMin);
@@ -149,31 +174,56 @@ const DetailPage = observer(function DetailPage() {
   const curPage = Math.min(page, totalPages);
   const pageRows = filtered.slice((curPage - 1) * pageSize, curPage * pageSize);
 
+  const toMember = (m: (typeof enriched)[number]): LinkedMember => ({
+    id: m.id,
+    name: m.name,
+    country: m.country,
+    industry: m.industry,
+    deposit: m.deposit, // 交易金额 (USDT)
+    count: m.count,
+    firstDepositAt: m.profile.firstDepositAt,
+    lastDepositAt: m.profile.lastDepositAt,
+  });
+
+  // Open the linked-merchants modal for a clicked row: gather every merchant
+  // that shares the same email, with the clicked one placed first.
+  const openLinked = (m: (typeof enriched)[number]) => {
+    const email = m.profile.email;
+    const group = enriched.filter((x) => x.profile.email === email);
+    const ordered = [m, ...group.filter((x) => x.id !== m.id)];
+    setLinkedCtx({ email, anchorName: m.name, members: ordered.map(toMember) });
+  };
+
   const exportCsv = () => {
-    const otherKey = sortBy === 'deposit' ? 'exchange' : 'deposit';
-    const sortLbl = sortBy === 'deposit' ? '充值金额' : '换币金额';
-    const otherLbl = otherKey === 'deposit' ? '充值金额' : '换币金额';
     const headers = [
       '排名',
       '商户名',
       'Display ID',
+      '商户邮箱',
+      '关联商户数量',
       '地区',
       '行业',
-      `${sortLbl} (USDT)`,
-      `${otherLbl} (USDT)`,
+      '交易金额 (USDT)',
+      '充提换收入 (USDT)',
       '交易笔数',
+      '首充时间',
+      '最后充值时间',
     ];
     const rows = filtered.map((m, i) => [
       i + 1,
       m.name,
       m.id,
+      m.profile.email,
+      m.profile.linkedCount,
       m.country,
       industryLabel(m.industry),
-      m[sortBy],
-      m[otherKey],
+      m.deposit,
+      m.revenue,
       m.count,
+      m.profile.firstDepositAt,
+      m.profile.lastDepositAt,
     ]);
-    downloadCsv(`商户交易统计_${rangeLabel}_按${sortLbl}.csv`, [headers, ...rows]);
+    downloadCsv(`商户交易统计_${rangeLabel}.csv`, [headers, ...rows]);
   };
 
   const advActive =
@@ -266,18 +316,12 @@ const DetailPage = observer(function DetailPage() {
 
       <Card sx={{ p: 5, mb: 4 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3, gap: 4, flexWrap: 'wrap' }}>
-          <Select
-            size="small"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as 'deposit' | 'exchange')}
-            sx={{ height: 32, minWidth: 140 }}
-          >
-            <MenuItem value="deposit">按充值金额</MenuItem>
-            <MenuItem value="exchange">按换币金额</MenuItem>
-          </Select>
+          <Typography sx={{ fontSize: 12.5, color: 'text.secondary' }}>
+            按<Box component="span" sx={{ color: 'text.primary', fontWeight: 600 }}>交易金额</Box>降序
+          </Typography>
           <TextField
             size="small"
-            placeholder="搜索 商户名 / Display ID"
+            placeholder="搜索 商户名 / Display ID / 邮箱"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -288,24 +332,26 @@ const DetailPage = observer(function DetailPage() {
         </Stack>
 
         <Box sx={{ overflowX: 'auto' }}>
-        <Table size="small" sx={{ minWidth: 980 }}>
+        <Table size="small" sx={{ minWidth: 1320 }}>
           <TableHead>
             <TableRow>
               <TableCell sx={{ width: 56 }}>排名</TableCell>
-              <TableCell>商户</TableCell>
+              <TableCell sx={{ minWidth: 240 }}>商户</TableCell>
+              <TableCell align="right">关联商户数量</TableCell>
               <TableCell>地区</TableCell>
               <TableCell>行业</TableCell>
-              <TableCell align="right">{rankLabel || '充值金额'} (USDT)</TableCell>
-              <TableCell align="right">{sortBy === 'deposit' ? '换币金额' : '充值金额'} (USDT)</TableCell>
+              <TableCell align="right">交易金额 (USDT)</TableCell>
+              <TableCell align="right">充提换收入 (USDT)</TableCell>
               <TableCell align="right">交易笔数</TableCell>
-              <TableCell sx={{ minWidth: 200 }}>交易笔数变化趋势</TableCell>
+              <TableCell>首充时间</TableCell>
+              <TableCell>最后充值时间</TableCell>
+              <TableCell sx={{ minWidth: 200 }}>交易笔数变化趋势（近 90 天）</TableCell>
               <TableCell align="right" sx={{ width: 60 }}>操作</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {pageRows.map((m, idx) => {
               const i = (curPage - 1) * pageSize + idx;
-              const otherKey: 'deposit' | 'exchange' = sortBy === 'deposit' ? 'exchange' : 'deposit';
               const top = i < 3;
               return (
                 <TableRow key={m.id}>
@@ -343,13 +389,45 @@ const DetailPage = observer(function DetailPage() {
                       >
                         {m.name.split(' ').map((w) => w[0]).join('').slice(0, 2)}
                       </Box>
-                      <Box>
-                        <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{m.name}</Typography>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography sx={{ fontSize: 13, fontWeight: 600 }} noWrap>
+                          {m.name}
+                        </Typography>
+                        <Typography
+                          sx={{ fontSize: 11.5, color: 'text.secondary', fontFamily: 'var(--font-mono)' }}
+                          noWrap
+                          title={m.profile.email}
+                        >
+                          {m.profile.email}
+                        </Typography>
                         <Typography sx={{ fontSize: 11.5, color: 'text.secondary', fontFamily: 'var(--font-mono)' }}>
                           {m.id}
                         </Typography>
                       </Box>
                     </Stack>
+                  </TableCell>
+                  <TableCell align="right">
+                    {m.profile.linkedCount > 0 ? (
+                      <Chip
+                        label={m.profile.linkedCount}
+                        size="small"
+                        clickable
+                        onClick={() => openLinked(m)}
+                        title={`查看该商户的 ${m.profile.linkedCount} 个关联商户`}
+                        sx={{
+                          height: 20,
+                          fontSize: 11.5,
+                          fontWeight: 600,
+                          bgcolor: 'rgba(60,111,245,0.12)',
+                          color: 'primary.dark',
+                          '&:hover': { bgcolor: 'rgba(60,111,245,0.22)' },
+                        }}
+                      />
+                    ) : (
+                      <Typography component="span" sx={{ fontSize: 12.5, color: 'text.disabled' }}>
+                        0
+                      </Typography>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Chip label={m.country} size="small" />
@@ -360,13 +438,19 @@ const DetailPage = observer(function DetailPage() {
                     </Typography>
                   </TableCell>
                   <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
-                    {m[sortBy].toLocaleString()}
+                    {m.deposit.toLocaleString()}
                   </TableCell>
-                  <TableCell align="right" sx={{ color: 'text.secondary' }}>
-                    {m[otherKey].toLocaleString()}
+                  <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
+                    {m.revenue.toLocaleString()}
                   </TableCell>
                   <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
                     {m.count.toLocaleString()}
+                  </TableCell>
+                  <TableCell sx={{ fontVariantNumeric: 'tabular-nums', color: 'text.secondary', fontSize: 12.5 }}>
+                    {m.profile.firstDepositAt}
+                  </TableCell>
+                  <TableCell sx={{ fontVariantNumeric: 'tabular-nums', color: 'text.secondary', fontSize: 12.5 }}>
+                    {m.profile.lastDepositAt}
                   </TableCell>
                   <TableCell>
                     <Box sx={{ minWidth: 120, height: 28 }}>
@@ -375,7 +459,7 @@ const DetailPage = observer(function DetailPage() {
                         labels={m.labels}
                         label="交易笔数"
                         valueFormat={(v) => v.toLocaleString()}
-                        color={sortBy === 'deposit' ? '#3C6FF5' : '#BEE072'}
+                        color="#3C6FF5"
                         width="100%"
                         height={28}
                       />
@@ -460,6 +544,7 @@ const DetailPage = observer(function DetailPage() {
         globalPreset={merchant.globalPreset}
         onClose={() => setTxnFor(null)}
       />
+      <LinkedMerchantsModal ctx={linkedCtx} onClose={() => setLinkedCtx(null)} />
     </Container>
   );
 });

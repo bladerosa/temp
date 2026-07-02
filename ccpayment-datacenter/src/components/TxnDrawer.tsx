@@ -48,21 +48,20 @@ const UNIT_LABEL: Record<PeriodUnit, string> = { day: '日', week: '周', month:
 
 interface PeriodRow {
   range: string;
+  /** 交易金额 (USDT) = 该商户充值金额按各周期交易笔数占比拆分。 */
   deposit: number;
-  exchange: number;
   count: number;
 }
 
 /** Per-period rows = bucket the merchant's daily count series (same one the
  *  parent table's sparkline + 交易笔数 column derive from), then split the
- *  total deposit/exchange proportionally to each bucket's count share. */
+ *  total 交易金额 proportionally to each bucket's count share. */
 function buildPeriodRows(merchant: TxnDrawerMerchant, unit: PeriodUnit, from: string, to: string): PeriodRow[] {
   const buckets = bucketRanges(unit, from, to);
   const daily = merchantSparklineValues(merchant, from, to);
   const counts = bucketSum(daily, buckets);
   const totalCount = counts.reduce((s, v) => s + v, 0) || 1;
   const totalDeposit = merchant.deposit ?? 0;
-  const totalExchange = merchant.exchange ?? 0;
   return buckets.map((b, i) => {
     const count = counts[i];
     const share = count / totalCount;
@@ -70,14 +69,13 @@ function buildPeriodRows(merchant: TxnDrawerMerchant, unit: PeriodUnit, from: st
       range: b.label,
       count,
       deposit: Math.round(totalDeposit * share),
-      exchange: Math.round(totalExchange * share),
     };
   });
 }
 
 const PAGE_SIZE = 12;
 
-type SortField = 'range' | 'deposit' | 'exchange' | 'count';
+type SortField = 'range' | 'deposit' | 'count';
 type SortDir = 'asc' | 'desc';
 
 export function TxnDrawer({
@@ -118,10 +116,9 @@ export function TxnDrawer({
     return rows.reduce(
       (acc, r) => ({
         deposit: acc.deposit + r.deposit,
-        exchange: acc.exchange + r.exchange,
         count: acc.count + r.count,
       }),
-      { deposit: 0, exchange: 0, count: 0 }
+      { deposit: 0, count: 0 }
     );
   }, [rows]);
 
@@ -136,8 +133,8 @@ export function TxnDrawer({
 
   const exportCsv = () => {
     if (!merchant) return;
-    const headers = ['日期', '充值金额 (USDT)', '换币金额 (USDT)', '交易笔数'];
-    const out = sorted.map((r) => [r.range, r.deposit, r.exchange, r.count]);
+    const headers = ['日期', '交易金额 (USDT)', '交易笔数'];
+    const out = sorted.map((r) => [r.range, r.deposit, r.count]);
     downloadCsv(
       `商户明细_${merchant.name}_${UNIT_LABEL[effectiveUnit]}_${globalFrom.replace(/\//g, '-')}_${globalTo.replace(/\//g, '-')}.csv`,
       [headers, ...out]
@@ -179,7 +176,7 @@ export function TxnDrawer({
               </Box>
               <span>·</span>
               <span>
-                合计：充值 {fmtMoney(totals.deposit, 0)} · 换币 {fmtMoney(totals.exchange, 0)} · {totals.count.toLocaleString()} 笔
+                合计：交易金额 {fmtMoney(totals.deposit, 0)} · {totals.count.toLocaleString()} 笔
               </span>
             </Stack>
           </Box>
@@ -228,19 +225,9 @@ export function TxnDrawer({
                 sx={{ cursor: 'pointer', userSelect: 'none' }}
                 onClick={() => toggleSort('deposit')}
               >
-                充值金额 (USDT){' '}
+                交易金额 (USDT){' '}
                 <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>
                   {sortIcon('deposit')}
-                </Box>
-              </TableCell>
-              <TableCell
-                align="right"
-                sx={{ cursor: 'pointer', userSelect: 'none' }}
-                onClick={() => toggleSort('exchange')}
-              >
-                换币金额 (USDT){' '}
-                <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>
-                  {sortIcon('exchange')}
                 </Box>
               </TableCell>
               <TableCell
@@ -262,9 +249,6 @@ export function TxnDrawer({
                 <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
                   {fmtMoney(r.deposit, 0)}
                 </TableCell>
-                <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums', color: 'text.secondary' }}>
-                  {fmtMoney(r.exchange, 0)}
-                </TableCell>
                 <TableCell align="right" sx={{ pr: 5, fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
                   {r.count.toLocaleString()}
                 </TableCell>
@@ -272,7 +256,7 @@ export function TxnDrawer({
             ))}
             {pageRows.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} sx={{ p: 12, textAlign: 'center', color: 'text.secondary' }}>
+                <TableCell colSpan={3} sx={{ p: 12, textAlign: 'center', color: 'text.secondary' }}>
                   无匹配记录
                 </TableCell>
               </TableRow>

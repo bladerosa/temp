@@ -30,7 +30,7 @@ import { paths } from '@/routes/paths';
 
 const PAGE_SIZE = 20;
 
-type SortField = 'id' | 'swap' | 'swapCount' | 'swapCost' | 'swapFee' | 'profit';
+type SortField = 'id' | 'swap' | 'swapCount' | 'swapFee';
 type SortDir = 'asc' | 'desc';
 
 const SwapFeeDetailPage = observer(function SwapFeeDetailPage() {
@@ -40,7 +40,7 @@ const SwapFeeDetailPage = observer(function SwapFeeDetailPage() {
 
   const [search, setSearch] = useState('');
   const [tone, setTone] = useState<'all' | 'profit' | 'loss'>('all');
-  const [sortField, setSortField] = useState<SortField>('profit');
+  const [sortField, setSortField] = useState<SortField>('swapFee');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [page, setPage] = useState(1);
 
@@ -78,23 +78,15 @@ const SwapFeeDetailPage = observer(function SwapFeeDetailPage() {
       '商户ID',
       '换币金额 (USD)',
       '换币笔数',
-      '平台换币成本fee (USD)',
-      '平台换币成本fee率 (%)',
       '用户支付换币服务费用 (USD)',
       '用户支付换币服务费率 (%)',
-      '换币服务费率差 (%)',
-      '换币服务费利润 (USD)',
     ];
     const rows = filtered.map((r) => [
       r.id,
       r.swap,
       r.swapCount,
-      r.swapCost,
-      r.costRate,
       r.swapFee,
       r.swapRate,
-      r.rateDiff,
-      r.profit,
     ]);
     downloadCsv(
       `换币服务费明细_${globalFrom.replace(/\//g, '-')}_${globalTo.replace(/\//g, '-')}.csv`,
@@ -112,27 +104,6 @@ const SwapFeeDetailPage = observer(function SwapFeeDetailPage() {
       </Box>
     </Box>
   );
-
-  const renderProfitCell = (row: SwapFeeDetailRow) => {
-    const profit = row.profit > 0;
-    const zero = row.profit === 0;
-    const color = zero ? 'text.secondary' : profit ? 'error.main' : 'success.dark';
-    const sign = profit ? '+' : '';
-    return (
-      <Box component="span" sx={{ color, fontVariantNumeric: 'tabular-nums' }}>
-        <Box component="span" sx={{ fontWeight: 600 }}>
-          {sign}
-          {fmtMoney(row.profit, 2)}
-        </Box>
-        {!zero && (
-          <Box component="span" sx={{ ml: 0.5, fontSize: 12 }}>
-            ({sign}
-            {row.rateDiff.toFixed(2)}%)
-          </Box>
-        )}
-      </Box>
-    );
-  };
 
   return (
     <Container maxWidth={false} disableGutters>
@@ -154,7 +125,6 @@ const SwapFeeDetailPage = observer(function SwapFeeDetailPage() {
             <span>用户支付换币服务费明细</span>
           </Stack>
         }
-        subtitle="红色 (顺差) = 换币服务费 > 平台换币成本 fee，我们挣钱；绿色 (逆差) = 我们亏钱。"
         action={
           <Button variant="outlined" startIcon={<Download size={14} />} onClick={exportCsv}>
             导出 CSV
@@ -213,7 +183,7 @@ const SwapFeeDetailPage = observer(function SwapFeeDetailPage() {
         </Stack>
 
         <Box sx={{ overflowX: 'auto' }}>
-          <Table sx={{ minWidth: 920 }}>
+          <Table sx={{ minWidth: 720 }}>
             <TableHead>
               <TableRow>
                 <TableCell sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('id')}>
@@ -225,14 +195,8 @@ const SwapFeeDetailPage = observer(function SwapFeeDetailPage() {
                 <TableCell align="right" sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('swapCount')}>
                   换币笔数 <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>{sortIcon('swapCount')}</Box>
                 </TableCell>
-                <TableCell align="right" sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('swapCost')}>
-                  平台换币成本fee <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>{sortIcon('swapCost')}</Box>
-                </TableCell>
                 <TableCell align="right" sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('swapFee')}>
                   用户支付换币服务费用 <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>{sortIcon('swapFee')}</Box>
-                </TableCell>
-                <TableCell align="right" sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('profit')}>
-                  换币服务费利润 <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>{sortIcon('profit')}</Box>
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -248,9 +212,7 @@ const SwapFeeDetailPage = observer(function SwapFeeDetailPage() {
                   <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>
                     {r.swapCount.toLocaleString()}
                   </TableCell>
-                  <TableCell align="right">{renderPctCell(r.swapCost, r.costRate)}</TableCell>
                   <TableCell align="right">{renderPctCell(r.swapFee, r.swapRate)}</TableCell>
-                  <TableCell align="right">{renderProfitCell(r)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -22,26 +22,18 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { EmptyState } from '@/components/EmptyState';
 import { useStores } from '@/stores';
-import { AGGREGATION_FEE_DETAIL, PLATFORM_AGGREGATION_FEE } from '@/data/rate';
+import { WITHDRAW_FEE_DETAIL, type WithdrawFeeDetailRow } from '@/data/withdrawFee';
 import { fmtMoney } from '@/utils/format';
 import { fmtRangeStr } from '@/utils/dateRange';
 import { downloadCsv } from '@/utils/csv';
 import { paths } from '@/routes/paths';
-import type { AggregationFeeDetailRow } from '@/data/rate';
 
 const PAGE_SIZE = 20;
 
-type SortField =
-  | 'id'
-  | 'deposit'
-  | 'depositCount'
-  | 'aggCount'
-  | 'platformCost'
-  | 'userFee'
-  | 'profit';
+type SortField = 'id' | 'withdraw' | 'withdrawCount' | 'platformCost' | 'userFee' | 'profit';
 type SortDir = 'asc' | 'desc';
 
-const AggregationFeeDetailPage = observer(function AggregationFeeDetailPage() {
+const WithdrawFeeDetailPage = observer(function WithdrawFeeDetailPage() {
   const { merchant } = useStores();
   const navigate = useNavigate();
   const { globalFrom, globalTo, globalPreset } = merchant;
@@ -53,7 +45,7 @@ const AggregationFeeDetailPage = observer(function AggregationFeeDetailPage() {
   const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
-    let list: AggregationFeeDetailRow[] = AGGREGATION_FEE_DETAIL.slice();
+    let list: WithdrawFeeDetailRow[] = WITHDRAW_FEE_DETAIL.slice();
     const q = search.trim().toLowerCase();
     if (q) list = list.filter((r) => r.id.toLowerCase().includes(q));
     if (tone === 'profit') list = list.filter((r) => r.rateDiff > 0);
@@ -84,21 +76,19 @@ const AggregationFeeDetailPage = observer(function AggregationFeeDetailPage() {
   const exportCsv = () => {
     const headers = [
       '商户ID',
-      '充值金额 (USD)',
-      '充值笔数',
-      '归集次数',
-      '平台支付归集成本 (USD)',
-      '平台支付归集成本率 (%)',
-      '用户支付归集费用 (USD)',
-      '用户支付归集费率 (%)',
-      '归集利润 (USD)',
-      '归集利润率 (%)',
+      '提现金额 (USD)',
+      '提现笔数',
+      '平台支付fee成本 (USD)',
+      '平台支付fee成本率 (%)',
+      '用户支付fee (USD)',
+      '用户支付fee率 (%)',
+      '提现利润 (USD)',
+      '提现利润率 (%)',
     ];
     const rows = filtered.map((r) => [
       r.id,
-      r.deposit,
-      r.depositCount,
-      r.aggCount,
+      r.withdraw,
+      r.withdrawCount,
       r.platformCost,
       r.platformRate,
       r.userFee,
@@ -107,7 +97,7 @@ const AggregationFeeDetailPage = observer(function AggregationFeeDetailPage() {
       r.rateDiff,
     ]);
     downloadCsv(
-      `用户支付归集费明细_${globalFrom.replace(/\//g, '-')}_${globalTo.replace(/\//g, '-')}.csv`,
+      `用户支付提现网络费明细_${globalFrom.replace(/\//g, '-')}_${globalTo.replace(/\//g, '-')}.csv`,
       [headers, ...rows]
     );
   };
@@ -123,9 +113,8 @@ const AggregationFeeDetailPage = observer(function AggregationFeeDetailPage() {
     </Box>
   );
 
-  /** Render profit cell with the Chinese stock-market convention:
-   *  positive (we profit) = red `+x`, negative (we lose) = green `-x`. */
-  const renderProfitCell = (row: AggregationFeeDetailRow) => {
+  /** 提现利润 cell — 顺差 (we profit) = red `+x`, 逆差 (we lose) = green `-x`. */
+  const renderProfitCell = (row: WithdrawFeeDetailRow) => {
     const profit = row.profit > 0;
     const zero = row.profit === 0;
     const color = zero ? 'text.secondary' : profit ? 'error.main' : 'success.dark';
@@ -163,10 +152,10 @@ const AggregationFeeDetailPage = observer(function AggregationFeeDetailPage() {
             >
               <ArrowLeft size={22} />
             </Box>
-            <span>用户支付归集费明细</span>
+            <span>用户支付提现网络费明细</span>
           </Stack>
         }
-        subtitle={`平台归集费率：${PLATFORM_AGGREGATION_FEE}%。红色 (顺差) = 用户支付 > 平台成本，我们挣钱；绿色 (逆差) = 我们亏钱。`}
+        subtitle="红色 (顺差) = 用户支付 fee > 平台支付 fee 成本，我们挣钱；绿色 (逆差) = 我们亏钱。"
         action={
           <Button variant="outlined" startIcon={<Download size={14} />} onClick={exportCsv}>
             导出 CSV
@@ -193,12 +182,7 @@ const AggregationFeeDetailPage = observer(function AggregationFeeDetailPage() {
       </Card>
 
       <Card sx={{ p: 5 }}>
-        <Stack
-          direction="row"
-          spacing={2}
-          alignItems="center"
-          sx={{ mb: 4, flexWrap: 'wrap', gap: 2 }}
-        >
+        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 4, flexWrap: 'wrap', gap: 2 }}>
           <TextField
             size="small"
             placeholder="搜索商户ID"
@@ -225,102 +209,48 @@ const AggregationFeeDetailPage = observer(function AggregationFeeDetailPage() {
         </Stack>
 
         <Box sx={{ overflowX: 'auto' }}>
-        <Table sx={{ minWidth: 920 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell
-                sx={{ cursor: 'pointer', userSelect: 'none' }}
-                onClick={() => toggleSort('id')}
-              >
-                商户ID{' '}
-                <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>
-                  {sortIcon('id')}
-                </Box>
-              </TableCell>
-              <TableCell
-                align="right"
-                sx={{ cursor: 'pointer', userSelect: 'none' }}
-                onClick={() => toggleSort('deposit')}
-              >
-                充值金额 (USD){' '}
-                <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>
-                  {sortIcon('deposit')}
-                </Box>
-              </TableCell>
-              <TableCell
-                align="right"
-                sx={{ cursor: 'pointer', userSelect: 'none' }}
-                onClick={() => toggleSort('depositCount')}
-              >
-                充值笔数{' '}
-                <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>
-                  {sortIcon('depositCount')}
-                </Box>
-              </TableCell>
-              <TableCell
-                align="right"
-                sx={{ cursor: 'pointer', userSelect: 'none' }}
-                onClick={() => toggleSort('aggCount')}
-              >
-                归集次数{' '}
-                <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>
-                  {sortIcon('aggCount')}
-                </Box>
-              </TableCell>
-              <TableCell
-                align="right"
-                sx={{ cursor: 'pointer', userSelect: 'none' }}
-                onClick={() => toggleSort('platformCost')}
-              >
-                平台支付归集成本{' '}
-                <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>
-                  {sortIcon('platformCost')}
-                </Box>
-              </TableCell>
-              <TableCell
-                align="right"
-                sx={{ cursor: 'pointer', userSelect: 'none' }}
-                onClick={() => toggleSort('userFee')}
-              >
-                用户支付归集费用{' '}
-                <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>
-                  {sortIcon('userFee')}
-                </Box>
-              </TableCell>
-              <TableCell
-                align="right"
-                sx={{ cursor: 'pointer', userSelect: 'none' }}
-                onClick={() => toggleSort('profit')}
-              >
-                归集利润{' '}
-                <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>
-                  {sortIcon('profit')}
-                </Box>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {pageRows.map((r) => (
-              <TableRow key={r.id}>
-                <TableCell sx={{ fontFamily: 'var(--font-mono)', color: 'primary.main' }}>
-                  {r.id}
+          <Table sx={{ minWidth: 920 }}>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('id')}>
+                  商户ID <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>{sortIcon('id')}</Box>
                 </TableCell>
-                <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
-                  {fmtMoney(r.deposit, 2)}
+                <TableCell align="right" sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('withdraw')}>
+                  提现金额 (USD) <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>{sortIcon('withdraw')}</Box>
                 </TableCell>
-                <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {r.depositCount.toLocaleString()}
+                <TableCell align="right" sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('withdrawCount')}>
+                  提现笔数 <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>{sortIcon('withdrawCount')}</Box>
                 </TableCell>
-                <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {r.aggCount.toLocaleString()}
+                <TableCell align="right" sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('platformCost')}>
+                  平台支付fee成本 <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>{sortIcon('platformCost')}</Box>
                 </TableCell>
-                <TableCell align="right">{renderPctCell(r.platformCost, r.platformRate)}</TableCell>
-                <TableCell align="right">{renderPctCell(r.userFee, r.userRate)}</TableCell>
-                <TableCell align="right">{renderProfitCell(r)}</TableCell>
+                <TableCell align="right" sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('userFee')}>
+                  用户支付fee <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>{sortIcon('userFee')}</Box>
+                </TableCell>
+                <TableCell align="right" sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('profit')}>
+                  提现利润 <Box component="span" sx={{ color: 'text.disabled', ml: 0.5 }}>{sortIcon('profit')}</Box>
+                </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {pageRows.map((r) => (
+                <TableRow key={r.id}>
+                  <TableCell sx={{ fontFamily: 'var(--font-mono)', color: 'primary.main' }}>
+                    {r.id}
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
+                    {fmtMoney(r.withdraw, 2)}
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {r.withdrawCount.toLocaleString()}
+                  </TableCell>
+                  <TableCell align="right">{renderPctCell(r.platformCost, r.platformRate)}</TableCell>
+                  <TableCell align="right">{renderPctCell(r.userFee, r.userRate)}</TableCell>
+                  <TableCell align="right">{renderProfitCell(r)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </Box>
         {pageRows.length === 0 && <EmptyState title="无匹配记录" desc="请调整筛选条件后重试" />}
 
@@ -375,4 +305,4 @@ const AggregationFeeDetailPage = observer(function AggregationFeeDetailPage() {
   );
 });
 
-export default AggregationFeeDetailPage;
+export default WithdrawFeeDetailPage;

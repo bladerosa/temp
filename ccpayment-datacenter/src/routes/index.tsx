@@ -10,6 +10,7 @@ const DetailPage = lazy(() => import('@/pages/DetailPage'));
 const AggregationFeeDetailPage = lazy(() => import('@/pages/AggregationFeeDetailPage'));
 const ServiceFeeDetailPage = lazy(() => import('@/pages/ServiceFeeDetailPage'));
 const SwapFeeDetailPage = lazy(() => import('@/pages/SwapFeeDetailPage'));
+const WithdrawFeeDetailPage = lazy(() => import('@/pages/WithdrawFeeDetailPage'));
 const FinancePage = lazy(() => import('@/pages/FinancePage'));
 const SystemPage = lazy(() => import('@/pages/SystemPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
@@ -34,6 +35,7 @@ export function AppRoutes() {
           <Route path="merchant/aggregation-fee-detail" element={<AggregationFeeDetailPage />} />
           <Route path="merchant/service-fee-detail" element={<ServiceFeeDetailPage />} />
           <Route path="merchant/swap-fee-detail" element={<SwapFeeDetailPage />} />
+          <Route path="merchant/withdraw-fee-detail" element={<WithdrawFeeDetailPage />} />
           <Route path="finance" element={<FinancePage />} />
           <Route path="system" element={<SystemPage />} />
         </Route>
