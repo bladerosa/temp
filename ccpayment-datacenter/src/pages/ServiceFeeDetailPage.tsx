@@ -5,8 +5,6 @@ import {
   Card,
   Container,
   IconButton,
-  MenuItem,
-  Select,
   Stack,
   Table,
   TableBody,
@@ -45,7 +43,6 @@ const ServiceFeeDetailPage = observer(function ServiceFeeDetailPage() {
   const { globalFrom, globalTo, globalPreset } = merchant;
 
   const [search, setSearch] = useState('');
-  const [tone, setTone] = useState<'all' | 'profit' | 'loss'>('all');
   const [sortField, setSortField] = useState<SortField>('serviceFee');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [page, setPage] = useState(1);
@@ -54,8 +51,6 @@ const ServiceFeeDetailPage = observer(function ServiceFeeDetailPage() {
     let list: ServiceFeeDetailRow[] = SERVICE_FEE_DETAIL.slice();
     const q = search.trim().toLowerCase();
     if (q) list = list.filter((r) => r.id.toLowerCase().includes(q));
-    if (tone === 'profit') list = list.filter((r) => r.rateDiff > 0);
-    else if (tone === 'loss') list = list.filter((r) => r.rateDiff < 0);
     list.sort((a, b) => {
       const av = a[sortField];
       const bv = b[sortField];
@@ -64,7 +59,7 @@ const ServiceFeeDetailPage = observer(function ServiceFeeDetailPage() {
       return 0;
     });
     return list;
-  }, [search, tone, sortField, sortDir]);
+  }, [search, sortField, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const curPage = Math.min(page, totalPages);
@@ -177,19 +172,6 @@ const ServiceFeeDetailPage = observer(function ServiceFeeDetailPage() {
             }}
             sx={{ width: 220 }}
           />
-          <Select
-            size="small"
-            value={tone}
-            onChange={(e) => {
-              setTone(e.target.value as 'all' | 'profit' | 'loss');
-              setPage(1);
-            }}
-            sx={{ height: 32, minWidth: 140 }}
-          >
-            <MenuItem value="all">全部 (顺差 + 逆差)</MenuItem>
-            <MenuItem value="profit">仅顺差 (挣钱)</MenuItem>
-            <MenuItem value="loss">仅逆差 (亏钱)</MenuItem>
-          </Select>
         </Stack>
 
         <Box sx={{ overflowX: 'auto' }}>

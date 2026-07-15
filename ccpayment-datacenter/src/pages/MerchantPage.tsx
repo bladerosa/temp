@@ -240,7 +240,7 @@ const KpiTableCard = observer(function KpiTableCard({
       </Table>
       </Box>
       <Typography sx={{ fontSize: 12, color: 'text.secondary', mt: 2, ml: 0.5 }}>
-        累计行口径：新增注册 / 新增验证按窗口列求和；交易 / 无交易按窗口去重，不随单位变化。
+        累计行口径：新增注册按窗口列求和；交易 / 无交易按窗口去重，不随单位变化。
       </Typography>
     </Card>
   );
@@ -819,7 +819,7 @@ const MerchantPage = observer(function MerchantPage() {
     <Container maxWidth={false} disableGutters>
       <PageHeader
         title="商户数据"
-        subtitle="商户注册、验证及活跃度的多维分析与长周期对比"
+        subtitle="商户注册及活跃度的多维分析与长周期对比"
         action={
           <>
             <Button
