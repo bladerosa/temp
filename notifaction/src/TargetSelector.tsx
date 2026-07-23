@@ -1,6 +1,6 @@
 import { Select, Button } from './ui';
 import { IconSearch, IconX, IconUsers, IconDownload } from './icons';
-import { ConditionGroup } from './ConditionBuilder';
+import { ConditionGroup, anyFilterEnabled } from './ConditionBuilder';
 import type { TargetSelectorValue, QueryResult } from './types';
 
 const TARGET_OPTIONS = [
@@ -21,8 +21,7 @@ export function TargetSelector({ value, onChange }: TargetSelectorProps) {
   const update = (patch: Partial<TargetSelectorValue>) => onChange({ ...v, ...patch });
 
   const handleSubmit = () => {
-    const hasAny = v.conditionValue?.regEnabled || v.conditionValue?.depositEnabled;
-    if (!hasAny) return;
+    if (!anyFilterEnabled(v.conditionValue)) return;
     const seed = JSON.stringify(v.conditionValue ?? {}).length;
     const count = 1200 + (seed * 173) % 8000;
     const samples = Array.from({ length: 5 }, (_, i) =>
@@ -39,7 +38,7 @@ export function TargetSelector({ value, onChange }: TargetSelectorProps) {
 
   const handleClear = () => update({ conditionValue: null, queryResult: null });
 
-  const canSubmit = !!(v.conditionValue && (v.conditionValue.regEnabled || v.conditionValue.depositEnabled));
+  const canSubmit = anyFilterEnabled(v.conditionValue);
 
   return (
     <div>

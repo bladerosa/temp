@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, Field, Select, TextInput, Button, Tag, Switch } from './ui';
 import { IconPlus, IconClock, IconEdit, IconZap, IconInfo, IconLink, IconCopy } from './icons';
-import { ConditionGroup, formatRegTime, formatDeposit } from './ConditionBuilder';
+import { ConditionGroup, anyFilterEnabled, buildConditionSummary } from './ConditionBuilder';
 import { AutoNoticeHistory } from './AutoNoticeHistory';
 import { PageHeader, SectionTitle, RichTextPlaceholder, EmailPreviewPlaceholder } from './NormalNotice';
 import type { AutoNoticeItem, ConditionGroupValue, RegTimeRelative } from './types';
@@ -24,7 +24,7 @@ const MOCK_AUTO_LIST: AutoNoticeItem[] = [
     type: 'Email通知',
     enabled: true,
     schedule: '每周一 10:00',
-    triggerSummary: '注册时间 大于 3个月 · 且 最近30天内 入金金额 小于 10.00 USD',
+    triggerSummary: '注册时间 大于 3个月 · 且 近30天(A) 入金金额 小于 前30天(B) × 50%',
     totalMatched: 3021,
     lastRunAt: '2026-04-21 10:00:04',
     createdAt: '2026-03-02',
@@ -46,7 +46,7 @@ const MOCK_AUTO_LIST: AutoNoticeItem[] = [
     type: '小铃铛',
     enabled: true,
     schedule: '每周五 18:00',
-    triggerSummary: '注册时间 大于 7天',
+    triggerSummary: '未使用过 Swap · 且 当前费率 大于 0.5% · 屏蔽 12 个商户',
     totalMatched: 5318,
     lastRunAt: '2026-04-17 18:00:01',
     createdAt: '2026-03-20',
@@ -57,7 +57,7 @@ const MOCK_AUTO_LIST: AutoNoticeItem[] = [
     type: '系统公告',
     enabled: true,
     schedule: '每月 15 日 10:00',
-    triggerSummary: '注册时间 大于 30天',
+    triggerSummary: '首次入金时间 距执行日 大于 30 天',
     totalMatched: 12045,
     lastRunAt: '2026-04-15 10:00:03',
     createdAt: '2026-02-28',
@@ -142,7 +142,8 @@ export function AutoNotice() {
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 2 }}>工作方式</div>
             <div style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.55 }}>
               系统会按设定频率与时间自动运行检测任务，筛选达到触发条件的用户并发送通知。
-              触发条件支持「注册时间」与「入金」两个维度（至少选择其一，同时选择表示"同时满足"）。
+              触发条件支持「注册时间」「入金」「交易状态」「当前费率」四个筛选维度（至少启用其一，多选表示"同时满足"），
+              并可附加「屏蔽商户」排除名单。
             </div>
           </div>
         </div>
@@ -261,6 +262,12 @@ function AutoNoticeEditor({ initial, onBack, onSave }: EditorProps) {
     regValue: { mode: 'relative', op: 'lt', n1: '7', u1: 'day', n2: '', u2: 'day' } as RegTimeRelative,
     depositEnabled: false,
     depositValue: null,
+    txEnabled: false,
+    txValue: null,
+    feeEnabled: false,
+    feeValue: null,
+    blockEnabled: false,
+    blockValue: null,
   });
 
   const scheduleLabel = () => {
@@ -272,14 +279,7 @@ function AutoNoticeEditor({ initial, onBack, onSave }: EditorProps) {
     return `每月 ${scheduleDay} 日 ${scheduleTime}`;
   };
 
-  const triggerSummary = () => {
-    const parts: string[] = [];
-    if (trigger.regEnabled && trigger.regValue)
-      parts.push(formatRegTime(trigger.regValue, 'relative'));
-    if (trigger.depositEnabled && trigger.depositValue)
-      parts.push(formatDeposit(trigger.depositValue, 'relative'));
-    return parts.length ? parts.join(' · 且 ') : '未设置触发条件';
-  };
+  const triggerSummary = () => buildConditionSummary(trigger, 'relative');
 
   const typeLabel = () => {
     const map: Record<string, string> = {
@@ -289,7 +289,7 @@ function AutoNoticeEditor({ initial, onBack, onSave }: EditorProps) {
     return map[type] ?? type;
   };
 
-  const valid = name.trim() && (trigger.regEnabled || trigger.depositEnabled);
+  const valid = name.trim() && anyFilterEnabled(trigger);
 
   return (
     <div>
