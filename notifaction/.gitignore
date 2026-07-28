@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# PRD 工作区（本地保留，不提交）
+workflow
