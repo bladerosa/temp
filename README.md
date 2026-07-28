@@ -13,6 +13,7 @@ CCPayment 内部原型仓库。
 | [`ccpayment-bd/`](./ccpayment-bd)                 | BD 推广 | React + Vite + TypeScript + MUI + MobX |
 | [`ccpayment-bd-1.5/`](./ccpayment-bd-1.5)         | BD 推广 1.5 | React + Vite + TypeScript + MUI + MobX |
 | [`ccpayment-merchant/`](./ccpayment-merchant)     | 商户后台（Dashboard 接入引导 / Developer · Webhook · Integrations / Settings） | React + Vite + TypeScript + MUI + MobX |
+| [`ccpayment-riskcontrol/`](./ccpayment-riskcontrol) | 运营后台 · 风控交易管理（风险充值 / 风险提现 / 风险地址 + MistTrack AML 风险评估详情） | React + Vite + TypeScript + MUI + MobX |
 
 ## 启动
 
@@ -37,4 +38,7 @@ cd ccpayment-bd-1.5 && npm install && npm run dev
 
 # 商户后台（端口固定 5177）
 cd ccpayment-merchant && npm install && npm run dev
+
+# 运营后台 · 风控交易管理（端口固定 5178）
+cd ccpayment-riskcontrol && npm install && npm run dev
 ```
