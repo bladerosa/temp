@@ -431,16 +431,34 @@ export function DateInput({ value, onChange, placeholder }: DateInputProps) {
 }
 
 // ── NumberInput ──────────────────────────────────────────────────────────────
+/** 数值输入统一口径：不接受负数、小数位最多 8 位、超过上限自动收敛到上限 */
+export const MAX_DECIMALS = 8;
+
+export function sanitizeNumeric(raw: string, max?: number, decimals = MAX_DECIMALS): string {
+  if (raw === '') return '';
+  let s = raw.replace(/-/g, '');                       // 拦截负数：过滤负号
+  const m = /^(\d*)(?:\.(\d*))?$/.exec(s);
+  if (m && m[2] !== undefined && m[2].length > decimals) {
+    s = m[1] + '.' + m[2].slice(0, decimals);          // 小数位截断
+  }
+  if (max != null) {
+    const n = parseFloat(s);
+    if (!isNaN(n) && n > max) return String(max);      // 超上限收敛
+  }
+  return s;
+}
+
 interface NumberInputProps {
   value?: string | number;
   onChange?: (v: string) => void;
   placeholder?: string;
   min?: number;
+  max?: number;
   suffix?: string;
   step?: string;
 }
 
-export function NumberInput({ value, onChange, placeholder, min, suffix, step }: NumberInputProps) {
+export function NumberInput({ value, onChange, placeholder, min, max, suffix, step }: NumberInputProps) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center',
@@ -451,8 +469,9 @@ export function NumberInput({ value, onChange, placeholder, min, suffix, step }:
         type="number"
         value={value ?? ''}
         min={min}
+        max={max}
         step={step}
-        onChange={e => onChange?.(e.target.value)}
+        onChange={e => onChange?.(sanitizeNumeric(e.target.value, max))}
         style={{ border: 'none', outline: 'none', fontSize: 14, fontFamily: 'inherit', flex: 1, background: 'transparent', color: 'var(--text-primary)', minWidth: 0, width: '100%' }}
         placeholder={placeholder}
       />

@@ -288,7 +288,9 @@ function DepositAmount({ v, update, rangeMode }: {
 
       {/* Amount row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 13, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>入金金额（相对执行日）</span>
+        <span style={{ fontSize: 13, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+          {rangeMode === 'absolute' ? '入金金额' : '入金金额（相对执行日）'}
+        </span>
         <div style={{ width: 120 }}>
           <Select value={v.op} onChange={op => update({ op: op as Operator })} options={OPERATOR_OPTIONS} />
         </div>
@@ -549,7 +551,7 @@ export function FeeRateCondition({ value, onChange }: {
         </div>
         {v.op !== 'between' ? (
           <div style={{ width: 150 }}>
-            <NumberInput value={v.v1} onChange={v1 => update({ v1 })} placeholder="0.00" min={0} step="0.01" suffix="%" />
+            <NumberInput value={v.v1} onChange={v1 => update({ v1 })} placeholder="0.00" min={0} max={100} step="0.01" suffix="%" />
           </div>
         ) : (
           <>
@@ -557,14 +559,14 @@ export function FeeRateCondition({ value, onChange }: {
               <Select value={v.leftOp ?? 'gt'} onChange={leftOp => update({ leftOp: leftOp as BoundOp })} options={LEFT_OP_OPTIONS} />
             </div>
             <div style={{ width: 120 }}>
-              <NumberInput value={v.v1} onChange={v1 => update({ v1 })} placeholder="0.00" min={0} step="0.01" suffix="%" />
+              <NumberInput value={v.v1} onChange={v1 => update({ v1 })} placeholder="0.00" min={0} max={100} step="0.01" suffix="%" />
             </div>
             <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>且</span>
             <div style={{ width: 118 }}>
               <Select value={v.rightOp ?? 'lt'} onChange={rightOp => update({ rightOp: rightOp as BoundOp })} options={RIGHT_OP_OPTIONS} />
             </div>
             <div style={{ width: 120 }}>
-              <NumberInput value={v.v2} onChange={v2 => update({ v2 })} placeholder="0.00" min={0} step="0.01" suffix="%" />
+              <NumberInput value={v.v2} onChange={v2 => update({ v2 })} placeholder="0.00" min={0} max={100} step="0.01" suffix="%" />
             </div>
           </>
         )}
