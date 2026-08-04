@@ -170,10 +170,6 @@ export const ADDRESS: AddressRow[] = [
   { merchantId: '15285', riskAt: '01 Jan 2025 14:50', network: 'BSC', address: '0x2b39…cA71D2', score: 25, notify: 'Pending', after: '--' },
 ];
 
-// 地址下拉筛选项：风险充值按 To Address 筛、风险提现按 From Address 筛
-export const DEPOSIT_TO_ADDRESSES: string[] = Array.from(new Set(DEPOSIT.map((r) => r.to)));
-export const WITHDRAW_FROM_ADDRESSES: string[] = Array.from(new Set(WITHDRAW.map((r) => r.from)));
-
 // ---------- coin / level / status / risk-type meta ----------
 
 export interface CoinMeta {
