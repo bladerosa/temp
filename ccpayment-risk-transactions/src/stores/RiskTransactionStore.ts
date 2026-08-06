@@ -231,28 +231,22 @@ export class RiskTransactionStore {
    * 当前页面原样保留，商户看完直接关掉新标签页就回到原处，不需要返回入口。
    */
   jumpToPayment = (id: string) => {
-    const url = `${window.location.pathname}?tab=pay&recordId=${encodeURIComponent(id)}`;
+    const url = `${window.location.pathname}?recordId=${encodeURIComponent(id)}`;
     window.open(url, '_blank', 'noopener');
   };
 
-  /** 新标签页打开时，按地址栏参数把列表筛到目标记录。 */
+  /**
+   * 新标签页打开时，按地址栏参数把列表筛到目标记录。
+   * 落点固定为「風險付款」—— 关联记录本身就是一笔风险充值，不存在落到提款列表的场景。
+   */
   applyFromQuery = (search: string) => {
-    const q = new URLSearchParams(search);
-    if (q.get('tab') === 'withdraw') this.tab = 'withdraw';
-    const recordId = q.get('recordId');
+    const recordId = new URLSearchParams(search).get('recordId');
     if (!recordId) return;
-    this.tab = q.get('tab') === 'withdraw' ? 'withdraw' : 'pay';
-    if (this.tab === 'pay') {
-      this.paySearchField = '紀錄 ID';
-      this.payQuery = recordId;
-      this.payReprocess = '全部';
-      this.payPage = 1;
-    } else {
-      this.withdrawSearchField = '紀錄 ID';
-      this.withdrawQuery = recordId;
-      this.withdrawMode = '全部';
-      this.withdrawPage = 1;
-    }
+    this.tab = 'pay';
+    this.paySearchField = '紀錄 ID';
+    this.payQuery = recordId;
+    this.payReprocess = '全部';
+    this.payPage = 1;
   };
 
   // ------------------------------------------------- 高風險支付管理 Drawer
