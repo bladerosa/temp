@@ -226,15 +226,33 @@ export class RiskTransactionStore {
     return this.payments.filter((p) => p.id === row.source);
   };
 
-  /** 从详情弹窗跳到「風險付款」并按记录 ID 精确筛选。 */
+  /**
+   * 从详情弹窗查看某笔风险充值：**新开一个浏览器标签页**打开筛选后的列表，
+   * 当前页面原样保留，商户看完直接关掉新标签页就回到原处，不需要返回入口。
+   */
   jumpToPayment = (id: string) => {
-    this.tab = 'pay';
-    this.paySearchField = '紀錄 ID';
-    this.payQuery = id;
-    this.payReprocess = '全部';
-    this.payPage = 1;
-    this.reprocessDetail = null;
-    this.withdrawDetail = null;
+    const url = `${window.location.pathname}?tab=pay&recordId=${encodeURIComponent(id)}`;
+    window.open(url, '_blank', 'noopener');
+  };
+
+  /** 新标签页打开时，按地址栏参数把列表筛到目标记录。 */
+  applyFromQuery = (search: string) => {
+    const q = new URLSearchParams(search);
+    if (q.get('tab') === 'withdraw') this.tab = 'withdraw';
+    const recordId = q.get('recordId');
+    if (!recordId) return;
+    this.tab = q.get('tab') === 'withdraw' ? 'withdraw' : 'pay';
+    if (this.tab === 'pay') {
+      this.paySearchField = '紀錄 ID';
+      this.payQuery = recordId;
+      this.payReprocess = '全部';
+      this.payPage = 1;
+    } else {
+      this.withdrawSearchField = '紀錄 ID';
+      this.withdrawQuery = recordId;
+      this.withdrawMode = '全部';
+      this.withdrawPage = 1;
+    }
   };
 
   // ------------------------------------------------- 高風險支付管理 Drawer

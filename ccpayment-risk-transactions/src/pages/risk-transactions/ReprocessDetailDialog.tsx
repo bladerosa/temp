@@ -3,7 +3,7 @@ import { Box, Dialog, DialogContent, Link, Stack, Typography } from '@mui/materi
 import { observer } from 'mobx-react-lite';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { CryptoBadge } from '@/components/CryptoBadge';
-import { CHAIN_FEE, MEMO_COINS, REJECT_ADDRESS } from '@/data/riskTransactions';
+import { CHAIN_FEE, MEMO_COINS, REFUND_ADDRESS } from '@/data/riskTransactions';
 import { useStores } from '@/stores';
 import { parseAmount, stripSign, trimNumber } from '@/utils/format';
 import { DetailRow, DialogTitleBar } from './shared';
@@ -29,7 +29,7 @@ export const ReprocessDetailDialog = observer(function ReprocessDetailDialog() {
     ? `${trimNumber(members.reduce((sum, m) => sum + parseAmount(m.amount).n, 0))} ${parseAmount(row.amount).unit}`
     : '';
   const supportsMemo = MEMO_COINS.includes(row.symbol);
-  const toAddress = refunded ? row.from : REJECT_ADDRESS;
+  const toAddress = refunded ? row.from : REFUND_ADDRESS[row.chain];
 
   return (
     <Dialog

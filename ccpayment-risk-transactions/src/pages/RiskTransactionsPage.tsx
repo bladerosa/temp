@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { Box, Button, Card, Container, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
+import { useLocation } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { TableCard } from '@/components/TableCard';
@@ -16,6 +18,12 @@ import { WithdrawDetailDialog } from './risk-transactions/WithdrawDetailDialog';
 
 const RiskTransactionsPage = observer(function RiskTransactionsPage() {
   const { risk, ui } = useStores();
+  const { search } = useLocation();
+
+  // 从详情弹窗新开标签页进来时，按地址栏参数直接筛到目标记录
+  useEffect(() => {
+    risk.applyFromQuery(search);
+  }, [risk, search]);
 
   return (
     <Container maxWidth={ui.themeStretch ? false : 'xl'} disableGutters>

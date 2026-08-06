@@ -116,8 +116,16 @@ export const CHAIN_FEE: Record<ChainName, string> = {
   Hedera: '0.0012 USDT',
 };
 
-/** 「已拒絕」时详情里展示的收款地址。 */
-export const REJECT_ADDRESS = 'TUQ7qQDWXB…LLbTgJDqav';
+/**
+ * 详情里的「To address」在未成功退款时展示的退款地址 —— 即发起这笔退款时
+ * 填写（手动）或按退回路径选出（自动）的目标地址。按链给出对应格式，
+ * 否则会出现「Hedera 记录上显示 TRON 形态地址」这种不成立的演示数据。
+ */
+export const REFUND_ADDRESS: Record<ChainName, string> = {
+  TRON: 'TUQ7qQDWXB…LLbTgJDqav',
+  Polygon: '0x9c4b2f7a51…6e08d3b1fa',
+  Hedera: '0.0.6172094',
+};
 
 /** 支持 memo 的币种。 */
 export const MEMO_COINS: TokenSymbol[] = ['HBAR'];
