@@ -20,7 +20,7 @@ export const WithdrawDetailDialog = observer(function WithdrawDetailDialog() {
   if (!row) return null;
 
   const isBatch = Boolean(row.bill);
-  const members = risk.membersOfBill(row.bill ?? '');
+  const covered = risk.coveredPayments(row);
   const meta = WITHDRAW_STATUS_META[row.status];
   const supportsMemo = MEMO_COINS.includes(row.symbol);
 
@@ -89,7 +89,7 @@ export const WithdrawDetailDialog = observer(function WithdrawDetailDialog() {
 
           <DetailRow label="退款時間">{row.time}</DetailRow>
 
-          {isBatch && (
+          {covered.length > 0 && (
             <Box sx={{ borderTop: '1px solid', borderColor: 'divider', pt: 4 }}>
               <Stack
                 direction="row"
@@ -99,7 +99,7 @@ export const WithdrawDetailDialog = observer(function WithdrawDetailDialog() {
                 sx={{ gap: 4, cursor: 'pointer' }}
               >
                 <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
-                  本次退款覆蓋的風險付款（{members.length} 筆）
+                  本次退款覆蓋的風險付款（{covered.length} 筆）
                 </Typography>
                 <Box sx={{ color: 'text.secondary', display: 'inline-flex' }}>
                   {expanded ? <ChevronUp size={20} strokeWidth={1.8} /> : <ChevronDown size={20} strokeWidth={1.8} />}
@@ -109,7 +109,7 @@ export const WithdrawDetailDialog = observer(function WithdrawDetailDialog() {
               {expanded && (
                 <>
                   <Box sx={{ mt: 3, border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
-                    {members.map((m) => (
+                    {covered.map((m) => (
                       <Stack
                         key={m.id}
                         direction="row"

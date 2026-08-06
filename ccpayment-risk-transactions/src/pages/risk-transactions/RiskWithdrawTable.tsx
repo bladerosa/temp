@@ -1,10 +1,7 @@
-import { useState } from 'react';
 import {
   Box,
   Button,
-  IconButton,
   Link,
-  Menu,
   MenuItem,
   Stack,
   Table,
@@ -17,7 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import { CalendarDays, Download, MoreVertical, SearchX } from 'lucide-react';
+import { CalendarDays, Download, SearchX } from 'lucide-react';
 import { CryptoBadge } from '@/components/CryptoBadge';
 import { EmptyState } from '@/components/EmptyState';
 import { ListPagination } from '@/components/ListPagination';
@@ -48,40 +45,24 @@ const COLUMNS: { label: string; width: number }[] = [
 
 const RowActions = observer(function RowActions({ row }: { row: RiskWithdrawal }) {
   const { risk } = useStores();
-  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
 
+  // 本列表只有「退款詳情」一个操作场景，不走「更多操作」菜单。
   return (
-    <>
-      <IconButton
-        aria-label="更多操作"
-        size="small"
-        onClick={(e) => setAnchor(e.currentTarget)}
-        sx={{ width: 24, height: 24, color: anchor ? 'primary.main' : 'text.secondary' }}
-      >
-        <MoreVertical size={18} strokeWidth={2} />
-      </IconButton>
-
-      <Menu
-        anchorEl={anchor}
-        open={Boolean(anchor)}
-        onClose={() => setAnchor(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        slotProps={{ paper: { sx: { width: 196, mt: 1 } } }}
-      >
-        <MenuItem
-          sx={{ fontSize: 14, py: 3 }}
-          onClick={() => {
-            setAnchor(null);
-            risk.openWithdrawDetail(row);
-          }}
-        >
-          退款詳情
-        </MenuItem>
-        <MenuItem sx={{ fontSize: 14, py: 3 }}>發送 Webhook</MenuItem>
-        <MenuItem sx={{ fontSize: 14, py: 3 }}>查看報告</MenuItem>
-      </Menu>
-    </>
+    <Box
+      component="span"
+      role="button"
+      onClick={() => risk.openWithdrawDetail(row)}
+      sx={{
+        fontSize: 14,
+        fontWeight: 500,
+        color: 'primary.main',
+        cursor: 'pointer',
+        whiteSpace: 'nowrap',
+        '&:hover': { color: 'primary.dark' },
+      }}
+    >
+      退款詳情
+    </Box>
   );
 });
 

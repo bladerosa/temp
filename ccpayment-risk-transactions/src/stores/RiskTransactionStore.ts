@@ -216,6 +216,16 @@ export class RiskTransactionStore {
   membersOfBill = (bill: string): RiskPayment[] =>
     bill ? this.payments.filter((p) => p.bill === bill) : [];
 
+  /**
+   * 一笔退款覆盖的风险付款。批量取整个批次，非批量取它对应的那一笔充值。
+   * 非批量记录未登记来源充值时返回空数组，此时详情弹窗不渲染该区块。
+   */
+  coveredPayments = (row: RiskWithdrawal): RiskPayment[] => {
+    if (row.bill) return this.membersOfBill(row.bill);
+    if (!row.source) return [];
+    return this.payments.filter((p) => p.id === row.source);
+  };
+
   /** 从详情弹窗跳到「風險付款」并按记录 ID 精确筛选。 */
   jumpToPayment = (id: string) => {
     this.tab = 'pay';
