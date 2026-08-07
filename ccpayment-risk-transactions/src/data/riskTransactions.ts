@@ -113,17 +113,6 @@ export const CHAIN_FEE: Record<ChainName, string> = {
   Hedera: '0.0012 USDT',
 };
 
-/**
- * 详情里的「To address」在未成功退款时展示的退款地址 —— 即发起这笔退款时
- * 填写（手动）或按退回路径选出（自动）的目标地址。按链给出对应格式，
- * 否则会出现「Hedera 记录上显示 TRON 形态地址」这种不成立的演示数据。
- */
-export const REFUND_ADDRESS: Record<ChainName, string> = {
-  TRON: 'TUQ7qQDWXB…LLbTgJDqav',
-  Polygon: '0x9c4b2f7a51…6e08d3b1fa',
-  Hedera: '0.0.6172094',
-};
-
 /** 支持 memo 的币种。 */
 export const MEMO_COINS: TokenSymbol[] = ['HBAR'];
 
@@ -166,7 +155,7 @@ export const PAYMENTS: RiskPayment[] = [
 ];
 
 export const WITHDRAWALS: RiskWithdrawal[] = [
-  { id: '20260609075859415970427518', symbol: 'POL', amount: '- 17.988156 POL', chain: 'Polygon', fee: '0.00665804 USDT', to: '0x50e281e7d07707fb1d7bfa…', txid: '0x8b41c7d902…5ea7710b46', time: '09 Jun. 2026 15:59', status: 'success', memo: '' },
+  { id: '20260609075859415970427518', symbol: 'POL', amount: '- 17.988156 POL', chain: 'Polygon', fee: '0.00665804 USDT', to: '0x50e281e7d07707fb1d7bfa…', txid: '0x493ba2958c…cad4bf6d67', time: '09 Jun. 2026 15:59', status: 'success', memo: '' },
   { id: '20260506030433403575143482', symbol: 'USDT', amount: '- 0.5 USDT', chain: 'TRON', fee: '34.343 USDT', to: 'TMhCk9FQs2P7mDGRZ1PhZns8…', txid: '3b02fd16cc…e4d5002dbf', time: '06 May. 2026 11:11', status: 'success' },
   { id: '20260430101844401510079714', symbol: 'TRX', amount: '- 0.000007 TRX', chain: 'TRON', fee: '8.15575 USDT', to: 'TMhCk9FQs2P7mDGRZ1PhZns8…', txid: 'dc4300c749…580ea3d552', time: '06 May. 2026 11:11', status: 'success' },
   { id: '20260430101815401509960028', symbol: 'POL', amount: '- 1 POL', chain: 'Polygon', fee: '0.00665733 USDT', to: '0x4766dc5207f5172c05da8d…', txid: '0x849d8c94…37f114781c', time: '30 Apr. 2026 18:21', status: 'success' },
@@ -177,16 +166,16 @@ export const WITHDRAWALS: RiskWithdrawal[] = [
   { id: '20260430065537401458963350', symbol: 'USDT', amount: '- 2 USDT', chain: 'Polygon', fee: '0.02416 USDT', to: '0x4766dc5207f5172c05da8d…', txid: '', time: '--', status: 'rejected' },
   { id: '20260430034125401410092518', symbol: 'USDT', amount: '- 3.8 USDT', chain: 'TRON', fee: '61.56 USDT', to: 'TMhCk9FQs2P7mDGRZ1PhZns8…', txid: '', time: '--', status: 'rejected' },
   { id: '20260319204518679966098506', symbol: 'TRX', amount: '- 0.000001 TRX', chain: 'TRON', fee: '25.641 USDT', to: 'TTXSwp47kJ…HFxDm7FqaV', txid: '5676c480a8…c260a61834', time: '19 Mar. 2026 20:45', status: 'success' },
-  { id: '20260319200312386411871079', symbol: 'HBAR', amount: '- 10.5 HBAR', chain: 'Hedera', fee: '0.00042 USDT', to: '0.0.5561028', txid: '01c7f42be5…3a90d51f77', time: '19 Mar. 2026 20:04', status: 'success', memo: '883921' },
+  { id: '20260319200312386411871079', symbol: 'HBAR', amount: '- 10.5 HBAR', chain: 'Hedera', fee: '0.00042 USDT', to: '0.0.5561028', txid: '32fd27f96d…6ec2f3caf0', time: '19 Mar. 2026 20:04', status: 'success', memo: '883921' },
   { id: '20260319120540386316700142', symbol: 'USDT', amount: '- 2 USDT', chain: 'TRON', fee: '30.288 USDT', to: 'TMhCk9FQs2P7mDGRZ1PhZns8…', txid: '979b923aaf…a4c8ec3ffe', time: '19 Mar. 2026 20:05', status: 'success' },
   { id: '20260319120511386316580790', symbol: 'USDT', amount: '- 0.5 USDT', chain: 'TRON', fee: '30.288 USDT', to: 'TMhCk9FQs2P7mDGRZ1PhZns8…', txid: 'b946ee5cbc…d5da51f005', time: '19 Mar. 2026 20:05', status: 'success' },
   { id: '20260318190912385833410287', symbol: 'USDT', amount: '- 0.2 USDT', chain: 'TRON', fee: '28.104 USDT', to: 'TMhCk9FQs2P7mDGRZ1PhZns8…', txid: '5f1c07ab63…9e2d448a10', time: '18 Mar. 2026 19:09', status: 'success' },
-  { id: '20260318190845385833104755', symbol: 'HBAR', amount: '- 2 HBAR', chain: 'Hedera', fee: '0.00042 USDT', to: '0.0.4728193', txid: '02b6ad9137…5e1c7042ab', time: '--', status: 'rejected', memo: '' },
+  { id: '20260318190845385833104755', symbol: 'HBAR', amount: '- 2 HBAR', chain: 'Hedera', fee: '0.00042 USDT', to: '0.0.4728193', txid: '735ef09a4a…c3ad348ef2', time: '--', status: 'rejected', memo: '' },
   { id: '20260318185204385827118463', symbol: 'HBAR', amount: '- 3.5 HBAR', chain: 'Hedera', fee: '0.03042 USDT', to: '0.0.3915672', txid: '', time: '18 Mar. 2026 18:52', status: 'failed', memo: '010902' },
-  { id: '20260318185127385826740292', symbol: 'USDT', amount: '- 3.2 USDT', chain: 'Polygon', fee: '0.03042 USDT', to: '0x4766dc5207f5172c05da8d…', txid: '0x7bccdb3c…05395d7813', time: '18 Mar. 2026 18:52', status: 'failed', memo: '' },
+  { id: '20260318185127385826740292', symbol: 'USDT', amount: '- 3.2 USDT', chain: 'Polygon', fee: '0.03042 USDT', to: '0x4766dc5207f5172c05da8d…', txid: '0x828169f4d5…70f9b1ab4c', time: '18 Mar. 2026 18:52', status: 'failed', memo: '' },
   { id: '20260306114310374921065509', symbol: 'USDT', amount: '- 1.5 USDT', chain: 'TRON', fee: '25.641 USDT', to: 'TMhCk9FQs2P7mDGRZ1PhZns8…', txid: 'ab30f6c142…7d1e0c4b95', time: '06 Mar. 2026 11:43', status: 'success' },
-  { id: '20260227093054370118864342', symbol: 'HBAR', amount: '- 5.1 HBAR', chain: 'Hedera', fee: '0.00042 USDT', to: '0.0.3915672', txid: '0119cf83be…5c7a2e6041', time: '27 Feb. 2026 09:31', status: 'failed', memo: '660412' },
+  { id: '20260227093054370118864342', symbol: 'HBAR', amount: '- 5.1 HBAR', chain: 'Hedera', fee: '0.00042 USDT', to: '0.0.3915672', txid: 'ae449ad8d1…70636823f2', time: '27 Feb. 2026 09:31', status: 'failed', memo: '660412' },
   { id: '20260201152038427032785429', symbol: 'TRX', amount: '- 0.000001 TRX', chain: 'TRON', fee: '25.641 USDT', to: 'TY8z8xvCRF…m3Xydy2Uof', txid: 'd760b9b96b…2d43ef6f60', time: '01 Feb. 2026 15:20', status: 'success' },
-  { id: '20260201093042369330908455', symbol: 'TRX', amount: '- 0.000003 TRX', chain: 'TRON', fee: '25.641 USDT', to: 'TY8z8xvCRFxT8jYm3Xydy2U…', txid: 'e5feaeff70…1e21742cb1', time: '--', status: 'rejected', memo: '' },
+  { id: '20260201093042369330908455', symbol: 'TRX', amount: '- 0.000003 TRX', chain: 'TRON', fee: '25.641 USDT', to: 'TY8z8xvCRFxT8jYm3Xydy2U…', txid: '7a5756abb0…1c3bdcdcbd', time: '--', status: 'rejected', memo: '' },
   { id: '20251221180543954281156513', symbol: 'HBAR', amount: '- 4.4 HBAR', chain: 'Hedera', fee: '0.00042 USDT', to: '0.0.5561028', txid: '3dfb3316d4…57d06f8262', time: '21 Dec. 2025 18:05', status: 'success', memo: '771205' },
 ];

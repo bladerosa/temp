@@ -228,6 +228,14 @@ export class RiskTransactionStore {
     row.refundId ? this.coveredBy(row.refundId) : [];
 
   /**
+   * 处置某笔充值的那条风险资金提款记录。
+   * 「重新處理詳情」里的记录编号 / To address / Txid 描述的都是这次**退款**，
+   * 不是这笔充值本身，因此都要从这条记录上取。
+   */
+  refundOf = (row: RiskPayment): RiskWithdrawal | undefined =>
+    row.refundId ? this.withdrawals.find((w) => w.id === row.refundId) : undefined;
+
+  /**
    * 从详情弹窗查看某笔风险充值：**新开一个浏览器标签页**打开筛选后的列表，
    * 当前页面原样保留，商户看完直接关掉新标签页就回到原处，不需要返回入口。
    */

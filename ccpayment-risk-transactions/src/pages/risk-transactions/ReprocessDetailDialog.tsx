@@ -3,7 +3,7 @@ import { Box, Dialog, DialogContent, Link, Stack, Typography } from '@mui/materi
 import { observer } from 'mobx-react-lite';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { CryptoBadge } from '@/components/CryptoBadge';
-import { CHAIN_FEE, MEMO_COINS, REFUND_ADDRESS } from '@/data/riskTransactions';
+import { CHAIN_FEE, MEMO_COINS } from '@/data/riskTransactions';
 import { useStores } from '@/stores';
 import { parseAmount, stripSign, trimNumber } from '@/utils/format';
 import { DetailRow, DialogTitleBar } from './shared';
@@ -29,7 +29,12 @@ export const ReprocessDetailDialog = observer(function ReprocessDetailDialog() {
     ? `${trimNumber(members.reduce((sum, m) => sum + parseAmount(m.amount).n, 0))} ${parseAmount(row.amount).unit}`
     : '';
   const supportsMemo = MEMO_COINS.includes(row.symbol);
-  const toAddress = refunded ? row.from : REFUND_ADDRESS[row.chain];
+  // 记录编号 / To address / Txid 描述的是这次退款，取自关联的风险资金提款记录
+  const refund = risk.refundOf(row);
+  const refundRecordId = refund?.id ?? '--';
+  const toAddress = refund?.to ?? '--';
+  const refundTxid = refund?.txid ?? '';
+  const refundMemo = refund?.memo ?? '';
 
   return (
     <Dialog
@@ -113,20 +118,20 @@ export const ReprocessDetailDialog = observer(function ReprocessDetailDialog() {
         </Box>
 
         <Stack sx={{ pt: 5, px: 1, gap: 4.5 }}>
-          <DetailRow label="紀錄 ID" copyValue={row.id}>
-            {row.id}
+          <DetailRow label="紀錄 ID" copyValue={refundRecordId}>
+            {refundRecordId}
           </DetailRow>
 
           <DetailRow label="To address" copyValue={toAddress}>
             {toAddress}
           </DetailRow>
 
-          {supportsMemo && <DetailRow label="Memo">{row.memo?.length ? row.memo : '--'}</DetailRow>}
+          {supportsMemo && <DetailRow label="Memo">{refundMemo.length ? refundMemo : '--'}</DetailRow>}
 
           {refunded && (
-            <DetailRow label="Txid" copyValue={row.txid}>
+            <DetailRow label="Txid" copyValue={refundTxid}>
               <Link href="#" onClick={(e) => e.preventDefault()} sx={{ fontSize: 15, textDecoration: 'underline' }}>
-                {row.txid}
+                {refundTxid}
               </Link>
             </DetailRow>
           )}
