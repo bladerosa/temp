@@ -19,8 +19,8 @@ export const WithdrawDetailDialog = observer(function WithdrawDetailDialog() {
 
   if (!row) return null;
 
-  const isBatch = Boolean(row.bill);
   const covered = risk.coveredPayments(row);
+  const isBatch = covered.length >= 2;
   const meta = WITHDRAW_STATUS_META[row.status];
   const supportsMemo = MEMO_COINS.includes(row.symbol);
 
@@ -58,12 +58,6 @@ export const WithdrawDetailDialog = observer(function WithdrawDetailDialog() {
           <DetailRow label="紀錄 ID" copyValue={row.id}>
             {row.id}
           </DetailRow>
-
-          {isBatch && (
-            <DetailRow label="批次 ID" copyValue={row.bill}>
-              {row.bill}
-            </DetailRow>
-          )}
 
           <DetailRow label="區塊鏈">{row.chain}</DetailRow>
 

@@ -19,16 +19,19 @@ export type RiskTab = 'pay' | 'withdraw';
 export type ReprocessFilter = '全部' | ReprocessStatus;
 export type BatchType = 'token' | 'address';
 
-const payFieldValue = (row: RiskPayment, field: PaySearchField): string => {
+/**
+ * 「紀錄 ID」返回两个可匹配值：这笔充值自己的编号，以及处置它的那条退款记录的编号。
+ * 后者让商户在付款列表里直接用退款记录编号，一次筛出该次退款覆盖的全部充值 ——
+ * 这正是原先「批次 ID」搜索项的作用，现已由记录编号统一承担。
+ */
+const payFieldValues = (row: RiskPayment, field: PaySearchField): string[] => {
   switch (field) {
     case 'Txid':
-      return row.txid;
+      return [row.txid];
     case '从地址':
-      return row.from;
-    case '批次 ID':
-      return row.bill ?? '';
+      return [row.from];
     default:
-      return row.id;
+      return row.refundId ? [row.id, row.refundId] : [row.id];
   }
 };
 
@@ -38,8 +41,6 @@ const withdrawFieldValue = (row: RiskWithdrawal, field: WithdrawSearchField): st
       return row.txid;
     case '至地址':
       return row.to;
-    case '批次 ID':
-      return row.bill ?? '';
     default:
       return row.id;
   }
@@ -154,7 +155,7 @@ export class RiskTransactionStore {
     return this.payments.filter((row) => {
       if (this.payReprocess !== '全部' && row.reprocess !== this.payReprocess) return false;
       if (!q) return true;
-      return payFieldValue(row, this.paySearchField).toLowerCase().includes(q);
+      return payFieldValues(row, this.paySearchField).some((v) => v.toLowerCase().includes(q));
     });
   }
 
@@ -196,8 +197,8 @@ export class RiskTransactionStore {
   get filteredWithdrawals(): RiskWithdrawal[] {
     const q = this.withdrawQuery.trim().toLowerCase();
     return this.withdrawals.filter((row) => {
-      if (this.withdrawMode === '單筆' && row.bill) return false;
-      if (this.withdrawMode === '批量' && !row.bill) return false;
+      if (this.withdrawMode === '單筆' && this.isBatchRefund(row.id)) return false;
+      if (this.withdrawMode === '批量' && !this.isBatchRefund(row.id)) return false;
       if (!q) return true;
       return withdrawFieldValue(row, this.withdrawSearchField).toLowerCase().includes(q);
     });
@@ -212,19 +213,19 @@ export class RiskTransactionStore {
     return this.filteredWithdrawals.slice(start, start + this.withdrawPageSize);
   }
 
-  /** 同一批次 ID 下的所有风险付款。 */
-  membersOfBill = (bill: string): RiskPayment[] =>
-    bill ? this.payments.filter((p) => p.bill === bill) : [];
+  /** 某条退款记录覆盖的全部风险充值（按退款记录编号反查）。 */
+  coveredBy = (refundId: string): RiskPayment[] =>
+    refundId ? this.payments.filter((p) => p.refundId === refundId) : [];
 
-  /**
-   * 一笔退款覆盖的风险付款。批量取整个批次，非批量取它对应的那一笔充值。
-   * 非批量记录未登记来源充值时返回空数组，此时详情弹窗不渲染该区块。
-   */
-  coveredPayments = (row: RiskWithdrawal): RiskPayment[] => {
-    if (row.bill) return this.membersOfBill(row.bill);
-    if (!row.source) return [];
-    return this.payments.filter((p) => p.id === row.source);
-  };
+  /** 覆盖两笔及以上充值的退款即为批量退款。 */
+  isBatchRefund = (refundId: string): boolean => this.coveredBy(refundId).length >= 2;
+
+  /** 一笔退款覆盖的风险充值；未登记关联时返回空数组，详情弹窗据此不渲染该区块。 */
+  coveredPayments = (row: RiskWithdrawal): RiskPayment[] => this.coveredBy(row.id);
+
+  /** 与某笔充值同属一次退款的全部充值（含自身）。 */
+  siblingsOfPayment = (row: RiskPayment): RiskPayment[] =>
+    row.refundId ? this.coveredBy(row.refundId) : [];
 
   /**
    * 从详情弹窗查看某笔风险充值：**新开一个浏览器标签页**打开筛选后的列表，

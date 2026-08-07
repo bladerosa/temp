@@ -150,7 +150,7 @@ export const RiskWithdrawTable = observer(function RiskWithdrawTable() {
                         <Box component="span" sx={{ fontSize: 14, whiteSpace: 'nowrap' }}>
                           風險提款
                         </Box>
-                        {row.bill && <BatchTag />}
+                        {risk.isBatchRefund(row.id) && <BatchTag />}
                       </Stack>
                     </TableCell>
                     <TableCell>

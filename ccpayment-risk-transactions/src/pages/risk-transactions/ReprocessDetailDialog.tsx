@@ -20,8 +20,8 @@ export const ReprocessDetailDialog = observer(function ReprocessDetailDialog() {
   if (!row) return null;
 
   const refunded = row.reprocess === 'refunded';
-  const isBatch = Boolean(row.bill);
-  const members = risk.membersOfBill(row.bill ?? '');
+  const members = risk.siblingsOfPayment(row);
+  const isBatch = members.length >= 2;
 
   const chipLabel = refunded ? '已退款' : row.reprocess === 'failed' ? '失敗' : '已拒絕';
   const amount = refunded ? row.amount.replace('+ ', '- ') : row.amount;
@@ -116,12 +116,6 @@ export const ReprocessDetailDialog = observer(function ReprocessDetailDialog() {
           <DetailRow label="紀錄 ID" copyValue={row.id}>
             {row.id}
           </DetailRow>
-
-          {isBatch && (
-            <DetailRow label="批次 ID" copyValue={row.bill}>
-              {row.bill}
-            </DetailRow>
-          )}
 
           <DetailRow label="To address" copyValue={toAddress}>
             {toAddress}

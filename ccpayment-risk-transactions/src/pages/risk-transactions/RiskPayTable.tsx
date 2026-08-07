@@ -249,7 +249,7 @@ export const RiskPayTable = observer(function RiskPayTable() {
                       {meta ? (
                         <Stack direction="row" alignItems="center" sx={{ gap: 1.5 }}>
                           <OutlineChip label={meta.label} fg={meta.fg} border={meta.border} />
-                          {row.bill && <BatchTag />}
+                          {risk.isBatchRefund(row.refundId ?? '') && <BatchTag />}
                         </Stack>
                       ) : (
                         <Box component="span" sx={{ fontSize: 14, color: 'text.secondary' }}>
